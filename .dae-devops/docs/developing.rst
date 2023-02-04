@@ -1,5 +1,5 @@
 .. # ********** Please don't edit this file!
-.. # ********** It has been generated automatically by dae_devops version 0.4.1.dev0+g5d50877.d20230202.
+.. # ********** It has been generated automatically by dae_devops version 0.5.1.
 .. # ********** For repository_name echolocator
 
 Developing
@@ -13,7 +13,7 @@ Clone the repository::
 
 It is recommended that you install into a virtual environment so this
 installation will not interfere with any existing Python software.
-Make sure to have at least python version 3.8 then::
+Make sure to have at least python version 3.9 then::
 
     $ python3 -m venv /scratch/$USER/myvenv
     $ source /scratch/$USER/myvenv/bin/activate
@@ -36,4 +36,4 @@ If you plan to modify the docs, you will need to::
     
 
 
-.. # dae_devops_fingerprint 5e0aaf283342a2eb98b29fa132e40755
+.. # dae_devops_fingerprint c3acd7bd04d4c567174c7ba12f90efb0

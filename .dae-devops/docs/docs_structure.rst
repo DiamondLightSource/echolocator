@@ -1,5 +1,5 @@
 .. # ********** Please don't edit this file!
-.. # ********** It has been generated automatically by dae_devops version 0.4.1.dev0+g5d50877.d20230202.
+.. # ********** It has been generated automatically by dae_devops version 0.5.1.
 .. # ********** For repository_name echolocator
 
 About the documentation
@@ -21,4 +21,4 @@ improve most documentation - often immensely.
 
 `More information on this topic. <https://documentation.divio.com>`_
 
-.. # dae_devops_fingerprint e18335e3651840ab0035e2cc1d1132ea
+.. # dae_devops_fingerprint 8ded9698d9d71eda17e2c49cd737a2e2

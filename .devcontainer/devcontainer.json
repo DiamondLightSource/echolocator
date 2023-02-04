@@ -1,5 +1,5 @@
 // ********** Please don't edit this file!
-// ********** It has been generated automatically by dae_devops version 0.4.1.dev0+g5d50877.d20230202.
+// ********** It has been generated automatically by dae_devops version 0.5.1.
 // ********** For repository_name echolocator
 
 // For format details, see https://containers.dev/implementors/json_reference/
@@ -57,4 +57,4 @@
     "postCreateCommand": "pip install -e .[dev]"
 }
 
-// dae_devops_fingerprint 788cc46686ef73f5bd7cf96a4dcc245c
+// dae_devops_fingerprint 2507140a2722f4fa02e13592d5038e0e

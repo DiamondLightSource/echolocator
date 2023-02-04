@@ -1,5 +1,5 @@
 .. # ********** Please don't edit this file!
-.. # ********** It has been generated automatically by dae_devops version 0.4.1.dev0+g5d50877.d20230202.
+.. # ********** It has been generated automatically by dae_devops version 0.5.1.
 .. # ********** For repository_name echolocator
 
 Contributing to the project
@@ -38,4 +38,4 @@ should follow.
 
 .. _Developer Guide: https://diamondlightsource.github.io/echolocator/main/developer/how-to/contribute.html
 
-.. # dae_devops_fingerprint eed625051f6f5ae336ffbda5cc592433
+.. # dae_devops_fingerprint aed6364e5eff2f9face6b54b84a417f7

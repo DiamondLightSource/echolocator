@@ -1,5 +1,5 @@
 # ********** Please don't edit this file!
-# ********** It has been generated automatically by dae_devops version 0.4.1.dev0+g5d50877.d20230202.
+# ********** It has been generated automatically by dae_devops version 0.5.1.
 # ********** For repository_name echolocator
 
 from pathlib import Path
@@ -188,7 +188,7 @@ ultimate_replacements = {
     "$" + "{repository_name}": "echolocator",
     "$" + "{package_name}": "echolocator_lib",
     "$" + "{git_url}": "https://gitlab.diamond.ac.uk/xchem",
-    "$" + "{python_version_at_least}": "3.8",
+    "$" + "{python_version_at_least}": "3.9",
 }
 
 
@@ -197,4 +197,4 @@ def setup(app):
     app.connect("source-read", ultimateReplace)
 
 
-# dae_devops_fingerprint 7a0fc0748e9d4eeca5ab2970380c2823
+# dae_devops_fingerprint 20b12f1e3c3fe99e0b1b302ef56d79fc

@@ -1,5 +1,5 @@
 # ********** Please don't edit this file!
-# ********** It has been generated automatically by dae_devops version 0.4.1.dev0+g5d50877.d20230202.
+# ********** It has been generated automatically by dae_devops version 0.5.1.
 # ********** For repository_name echolocator
 
 # This file is for use as a devcontainer and a runtime container
@@ -40,4 +40,4 @@ ENV PATH=/venv/bin:$PATH
 ENTRYPOINT ["echolocator"]
 CMD ["--version"]
 
-# dae_devops_fingerprint dcc56c6c4e5e6290a064eea1f6529c93
+# dae_devops_fingerprint b2386a8edacc7cf00dbcde0bcfe434a4
