@@ -1,0 +1,137 @@
+<html>
+
+<head>
+    <title>Echolocator</title>
+    <meta charset="UTF-8">
+    <!-- jQuery -->
+    <script src="javascript/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- jQuery UI. -->
+    <script src="javascript/jqueryui/1.13.1/jquery-ui.min.js"></script>
+
+    <!-- jQuery UI theme. -->
+    <link rel="stylesheet" href="javascript/jqueryui/1.13.1/jquery-ui.min.css">
+    <link rel="stylesheet" href="javascript/jqueryui/1.13.1/themes/smoothness/jquery-ui.css">
+
+    <!-- Common javascript classes. -->
+    <script src="javascript/common/base.js"></script>
+
+    <!-- Classes for screen interaction. -->
+    <script src="javascript/raphael/raphael-2.1.4/raphael.min.js"></script>
+    <script src="javascript/webviz/hair/guide2.js"></script>
+    <script src="javascript/webviz/spreader.js"></script>
+    <script src="javascript/webviz/transformer.js"></script>
+
+    <!-- Support for all echolocator pages. -->
+    <script src="javascript/version.js"></script>
+    <script src="javascript/runtime.js"></script>
+    <script src="javascript/echolocator/page.js"></script>
+
+    <!-- Logic for this page. -->
+    <script src="javascript/echolocator/events.js"></script>
+    <script src="javascript/echolocator/ux_base.js"></script>
+    <script src="javascript/echolocator/ux_auto_update.js"></script>
+    <script src="javascript/echolocator/tabs_manager.js"></script>
+    <script src="javascript/echolocator/image_list_ux.js"></script>
+    <script src="javascript/echolocator/image_edit_ux.js"></script>
+    <script src="javascript/echolocator/pixel_ux.js"></script>
+
+    <!-- javascript companion to html layout -->
+    <script src="index.js"></script>
+
+    <!-- Styles for this page. -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/image_list_ux.css">
+    <link rel="stylesheet" href="css/image_edit_ux.css">
+    <link rel="stylesheet" href="css/pixel_ux.css">
+
+</head>
+
+<body class="body">
+    <div id="tabs_manager_interaction_parent">
+        <div class="T_tabs" id="tabs">
+
+            <ul>
+                <li><a href="#tab-image-list">Image List</a></li>
+                <li><a href="#tab-image-edit">Image Details</a></li>
+            </ul>
+
+
+            <div id="tab-image-list">
+                <div id="image_list_ux_interaction_parent">
+                    <div class="T_auto_update">
+                        <div class="T_toggle">AUTO</div>
+                        <div class="T_status">-</div>
+                    </div>
+                    <div class="T_buttons" style="margin-top: 8px; margin-bottom: 8px;">
+                        <button class="T_export_button" title="export">Export</button>
+                    </div>
+                    <div class="T_help">Exports all images matching the name pattern whether decided or not.</div>
+                    <div class="T_inputs" style="margin-top: 8px; margin-bottom: 8px;">
+                        <div class="T_row">
+                            <div class="T_field">
+                                <div class="T_prompt">name pattern</div>
+                                <div class="T_input"><input type="text" class="T_name_pattern"></div>
+                                <div class="T_separator"></div>
+                                <div class="T_prompt">show only undecided</div>
+                                <div class="T_input"><input type="checkbox" class="T_should_show_only_undecided"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="T_section">
+                        <div class="T_title" title="image list">Image List</div>
+                        <div class="T_composed T_image_list" style="overflow:scroll;height: 100%;">-</div>
+                    </div>
+                </div>
+            </div><!-- tab-image-list -->
+
+            <div id="tab-image-edit">
+                <div id="image_edit_ux_interaction_parent">
+                    <div class="T_buttons" style="margin-top: 8px; margin-bottom: 8px;">
+                        <button class="T_previous_button" title="previous image">Previous</button>
+                        <button class="T_accept_button" title="accept image">Usable</button>
+                        <button class="T_reject_button" title="reject image">Not Usable</button>
+                        <button class="T_reset_button" title="reset image">Undecided</button>
+                        <button class="T_next_button" title="next image">Next</button>
+                    </div>
+                    <div class="T_help">Right-click in the image to mark as not usable.</div>
+
+                    <div class="T_image_info" style="margin-top: 8px; margin-bottom: 8px;">
+                        <div class="T_field">
+                            <div class="T_prompt">filename:</div>
+                            <div class="T_input">
+                                <div class="T_filename"></div>
+                            </div>
+                            <div class="T_separator"></div>
+                            <div class="T_prompt">Num crystals:</div>
+                            <div class="T_input">
+                                <div class="T_number_of_crystals"></div>
+                            </div>
+                            <div class="T_separator"></div>
+                            <div class="T_prompt">is usable?</div>
+                            <div class="T_input">
+                                <div class="T_is_usable"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="image1" class="dataframe" style="width: 100%;">
+                        <div class="container view-container">
+                            <div id="image1_viewport" class="viewport">
+                                <img id="detector1_image" src="images/radial1.666.png"
+                                    style="image-rendering: pixelated;">
+                            </div>
+                            <div id="raphael1_viewport" class="viewport">
+                                <div id="raphael1_paper"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- tab-image-edit -->
+
+        </div><!-- tabs -->
+    </div><!-- tabs_manager_interaction_parent-->
+
+</body>
+
+</html>

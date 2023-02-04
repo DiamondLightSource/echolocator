@@ -1,0 +1,59 @@
+#image_list_ux_interaction_parent {}
+
+#image_list_ux_interaction_parent .T_image_list TR {
+    cursor: pointer
+}
+
+#image_list_ux_interaction_parent .T_picked {
+    color: red;
+}
+
+
+#image_list_ux_interaction_parent TH,
+#image_list_ux_interaction_parent TD {
+    vertical-align: bottom;
+}
+
+#image_list_ux_interaction_parent #width,
+#image_list_ux_interaction_parent #height,
+#image_list_ux_interaction_parent #target_position_x,
+#image_list_ux_interaction_parent #target_position_y,
+#image_list_ux_interaction_parent #number_of_crystals {
+    text-align: right;
+}
+
+
+/* Job states for images list and image details */
+
+#image_list_ux_interaction_parent .T_image_state {
+    white-space: nowrap;
+}
+
+#image_list_ux_interaction_parent .T_image_state.T_ready {
+    background-color: yellow;
+    color: slategray;
+    font-weight: bold;
+}
+
+#image_list_ux_interaction_parent .T_image_state.T_succeeded {
+    background-color: green;
+    color: white;
+    font-weight: bold;
+}
+
+#image_list_ux_interaction_parent .T_image_state.T_failed {
+    background-color: orangered;
+    color: white;
+    font-weight: bold;
+}
+
+#image_list_ux_interaction_parent .T_image_state.T_cancelled {
+    background-color: gray;
+    color: white;
+    font-weight: bold;
+}
+
+
+#image_list_ux_interaction_parent .T_name_pattern {
+    width: 320px;
+}

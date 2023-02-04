@@ -1,0 +1,85 @@
+type: echolocator_lib.echolocator_contexts.classic
+
+visit:
+    beamline: b29
+    year: 2022
+    visit: cy29757-3
+    directory: /dls/b29/data/2022/cy29757-3
+    # Format to make actual data_filename using data_label as token.
+    data_path_pattern: "/dls/b29/data/2022/cy29757-3/Merlin/{data_label}_data.mib"
+
+logging_settings:
+    console:
+        enabled: True
+        verbose: True
+    logfile:
+        enabled: True
+        directory: ${output_directory}/logfile.log
+    graypy:
+        enabled: False
+        host: 172.23.7.128
+        port: 12201
+        protocol: UDP
+
+# The external access bits.
+external_access_bits:
+    dls_servbase_dataface_server: &DLS_BILLY_DATAFACE_SERVER http://*:27620
+    dls_servbase_dataface_client: &DLS_BILLY_DATAFACE_CLIENT http://localhost:27620
+    dataface_port: &DATAFACE_PORT 27621
+    echolocator_gui_server: &ECHOLOCATOR_GUI_SERVER http://*:27622
+    echolocator_gui_client: &ECHOLOCATOR_GUI_CLIENT http://127.0.0.1:27622
+
+# The dls_servbase_dataface client/server composite.
+dls_servbase_dataface_specification: &DLS_BILLY_DATAFACE_SPECIFICATION
+    type: "dls_servbase_lib.datafaces.aiohttp"
+    type_specific_tbd:
+        # The remote dataface server access.
+        aiohttp_specification:
+            server: *DLS_BILLY_DATAFACE_SERVER
+            client: *DLS_BILLY_DATAFACE_CLIENT
+        # The local implementation of the dataface.
+        actual_dataface_specification:
+            type: "dls_servbase_lib.datafaces.aiosqlite"
+            database:
+                type: "dls_servbase_lib.databases.aiosqlite"
+                filename: "${output_directory}/dls_servbase_dataface.sqlite"
+                log_level: "WARNING"
+    context:
+        start_as: process
+
+# The echolocator_dataface client/server composite.
+echolocator_dataface_specification: &ECHOLOCATOR_DATAFACE_SPECIFICATION
+    type: "echolocator_lib.echolocator_datafaces.aiohttp"
+    type_specific_tbd:
+        # The remote echolocator_dataface server access.
+        aiohttp_specification:
+            server_host: "*"
+            client_host: "127.0.0.1"
+            port: *DATAFACE_PORT
+        # The local implementation of the echolocator_dataface.
+        actual_echolocator_dataface_specification:
+            type: "echolocator_lib.echolocator_datafaces.aiosqlite"
+            database:
+                type: "echolocator_lib.echolocator_databases.aiosqlite"
+                filename: "${output_directory}/echolocator_dataface.sqlite"
+                log_level: "WARNING"
+    context:
+        start_as: process
+
+# The echolocator_gui specification.
+echolocator_gui_specification:
+    type: "echolocator_lib.echolocator_guis.aiohttp"
+    type_specific_tbd:
+        # The remote echolocator_gui server access.
+        aiohttp_specification:
+            server: *ECHOLOCATOR_GUI_SERVER
+            client: *ECHOLOCATOR_GUI_CLIENT
+            search_paths: ["examples/html"]
+            cookie_specification:
+                type: "dls_servbase_lib.cookies.dataface"
+                type_specific_tbd:
+                    dataface_specification: *DLS_BILLY_DATAFACE_SPECIFICATION
+    # The dataface which the gui talks to.
+    echolocator_dataface_specification: *ECHOLOCATOR_DATAFACE_SPECIFICATION
+    context:
+        start_as: process

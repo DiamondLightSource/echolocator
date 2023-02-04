@@ -1,0 +1,27 @@
+#pixel_ux_interaction_parent .T_row >DIV
+{
+    display: inline-block;
+}
+
+#pixel_ux_interaction_parent .T_visible_button,
+#pixel_ux_interaction_parent .T_invisible_button
+{
+    width: 50px;
+}
+
+#pixel_ux_interaction_parent .T_field >DIV
+{
+    display: inline-block;
+}
+
+#pixel_ux_interaction_parent .T_pixel_x,
+#pixel_ux_interaction_parent .T_pixel_y
+{
+    width: 100px;
+}
+
+#pixel_ux_interaction_parent .T_meter_x,
+#pixel_ux_interaction_parent .T_meter_y
+{
+    width: 100px;
+}

@@ -1,0 +1,7 @@
+#system_health_ux_interaction_parent {}
+
+
+#system_health_ux_interaction_parent .T_composed>TABLE>THEAD>TR>TH,
+#system_health_ux_interaction_parent .T_composed>TABLE>TBODY>TR>TD {
+    vertical-align: top;
+}

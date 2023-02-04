@@ -1,0 +1,15 @@
+#%Module -*- tcl -*-
+
+proc ModulesHelp { } {
+  puts stderr "\tSets up the PYTHONPATH for echolocator commands."
+}
+
+module-whatis "sets up the PYTHONPATH for echolocator commands"
+
+# The echolocator pip environment we want to use.
+set echolocator_version 1.4.1
+
+# Provide echolocator runtime python modules.
+# This is python 3.9, so must agree with whatever the science environment has installed.
+prepend-path	PYTHONPATH		/dls_sw/apps/xchem/pippy_place/echolocator/$echolocator_version
+ 

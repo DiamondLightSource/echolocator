@@ -1,0 +1,304 @@
+BODY {
+  margin: 0px;
+  height: 100%;
+  overflow: hidden;
+}
+
+BODY,
+A,
+SELECT,
+INPUT,
+BUTTON,
+TH,
+TD,
+CAPTION {
+  font-family: Geneva, Verdana, sans-serif;
+  font-size: 12px;
+}
+
+A,
+A:visited,
+A:hover,
+.ui-widget-content A {
+  text-decoration: none;
+  color: blue;
+}
+
+#tabs {
+  height: 100%
+}
+
+TD {
+  padding: 2px;
+}
+
+BUTTON,
+SELECT,
+INPUT {
+  width: 172px;
+}
+
+INPUT[type=checkbox] {
+  width: 22px;
+}
+
+
+/* --------------------------------------------------------------------------- */
+.T_side_by_side {
+  white-space: nowrap;
+  width: 100%;
+}
+
+.T_side_by_side>DIV {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.T_columns>DIV {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.T_left_column {
+  overflow: hidden;
+}
+
+.T_right_column {}
+
+
+/* --------------------------------------------------------------------------- */
+.T_buttons,
+.T_help {
+  display: inline-block;
+}
+
+.T_help {
+  font-style: italic;
+  font-size: smaller;
+}
+
+
+/* --------------------------------------------------------------------------- */
+.dataframe {
+  border: 1px solid red;
+}
+
+.dataframe>.container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.dataframe>.container>.viewport {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+/* --------------------------------------------------------------------------- */
+.T_ajax_error_message_container {
+  border-radius: 4px;
+  border: 1px solid orangered;
+  color: orangered;
+}
+
+.T_ajax_error_message {
+  margin: 4px;
+}
+
+/* --------------------------------------------------------------------------- */
+
+/* This is the list of files show in the job details pane. */
+.T_execution_outputs .T_bytes {
+  text-align: right;
+  padding-right: 4px;
+}
+
+.T_execution_outputs .T_filename {
+  text-align: left;
+}
+
+.T_bx_job_detail_job {
+  color: blue;
+  cursor: pointer;
+}
+
+.T_bx_job_cancel_job {
+  color: orange;
+  cursor: pointer;
+}
+
+.T_bx_job_status {
+  white-space: nowrap;
+}
+
+.T_bx_job_status>DIV {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.T_bx_job_status>DIV:first-child {
+  margin-left: 0px;
+}
+
+.T_bx_job_status>.T_bx_job_delete_job {
+  color: red;
+  cursor: pointer;
+}
+
+.T_bx_job_status>.T_bx_job_unblock_job {
+  color: green;
+  cursor: pointer;
+}
+
+.T_bx_job_detail_job.T_picked {
+  font-weight: bold;
+}
+
+
+.T_auto_update .T_toggle {
+  color: blue;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.T_auto_update .T_toggle.T_disabled {
+  text-decoration: line-through;
+}
+
+.T_auto_update .T_status {
+  display: inline-block;
+  color: gray;
+  font-style: italic;
+  font-size: smaller;
+}
+
+/* section layout */
+.T_section {
+  margin-top: 16px;
+}
+
+.T_section>DIV {
+  margin-top: 4px;
+  margin-left: 16px;
+}
+
+.T_section:first-child {
+  margin-top: 0px;
+}
+
+.T_section>.T_title {
+  margin-left: 0px;
+  display: block;
+  font-weight: bold;
+}
+
+.T_section>.T_title:hover {
+  color: blue;
+}
+
+.T_section .T_composed>TABLE {
+  border-collapse: collapse;
+  border: 1px solid silver;
+}
+
+/* Don't display table captions put there by the prettytable title attribute. */
+.T_section .T_composed>TABLE>CAPTION {
+  display: none;
+}
+
+.T_section .T_composed>TABLE>THEAD>TR {
+  font-weight: bold;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.T_section .T_composed>TABLE>THEAD>TR>TH,
+.T_section .T_composed>TABLE>TBODY>TR>TD {
+  padding: 6px;
+  border: 1px solid silver;
+  vertical-align: top;
+}
+
+/* displaying workflow settings */
+TABLE.T_settings>TBODY>TR>TD {
+  vertical-align: top;
+}
+
+.T_settings .T_explanation_lines {
+  font-style: italic;
+}
+
+.T_setting {
+  margin-top: 8px;
+}
+
+TR.T_setting>TD {
+  padding-top: 8px;
+}
+
+.T_setting:first-child {
+  margin-top: 0px;
+}
+
+.T_setting .T_prompt {
+  padding-top: 2px;
+  display: inline-block;
+}
+
+.T_setting .T_input {
+  display: inline-block;
+
+}
+
+.T_setting .T_input INPUT {
+  width: 640px;
+}
+
+.T_setting .T_input.T_float INPUT {
+  width: 128px;
+}
+
+.T_setting .T_input.T_integer INPUT {
+  width: 80px;
+}
+
+.T_setting .T_input.T_boolean INPUT {
+  width: 48px;
+}
+
+
+/* Debug lines in html about callsign where code was generated. */
+.T_callsign {
+  font-style: italic;
+  color: gray;
+  font-size: smaller;
+  display: none;
+}
+
+
+.T_widget>.T_outer>.T_row {
+  margin: 2px;
+}
+
+.T_widget>.T_outer>.T_row>.T_field {
+  margin: 2px;
+}
+
+.T_field .T_prompt,
+.T_field .T_input,
+.T_field .T_separator {
+  margin: 2px;
+  display: inline-block;
+}
+
+.T_field .T_input>INPUT:text {
+  width: 80px;
+}
+
+.T_field .T_separator {
+  width: 32px;
+}

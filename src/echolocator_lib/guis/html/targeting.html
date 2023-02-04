@@ -1,0 +1,80 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- jQuery -->
+    <script src="javascript/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- jQuery UI. -->
+    <script src="javascript/jqueryui/1.13.1/jquery-ui.min.js"></script>
+
+    <!-- jQuery UI theme. -->
+    <link rel="stylesheet" href="javascript/jqueryui/1.13.1/jquery-ui.min.css">
+    <link rel="stylesheet" href="javascript/jqueryui/1.13.1/themes/smoothness/jquery-ui.css">
+
+    <!-- Common javascript classes. -->
+    <script src="javascript/common/base.js"></script>
+
+    <!-- Classes for screen interaction. -->
+    <script src="javascript/raphael/raphael-2.1.4/raphael.min.js"></script>
+    <script src="javascript/webviz/hair/guide2.js"></script>
+    <script src="javascript/webviz/spreader.js"></script>
+    <script src="javascript/webviz/transformer.js"></script>
+
+    <!-- Support for all echolocator pages. -->
+    <script src="javascript/version.js"></script>
+    <script src="javascript/runtime.js"></script>
+    <script src="javascript/echolocator/page.js"></script>
+
+    <!-- Logic for this page. -->
+    <script src="javascript/echolocator/events.js"></script>
+    <script src="javascript/echolocator/ux_base.js"></script>
+    <script src="javascript/echolocator/ux_auto_update.js"></script>
+    <script src="javascript/echolocator/image_list_ux.js"></script>
+    <script src="javascript/echolocator/image_edit_ux.js"></script>
+    <script src="javascript/echolocator/pixel_ux.js"></script>
+
+    <!-- javascript companion to html layout -->
+    <script src="targeting.js"></script>
+
+    <!-- Styles for this page. -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/image_list_ux.css">
+    <link rel="stylesheet" href="css/image_edit_ux.css">
+    <link rel="stylesheet" href="css/pixel_ux.css">
+
+</head>
+
+<body class="body">
+    <div id="image_list_ux_interaction_parent">
+        <div class="T_auto_update">
+            <div class="T_toggle">AUTO</div>
+            <div class="T_status">-</div>
+        </div>
+        <div class="T_section">
+            <div class="T_title" title="image list">Image List</div>
+            <div class="T_composed T_image_list" style="overflow:scroll;height: 100%;">-</div>
+        </div>
+    </div>
+
+    <div id="image_edit_ux_interaction_parent">
+        <div class="T_buttons" style="margin-top: 8px; margin-bottom: 8px;">
+            <button class="T_accept_button" title="accept image">Accept</button>
+            <button class="T_reject_button" title="reject image">Reject</button>
+        </div>
+
+        <div id="image1" class="dataframe" style="width: 100%;">
+            <div class="container view-container">
+                <div id="image1_viewport" class="viewport">
+                    <img id="detector1_image" src="images/radial1.666.png" style="image-rendering: pixelated;">
+                </div>
+                <div id="raphael1_viewport" class="viewport">
+                    <div id="raphael1_paper"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
