@@ -23,8 +23,4 @@ Viewing the docs
 
 You can view the docs from Diamond's internal server
 
-    http://www.cs.diamond.ac.uk/reports/gitlab-ci/echolocator/docs/latest/index.html
-
-Or from the cloned repository
-
-    file:///source_path/echolocator/public/index.html
+    https://diamondlightsource.github.io/echolocator
