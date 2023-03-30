@@ -6,11 +6,11 @@ import threading
 from dls_utilpack.callsign import callsign
 from dls_utilpack.require import require
 
+# Global managers.
+from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
+
 # Direct database queries (need to be deprecated).
 from echolocator_api.databases.constants import ImageFieldnames, Tablenames
-
-# Global managers.
-from echolocator_api.datafaces.datafaces import echolocator_datafaces_get_default
 
 # Basic things.
 from echolocator_api.thing import Thing
@@ -217,7 +217,7 @@ class Aiohttp(Thing, BaseAiohttp):
                     opaque, Cookies.IMAGE_EDIT_UX, "autoid", record["autoid"]
                 )
         else:
-            records = await echolocator_datafaces_get_default().query(
+            records = await xchembku_datafaces_get_default().query(
                 f"SELECT * FROM {Tablenames.ROCKMAKER_IMAGES} WHERE autoid = {autoid}"
             )
             record = records[0]
@@ -250,7 +250,7 @@ class Aiohttp(Thing, BaseAiohttp):
         else:
             where = ""
 
-        records = await echolocator_datafaces_get_default().query(
+        records = await xchembku_datafaces_get_default().query(
             f"SELECT * FROM {Tablenames.ROCKMAKER_IMAGES}"
             + where
             + f" ORDER BY {ImageFieldnames.CREATED_ON} DESC",
@@ -298,7 +298,7 @@ class Aiohttp(Thing, BaseAiohttp):
             where = " WHERE " + " AND ".join(where_and_sqls)
         else:
             where = ""
-        records = await echolocator_datafaces_get_default().query(
+        records = await xchembku_datafaces_get_default().query(
             f"SELECT * FROM {Tablenames.ROCKMAKER_IMAGES}"
             + where
             + f" ORDER BY {ImageFieldnames.CREATED_ON} DESC",
@@ -333,7 +333,7 @@ class Aiohttp(Thing, BaseAiohttp):
         subs.append(require("ajax request target_position", target_position, "y"))
         subs.append(require("ajax request", request_dict, "autoid"))
 
-        await echolocator_datafaces_get_default().execute(sql, subs)
+        await xchembku_datafaces_get_default().execute(sql, subs)
 
         response = {"status": "ok"}
 
@@ -355,7 +355,7 @@ class Aiohttp(Thing, BaseAiohttp):
         subs.append(require("ajax request", request_dict, "is_usable"))
         subs.append(require("ajax request", request_dict, "autoid"))
 
-        await echolocator_datafaces_get_default().execute(sql, subs)
+        await xchembku_datafaces_get_default().execute(sql, subs)
 
         # Fetch the next image record after the update.
         request_dict["direction"] = 1
