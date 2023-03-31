@@ -212,38 +212,6 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _fetch_image_records(self, opaque):
-
-        name_pattern = await self.get_cookie_content(
-            opaque, Cookies.IMAGE_LIST_UX, "name_pattern", default=""
-        )
-        should_show_only_undecided = await self.get_cookie_content(
-            opaque, Cookies.IMAGE_LIST_UX, "should_show_only_undecided", default=""
-        )
-
-        where_and_sqls = []
-        where_and_subs = []
-        if name_pattern != "":
-            where_and_sqls.append("filename GLOB ?")
-            where_and_subs.append(name_pattern)
-        if should_show_only_undecided:
-            where_and_sqls.append(f"{ImageFieldnames.IS_USABLE} IS NULL")
-
-        if len(where_and_sqls) > 0:
-            where = " WHERE " + " AND ".join(where_and_sqls)
-        else:
-            where = ""
-
-        records = await xchembku_datafaces_get_default().query(
-            f"SELECT * FROM {Tablenames.ROCKMAKER_IMAGES}"
-            + where
-            + f" ORDER BY {ImageFieldnames.CREATED_ON} DESC",
-            subs=where_and_subs,
-        )
-
-        return records
-
-    # ----------------------------------------------------------------------------------------
     async def _fetch_image_list(self, opaque, request_dict):
 
         # Remember last posted value for auto_update_enabled.
