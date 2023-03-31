@@ -10,9 +10,6 @@ from dls_utilpack.require import require
 from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
 from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
 
-# Direct database queries (need to be deprecated).
-from echolocator_api.databases.constants import ImageFieldnames, Tablenames
-
 # Basic things.
 from echolocator_api.thing import Thing
 

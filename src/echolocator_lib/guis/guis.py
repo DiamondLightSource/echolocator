@@ -4,6 +4,9 @@ import logging
 # Exceptions.
 from echolocator_api.exceptions import NotFound
 
+# Types.
+from echolocator_api.guis.constants import Types
+
 # Class managing list of things.
 from echolocator_api.things import Things
 
@@ -62,7 +65,7 @@ class Guis(Things):
     def lookup_class(self, class_type):
         """"""
 
-        if class_type == "echolocator_lib.echolocator_guis.aiohttp":
+        if class_type == Types.AIOHTTP:
             from echolocator_lib.guis.aiohttp import Aiohttp
 
             return Aiohttp

@@ -83,7 +83,7 @@ echolocator_dataface_specification_OLD: &ECHOLOCATOR_DATAFACE_SPECIFICATION_OLD
 
 # The echolocator_gui specification.
 echolocator_gui_specification:
-    type: "echolocator_lib.echolocator_guis.aiohttp"
+    type: "echolocator_lib.guis.aiohttp"
     type_specific_tbd:
         # The remote echolocator_gui server access.
         aiohttp_specification:
