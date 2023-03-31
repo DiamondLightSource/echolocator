@@ -6,6 +6,10 @@ from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 # Utilities.
 from dls_utilpack.describe import describe
 
+# Things xchembku provides.
+from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
+from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
+
 # Context creator.
 from echolocator_lib.contexts.contexts import Contexts
 from echolocator_lib.guis.constants import Commands, Cookies, Keywords
@@ -40,6 +44,16 @@ class GuiTester(BaseContextTester):
         configurator = self.get_configurator()
         context_configuration = await configurator.load()
 
+        # Reference the dict entry for the xchembku dataface.
+        xchembku_dataface_specification = multiconf_dict[
+            "xchembku_dataface_specification"
+        ]
+
+        # Make the xchembku client context, expected to be direct (no server).
+        xchembku_client_context = XchembkuDatafaceClientContext(
+            xchembku_dataface_specification
+        )
+
         gui_specification = context_configuration["echolocator_gui_specification"]
         type_specific_tbd = gui_specification["type_specific_tbd"]
         aiohttp_specification = type_specific_tbd["aiohttp_specification"]
@@ -47,73 +61,75 @@ class GuiTester(BaseContextTester):
 
         context = Contexts().build_object(context_configuration)
 
-        async with context:
+        # Start the client context for the direct access to the xchembku.
+        async with xchembku_client_context:
+            async with context:
 
-            # --------------------------------------------------------------------
-            # Use protocolj to fetch a request from the dataface.
-            # Simulates what javascript would do by ajax.
+                # --------------------------------------------------------------------
+                # Use protocolj to fetch a request from the dataface.
+                # Simulates what javascript would do by ajax.
 
-            # Load tabs, of which there are none at the start.
-            # This establishes the cookie though.
-            load_tabs_request = {
-                Keywords.COMMAND: Commands.LOAD_TABS,
-                ProtocoljKeywords.ENABLE_COOKIES: [Cookies.TABS_MANAGER],
-            }
+                # Load tabs, of which there are none at the start.
+                # This establishes the cookie though.
+                load_tabs_request = {
+                    Keywords.COMMAND: Commands.LOAD_TABS,
+                    ProtocoljKeywords.ENABLE_COOKIES: [Cookies.TABS_MANAGER],
+                }
 
-            response = await echolocator_guis_get_default().client_protocolj(
-                load_tabs_request, cookies={}
-            )
+                response = await echolocator_guis_get_default().client_protocolj(
+                    load_tabs_request, cookies={}
+                )
 
-            # The response is json, with the last saved tab_id.
-            assert Keywords.TAB_ID in response
-            assert response[Keywords.TAB_ID] is None
+                # The response is json, with the last saved tab_id.
+                assert Keywords.TAB_ID in response
+                assert response[Keywords.TAB_ID] is None
 
-            # We should also have cookies back.
-            assert "__cookies" in response
-            cookies = response["__cookies"]
-            assert Cookies.TABS_MANAGER in cookies
+                # We should also have cookies back.
+                assert "__cookies" in response
+                cookies = response["__cookies"]
+                assert Cookies.TABS_MANAGER in cookies
 
-            # Use the cookie name in the next requests.
-            cookie_uuid = cookies[Cookies.TABS_MANAGER]
+                # Use the cookie name in the next requests.
+                cookie_uuid = cookies[Cookies.TABS_MANAGER]
 
-            # --------------------------------------------------------------------
-            # Select a tab.
-            # The response is json, but nothing really to see in it.
+                # --------------------------------------------------------------------
+                # Select a tab.
+                # The response is json, but nothing really to see in it.
 
-            select_tab_request = {
-                Keywords.COMMAND: Commands.SELECT_TAB,
-                ProtocoljKeywords.ENABLE_COOKIES: [Cookies.TABS_MANAGER],
-                Keywords.TAB_ID: "123",
-            }
+                select_tab_request = {
+                    Keywords.COMMAND: Commands.SELECT_TAB,
+                    ProtocoljKeywords.ENABLE_COOKIES: [Cookies.TABS_MANAGER],
+                    Keywords.TAB_ID: "123",
+                }
 
-            response = await echolocator_guis_get_default().client_protocolj(
-                select_tab_request, cookies={Cookies.TABS_MANAGER: cookie_uuid}
-            )
+                response = await echolocator_guis_get_default().client_protocolj(
+                    select_tab_request, cookies={Cookies.TABS_MANAGER: cookie_uuid}
+                )
 
-            # --------------------------------------------------------------------
-            # Load tabs again, this time we should get the saved tab_id.
-            response = await echolocator_guis_get_default().client_protocolj(
-                load_tabs_request, cookies={Cookies.TABS_MANAGER: cookie_uuid}
-            )
+                # --------------------------------------------------------------------
+                # Load tabs again, this time we should get the saved tab_id.
+                response = await echolocator_guis_get_default().client_protocolj(
+                    load_tabs_request, cookies={Cookies.TABS_MANAGER: cookie_uuid}
+                )
 
-            logger.debug(describe("second load_tabs response", response))
-            assert Keywords.TAB_ID in response
-            assert response[Keywords.TAB_ID] == "123"
+                logger.debug(describe("second load_tabs response", response))
+                assert Keywords.TAB_ID in response
+                assert response[Keywords.TAB_ID] == "123"
 
-            # --------------------------------------------------------------------
-            # Write a text file and fetch it through the http server.
-            filename = "test.html"
-            contents = "some test html"
-            with open(f"{output_directory}/{filename}", "wt") as file:
-                file.write(contents)
-            await echolocator_guis_get_default().client_get_file(filename)
-            # assert text == contents
+                # --------------------------------------------------------------------
+                # Write a text file and fetch it through the http server.
+                filename = "test.html"
+                contents = "some test html"
+                with open(f"{output_directory}/{filename}", "wt") as file:
+                    file.write(contents)
+                await echolocator_guis_get_default().client_get_file(filename)
+                # assert text == contents
 
-            # Write a binary file and fetch it through the http server.
-            filename = "test.exe"
-            contents = "some test binary"
-            with open(f"{output_directory}/{filename}", "wt") as file:
-                file.write(contents)
-            binary = await echolocator_guis_get_default().client_get_file(filename)
-            # Binary comes back as bytes due to suffix of url filename.
-            assert binary == contents.encode()
+                # Write a binary file and fetch it through the http server.
+                filename = "test.exe"
+                contents = "some test binary"
+                with open(f"{output_directory}/{filename}", "wt") as file:
+                    file.write(contents)
+                binary = await echolocator_guis_get_default().client_get_file(filename)
+                # Binary comes back as bytes due to suffix of url filename.
+                assert binary == contents.encode()

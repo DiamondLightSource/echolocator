@@ -52,7 +52,7 @@ dls_servbase_dataface_specification: &DLS_BILLY_DATAFACE_SPECIFICATION
                 filename: "${output_directory}/dls_servbase_dataface.sqlite"
                 log_level: "WARNING"
     context:
-        start_as: process
+        start_as: coro
 
 # The xchembku_dataface direct access.
 xchembku_dataface_specification: &XCHEMBKU_DATAFACE_SPECIFICATION
@@ -97,4 +97,4 @@ echolocator_gui_specification:
     # The dataface which the gui talks to.
     echolocator_dataface_specification: *XCHEMBKU_DATAFACE_SPECIFICATION
     context:
-        start_as: process
+        start_as: coro

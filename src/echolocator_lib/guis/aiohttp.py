@@ -8,6 +8,7 @@ from dls_utilpack.require import require
 
 # Global managers.
 from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
+from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
 
 # Direct database queries (need to be deprecated).
 from echolocator_api.databases.constants import ImageFieldnames, Tablenames
@@ -173,55 +174,38 @@ class Aiohttp(Thing, BaseAiohttp):
     # ----------------------------------------------------------------------------------------
     async def _fetch_image(self, opaque, request_dict):
 
-        # Get autoid from the cookie if it's not being posted here.
-        autoid = await self.set_or_get_cookie_content(
+        # Get uuid from the cookie if it's not being posted here.
+        uuid = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_EDIT_UX,
-            "autoid",
-            request_dict.get("autoid"),
+            "uuid",
+            request_dict.get("uuid"),
             "",
         )
 
         # Not able to get an image from posted value or cookie?
         # Usually first time visiting Image Details tab when no image picked from list.
-        if autoid == "":
+        if uuid == "":
             response = {"record": None}
             return response
 
-        autoid = int(autoid)
+        # Start a filter where we anchor on the given image.
+        filter = CrystalWellFilterModel(anchor=uuid)
 
         # Image previous or next?
         direction = request_dict.get("direction", 0)
         if direction != 0:
-            records = await self._fetch_image_records(opaque)
-            # Look through the current list for our autoid.
-            for index in range(0, len(records)):
-                if records[index]["autoid"] == autoid:
-                    break
+            filter.direction = direction
 
-            if index >= len(records):
-                raise RuntimeError("image #{autoid} is no longer in the database")
+        crystal_well_models = await xchembku_datafaces_get_default().fetch_crystal_wells_needing_droplocation(
+            filter
+        )
 
-            index = index + direction
-            if index < 0:
-                index = len(records) - 1
-            if index == len(records):
-                index = 0
+        if len(crystal_well_models) == 0:
+            response = {"record": None}
+            return response
 
-            # New image selected?
-            record = records[index]
-
-            # We moved to a new image?
-            if autoid != record["autoid"]:
-                self.set_cookie_content(
-                    opaque, Cookies.IMAGE_EDIT_UX, "autoid", record["autoid"]
-                )
-        else:
-            records = await xchembku_datafaces_get_default().query(
-                f"SELECT * FROM {Tablenames.ROCKMAKER_IMAGES} WHERE autoid = {autoid}"
-            )
-            record = records[0]
-
+        record = crystal_well_models[0].dict()
         record["filename"] = "filestore" + record["filename"]
         response = {"record": record}
 
