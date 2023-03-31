@@ -8,6 +8,9 @@ import numpy as np
 
 # Base class for generic things.
 from dls_utilpack.thing import Thing
+from xchembku_api.models.crystal_well_needing_droplocation_model import (
+    CrystalWellNeedingDroplocationModel,
+)
 
 # Database record field names coming from database fields.
 from echolocator_api.databases.constants import ImageFieldnames
@@ -38,13 +41,13 @@ class Html(Thing):
         self.__indent = 0
 
     # ----------------------------------------------------------------------------------------
-    def compose_image_list(self, records):
+    def compose_image_list(self, models: [CrystalWellNeedingDroplocationModel]):
         """
         Compose the image list as an html table.
         """
 
         field_names = [
-            {"text": "autoid", "class": "T_autoid"},
+            {"text": "uuid", "class": "T_uuid"},
             {"text": "filename", "class": "T_filename"},
             {"text": "Barcode", "class": "T_barcode"},
             {"text": "Subwell", "class": "T_plate_position"},
@@ -73,19 +76,19 @@ class Html(Thing):
         html_lines.append("<tbody>")
 
         # Traverse all the given records.
-        for record in records:
-            autoid = record[ImageFieldnames.AUTOID]
-            error = record[ImageFieldnames.ERROR]
+        for model in models:
+            uuid = model.uuid
+            error = model.error
             if error is None:
                 error = "-"
-            html_lines.append(f"<tr autoid='{autoid}'>")
-            html_lines.append(f"<td>{autoid}</td>")
+            html_lines.append(f"<tr uuid='{uuid}'>")
+            html_lines.append(f"<td>{uuid}</td>")
             html_lines.append(
-                f"<td>{html.escape(record[ImageFieldnames.FILENAME])}</td>"
+                f"<td class='T_filename'>{html.escape(model.filename)}</td>"
             )
 
             # Extract derived info from filename
-            filename = Path(record[ImageFieldnames.FILENAME]).name
+            filename = Path(model.filename).name
             barcode, plate_position = self.extract_plate_info_from_filename(
                 str(filename)
             )
@@ -94,15 +97,15 @@ class Html(Thing):
 
             html_lines.append(f"<td>{plate_position}</td>")
 
-            t = record[ImageFieldnames.NUMBER_OF_CRYSTALS]
+            t = model.number_of_crystals
             if t is None:
                 t = "-"
             html_lines.append("<td id='number_of_crystals'>" + str(t) + "</td>")
 
-            target_x = record[ImageFieldnames.TARGET_POSITION_X]
-            target_y = record[ImageFieldnames.TARGET_POSITION_Y]
-            well_centre_x = record[ImageFieldnames.WELL_CENTER_X]
-            well_centre_y = record[ImageFieldnames.WELL_CENTER_Y]
+            target_x = model.auto_target_position_x
+            target_y = model.auto_target_position_y
+            well_centre_x = model.well_centroid_x
+            well_centre_y = model.well_centroid_y
             t = self.calculate_realspace_offset(
                 [target_y, target_x],
                 [well_centre_y, well_centre_x],
@@ -113,7 +116,7 @@ class Html(Thing):
             html_lines.append("<td id='real_space_target_x'>" + str(t[1]) + "</td>")
             html_lines.append("<td id='real_space_target_y'>" + str(t[0]) + "</td>")
 
-            t = record[ImageFieldnames.IS_DROP]
+            t = model.drop_detected
             if t is None:
                 t = "-"
             elif t:
@@ -122,7 +125,7 @@ class Html(Thing):
                 t = "no"
             html_lines.append("<td id='is_drop'>" + str(t) + "</td>")
 
-            t = record[ImageFieldnames.IS_USABLE]
+            t = model.is_valid
             if t is None:
                 t = "-"
             elif t:

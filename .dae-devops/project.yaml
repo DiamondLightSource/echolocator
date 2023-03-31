@@ -17,3 +17,5 @@ primary:
               - dls_servbase
               - dls_mainiac
               - dls_utilpack
+              # TODO: Change configuration so that certain depdendencies are marked for unit testing.
+              - beautifulsoup4
