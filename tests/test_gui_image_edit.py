@@ -9,6 +9,14 @@ from dls_utilpack.describe import describe
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
 from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
+from xchembku_api.models.crystal_well_autolocation_model import (
+    CrystalWellAutolocationModel,
+)
+from xchembku_api.models.crystal_well_droplocation_model import (
+    CrystalWellDroplocationModel,
+)
+from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
+from xchembku_api.models.crystal_well_model import CrystalWellModel
 
 # Context creator.
 from echolocator_lib.contexts.contexts import Contexts
@@ -54,11 +62,17 @@ class GuiImageEditTester(BaseContextTester):
             xchembku_dataface_specification
         )
 
-        context = Contexts().build_object(context_configuration)
+        echolocator_contexts = Contexts().build_object(context_configuration)
 
         # Start the client context for the direct access to the xchembku.
         async with xchembku_client_context:
-            async with context:
+            # Reference the dataface object which the context has set up as the default.
+            dataface = xchembku_datafaces_get_default()
+
+            # Inject a well.
+            crystal_well_model = await self.__inject(dataface, True, False)
+
+            async with echolocator_contexts:
 
                 # --------------------------------------------------------------------
                 # Do what the Image Details tab does when it loads.
@@ -88,7 +102,7 @@ class GuiImageEditTester(BaseContextTester):
                         Cookies.IMAGE_LIST_UX,
                     ],
                     Keywords.COMMAND: Commands.FETCH_IMAGE,
-                    "uuid": "000-111-222",
+                    "uuid": crystal_well_model.uuid,
                 }
 
                 response = await echolocator_guis_get_default().client_protocolj(
@@ -96,3 +110,39 @@ class GuiImageEditTester(BaseContextTester):
                 )
 
                 logger.debug(describe("first fetch_image response", response))
+
+    # ----------------------------------------------------------------------------------------
+
+    async def __inject(self, dataface, autolocation: bool, droplocation: bool):
+        """ """
+        if not hasattr(self, "__injected_count"):
+            self.__injected_count = 0
+
+        filename = "%03d.jpg" % (self.__injected_count)
+        self.__injected_count += 1
+
+        # Write well record.
+        m = CrystalWellModel(filename=filename)
+
+        await dataface.originate_crystal_wells([m])
+
+        if autolocation:
+            # Add a crystal well autolocation.
+            t = CrystalWellAutolocationModel(
+                crystal_well_uuid=m.uuid,
+                number_of_crystals=10,
+            )
+
+            await dataface.originate_crystal_well_autolocations([t])
+
+        if droplocation:
+            # Add a crystal well droplocation.
+            t = CrystalWellDroplocationModel(
+                crystal_well_uuid=m.uuid,
+                confirmed_target_position_x=10,
+                confirmed_target_position_y=11,
+            )
+
+            await dataface.originate_crystal_well_droplocations([t])
+
+        return m
