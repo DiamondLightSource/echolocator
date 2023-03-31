@@ -105,6 +105,10 @@ class Aiohttp(Thing, BaseAiohttp):
                 )
                 echolocator_composers_set_default(echolocator_composer)
 
+            # Presume the xchembku client has already been established.
+            # Note: this doesn't work for direct xchembku when a new process has just been started.
+            self.__xchembku = xchembku_datafaces_get_default()
+
         except Exception:
             raise RuntimeError(f"unable to start {callsign(self)} server coro")
 
@@ -204,8 +208,8 @@ class Aiohttp(Thing, BaseAiohttp):
         if should_show_only_undecided:
             filter.is_confirmed = False
 
-        crystal_well_models = await xchembku_datafaces_get_default().fetch_crystal_wells_needing_droplocation(
-            filter
+        crystal_well_models = (
+            await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
         )
 
         if len(crystal_well_models) == 0:
@@ -243,28 +247,31 @@ class Aiohttp(Thing, BaseAiohttp):
         )
 
         logger.debug(
-            f"fetching image records, name_pattern is '{name_pattern}', should_show_only_undecided is '{should_show_only_undecided}'"
+            f"fetching image records, name_pattern is '{name_pattern}' and "
+            f" should_show_only_undecided is '{should_show_only_undecided}'"
         )
 
-        where_and_sqls = []
-        where_and_subs = []
-        if name_pattern != "":
-            where_and_sqls.append("filename GLOB ?")
-            where_and_subs.append(name_pattern)
+        # Start a filter where we anchor on the given image.
+        filter = CrystalWellFilterModel(filename=name_pattern)
+
+        should_show_only_undecided = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.IMAGE_LIST_UX,
+            "should_show_only_undecided",
+            request_dict.get("should_show_only_undecided"),
+            False,
+        )
         if should_show_only_undecided:
-            where_and_sqls.append(f"{ImageFieldnames.IS_USABLE} IS NULL")
+            filter.is_confirmed = False
 
-        if len(where_and_sqls) > 0:
-            where = " WHERE " + " AND ".join(where_and_sqls)
-        else:
-            where = ""
-        records = await xchembku_datafaces_get_default().query(
-            f"SELECT * FROM {Tablenames.ROCKMAKER_IMAGES}"
-            + where
-            + f" ORDER BY {ImageFieldnames.CREATED_ON} DESC",
-            subs=where_and_subs,
+        # Fetch the list from the xchembku.
+        crystal_well_models = (
+            await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
         )
-        html = echolocator_composers_get_default().compose_image_list(records)
+
+        html = echolocator_composers_get_default().compose_image_list(
+            crystal_well_models
+        )
         filters = {
             "name_pattern": name_pattern,
             "should_show_only_undecided": should_show_only_undecided,
@@ -293,7 +300,7 @@ class Aiohttp(Thing, BaseAiohttp):
         subs.append(require("ajax request target_position", target_position, "y"))
         subs.append(require("ajax request", request_dict, "autoid"))
 
-        await xchembku_datafaces_get_default().execute(sql, subs)
+        await self.__xchembku.execute(sql, subs)
 
         response = {"status": "ok"}
 
@@ -315,7 +322,7 @@ class Aiohttp(Thing, BaseAiohttp):
         subs.append(require("ajax request", request_dict, "is_usable"))
         subs.append(require("ajax request", request_dict, "autoid"))
 
-        await xchembku_datafaces_get_default().execute(sql, subs)
+        await self.__xchembku.execute(sql, subs)
 
         # Fetch the next image record after the update.
         request_dict["direction"] = 1

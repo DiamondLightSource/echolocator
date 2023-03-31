@@ -87,7 +87,7 @@ class GuiTester(Base):
 
         # Start the client context for the direct access to the xchembku.
         async with xchembku_client_context:
-            # Start the dataface the gui uses for cookies..
+            # Start the dataface the gui uses for cookies.
             async with servbase_dataface_context:
                 # Start the gui client context.
                 async with gui_client_context:
@@ -195,6 +195,20 @@ class GuiTester(Base):
         assert record["uuid"] == crystal_wells[3].uuid
         assert record["is_valid"] is True
 
+        # -------------------------------------------------------------------------------------
+        # Same query again, but rely on cookies for values.
+        request.pop("uuid")
+
+        response = await echolocator_guis_get_default().client_protocolj(
+            request, cookies=response["__cookies"]
+        )
+
+        logger.debug(describe("fetch_image response", response))
+
+        record = response["record"]
+        assert record["uuid"] == crystal_wells[3].uuid
+        assert record["is_valid"] is True
+
     # ----------------------------------------------------------------------------------------
 
     async def __request_forward_undecided(self, crystal_wells):
@@ -213,6 +227,21 @@ class GuiTester(Base):
 
         response = await echolocator_guis_get_default().client_protocolj(
             request, cookies={}
+        )
+
+        logger.debug(describe("fetch_image response", response))
+
+        record = response["record"]
+        assert record["uuid"] == crystal_wells[5].uuid
+        assert record["is_valid"] is None
+
+        # -------------------------------------------------------------------------------------
+        # Same query again, but rely on cookies for values.
+        request.pop("uuid")
+        request.pop("should_show_only_undecided")
+
+        response = await echolocator_guis_get_default().client_protocolj(
+            request, cookies=response["__cookies"]
         )
 
         logger.debug(describe("fetch_image response", response))
