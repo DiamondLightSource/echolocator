@@ -187,7 +187,7 @@ class Aiohttp(Thing, BaseAiohttp):
             return response
 
         # Start a filter where we anchor on the given image.
-        filter = CrystalWellFilterModel(anchor=uuid)
+        filter = CrystalWellFilterModel(anchor=uuid, limit=1)
 
         # Image previous or next?
         direction = request_dict.get("direction", 0)
@@ -212,6 +212,7 @@ class Aiohttp(Thing, BaseAiohttp):
             response = {"record": None}
             return response
 
+        # Presumabley there is only one image of interest.
         record = crystal_well_models[0].dict()
         record["filename"] = "filestore" + record["filename"]
         response = {"record": record}
