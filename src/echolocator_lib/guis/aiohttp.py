@@ -194,6 +194,16 @@ class Aiohttp(Thing, BaseAiohttp):
         if direction != 0:
             filter.direction = direction
 
+        should_show_only_undecided = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.IMAGE_LIST_UX,
+            "should_show_only_undecided",
+            request_dict.get("should_show_only_undecided"),
+            False,
+        )
+        if should_show_only_undecided:
+            filter.is_confirmed = False
+
         crystal_well_models = await xchembku_datafaces_get_default().fetch_crystal_wells_needing_droplocation(
             filter
         )

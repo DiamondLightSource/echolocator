@@ -102,8 +102,25 @@ class GuiTester(Base):
         # Reference the xchembku object which the context has set up as the default.
         xchembku = xchembku_datafaces_get_default()
 
-        # Inject a well.
-        crystal_well_model = await self.__inject(xchembku, True, False)
+        crystal_wells = []
+
+        # Inject some wells.
+        crystal_wells.append(await self.__inject(xchembku, False, False))
+        crystal_wells.append(await self.__inject(xchembku, True, True))
+        crystal_wells.append(await self.__inject(xchembku, True, False))
+        crystal_wells.append(await self.__inject(xchembku, True, True))
+        crystal_wells.append(await self.__inject(xchembku, True, True))
+        crystal_wells.append(await self.__inject(xchembku, True, False))
+
+        await self.__request_initial(crystal_wells)
+        await self.__request_anchor(crystal_wells)
+        await self.__request_forward(crystal_wells)
+        await self.__request_forward_undecided(crystal_wells)
+
+    # ----------------------------------------------------------------------------------------
+
+    async def __request_initial(self, crystal_wells):
+        """ """
 
         # --------------------------------------------------------------------
         # Do what the Image Details tab does when it loads.
@@ -119,7 +136,6 @@ class GuiTester(Base):
                 Cookies.IMAGE_LIST_UX,
             ],
             Keywords.COMMAND: Commands.FETCH_IMAGE,
-            "uuid": crystal_well_model.uuid,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
@@ -128,15 +144,91 @@ class GuiTester(Base):
 
         logger.debug(describe("first fetch_image response", response))
 
+        record = response["record"]
+        assert record is None
+
+    # ----------------------------------------------------------------------------------------
+
+    async def __request_anchor(self, crystal_wells):
+        """ """
+
+        request = {
+            ProtocoljKeywords.ENABLE_COOKIES: [
+                Cookies.IMAGE_EDIT_UX,
+                Cookies.IMAGE_LIST_UX,
+            ],
+            Keywords.COMMAND: Commands.FETCH_IMAGE,
+            "uuid": crystal_wells[2].uuid,
+        }
+
+        response = await echolocator_guis_get_default().client_protocolj(
+            request, cookies={}
+        )
+
+        logger.debug(describe("first fetch_image response", response))
+
+        record = response["record"]
+        assert record["uuid"] == crystal_wells[2].uuid
+
+    # ----------------------------------------------------------------------------------------
+
+    async def __request_forward(self, crystal_wells):
+        """ """
+
+        request = {
+            ProtocoljKeywords.ENABLE_COOKIES: [
+                Cookies.IMAGE_EDIT_UX,
+                Cookies.IMAGE_LIST_UX,
+            ],
+            Keywords.COMMAND: Commands.FETCH_IMAGE,
+            "uuid": crystal_wells[2].uuid,
+            "direction": 1,
+        }
+
+        response = await echolocator_guis_get_default().client_protocolj(
+            request, cookies={}
+        )
+
+        logger.debug(describe("fetch_image response", response))
+
+        record = response["record"]
+        assert record["uuid"] == crystal_wells[3].uuid
+        assert record["is_valid"] is True
+
+    # ----------------------------------------------------------------------------------------
+
+    async def __request_forward_undecided(self, crystal_wells):
+        """ """
+
+        request = {
+            ProtocoljKeywords.ENABLE_COOKIES: [
+                Cookies.IMAGE_EDIT_UX,
+                Cookies.IMAGE_LIST_UX,
+            ],
+            Keywords.COMMAND: Commands.FETCH_IMAGE,
+            "uuid": crystal_wells[2].uuid,
+            "direction": 1,
+            "should_show_only_undecided": True,
+        }
+
+        response = await echolocator_guis_get_default().client_protocolj(
+            request, cookies={}
+        )
+
+        logger.debug(describe("fetch_image response", response))
+
+        record = response["record"]
+        assert record["uuid"] == crystal_wells[5].uuid
+        assert record["is_valid"] is None
+
     # ----------------------------------------------------------------------------------------
 
     async def __inject(self, xchembku, autolocation: bool, droplocation: bool):
         """ """
-        if not hasattr(self, "__injected_count"):
-            self.__injected_count = 0
+        if not hasattr(self, "injected_count"):
+            self.injected_count = 0
 
-        filename = "%03d.jpg" % (self.__injected_count)
-        self.__injected_count += 1
+        filename = "/tmp/%03d.jpg" % (self.injected_count)
 
         # Write well record.
         m = CrystalWellModel(filename=filename)
@@ -147,7 +239,9 @@ class GuiTester(Base):
             # Add a crystal well autolocation.
             t = CrystalWellAutolocationModel(
                 crystal_well_uuid=m.uuid,
-                number_of_crystals=10,
+                number_of_crystals=self.injected_count,
+                auto_target_position_x=self.injected_count * 10 + 1,
+                auto_target_position_y=self.injected_count * 10 + 2,
             )
 
             await xchembku.originate_crystal_well_autolocations([t])
@@ -156,10 +250,13 @@ class GuiTester(Base):
             # Add a crystal well droplocation.
             t = CrystalWellDroplocationModel(
                 crystal_well_uuid=m.uuid,
-                confirmed_target_position_x=10,
-                confirmed_target_position_y=11,
+                confirmed_target_position_x=self.injected_count * 10 + 3,
+                confirmed_target_position_y=self.injected_count * 10 + 4,
+                is_valid=True,
             )
 
             await xchembku.originate_crystal_well_droplocations([t])
+
+        self.injected_count += 1
 
         return m
