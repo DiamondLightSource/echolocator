@@ -1,14 +1,14 @@
 # Use standard logging in this module.
 import logging
 
+# Class managing list of things.
+from dls_utilpack.things import Things
+
 # Exceptions.
 from echolocator_api.exceptions import NotFound
 
 # Types.
 from echolocator_api.guis.constants import Types
-
-# Class managing list of things.
-from echolocator_api.things import Things
 
 logger = logging.getLogger(__name__)
 

@@ -6,11 +6,11 @@ from typing import Optional, Sequence, Union
 
 import numpy as np
 
+# Base class for generic things.
+from dls_utilpack.thing import Thing
+
 # Database record field names coming from database fields.
 from echolocator_api.databases.constants import ImageFieldnames
-
-# Base class for generic things.
-from echolocator_api.thing import Thing
 
 # Class to do the work using prettytable.
 from echolocator_lib.composers.prettyhelper import PrettyHelper

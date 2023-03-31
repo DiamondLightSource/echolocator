@@ -1,7 +1,7 @@
 import logging
 
 # Base class for a Thing which has a name and traits.
-from echolocator_api.thing import Thing
+from dls_utilpack.thing import Thing
 
 logger = logging.getLogger(__name__)
 
