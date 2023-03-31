@@ -37,12 +37,12 @@ logger = logging.getLogger(__name__)
 
 
 # ----------------------------------------------------------------------------------------
-class TestGui:
+class TestFetchImage:
     def test(self, constants, logging_setup, output_directory):
         """ """
 
         configuration_file = "tests/configurations/service.yaml"
-        GuiTester().main(
+        FetchImageTester().main(
             constants,
             configuration_file,
             output_directory,
@@ -50,9 +50,9 @@ class TestGui:
 
 
 # ----------------------------------------------------------------------------------------
-class GuiTester(Base):
+class FetchImageTester(Base):
     """
-    Class to test the gui.
+    Class to test the gui fetch_image endpoint.
     """
 
     async def _main_coroutine(self, constants, output_directory):
