@@ -30,20 +30,20 @@ logging_settings:
 
 # The external access bits.
 external_access_bits:
-    dls_servbase_dataface_server: &DLS_BILLY_DATAFACE_SERVER http://*:27620
-    dls_servbase_dataface_client: &DLS_BILLY_DATAFACE_CLIENT http://localhost:27620
+    dls_servbase_dataface_server: &DLS_SERVBASE_DATAFACE_SERVER http://*:27620
+    dls_servbase_dataface_client: &DLS_SERVBASE_DATAFACE_CLIENT http://localhost:27620
     dataface_port: &DATAFACE_PORT 27621
     echolocator_gui_server: &ECHOLOCATOR_GUI_SERVER http://*:27622
     echolocator_gui_client: &ECHOLOCATOR_GUI_CLIENT http://127.0.0.1:27622
 
 # The dls_servbase_dataface client/server composite.
-dls_servbase_dataface_specification: &DLS_BILLY_DATAFACE_SPECIFICATION
+dls_servbase_dataface_specification: &DLS_SERVBASE_DATAFACE_SPECIFICATION
     type: "dls_servbase_lib.datafaces.aiohttp"
     type_specific_tbd:
         # The remote dataface server access.
         aiohttp_specification:
-            server: *DLS_BILLY_DATAFACE_SERVER
-            client: *DLS_BILLY_DATAFACE_CLIENT
+            server: *DLS_SERVBASE_DATAFACE_SERVER
+            client: *DLS_SERVBASE_DATAFACE_CLIENT
         # The local implementation of the dataface.
         actual_dataface_specification:
             type: "dls_servbase_lib.datafaces.aiosqlite"
@@ -62,25 +62,6 @@ xchembku_dataface_specification: &XCHEMBKU_DATAFACE_SPECIFICATION
         filename: "${output_directory}/xchembku.sqlite"
         log_level: "WARNING"
 
-# The echolocator_dataface client/server composite.
-echolocator_dataface_specification_OLD: &ECHOLOCATOR_DATAFACE_SPECIFICATION_OLD
-    type: "echolocator_lib.echolocator_datafaces.aiohttp"
-    type_specific_tbd:
-        # The remote echolocator_dataface server access.
-        aiohttp_specification:
-            server_host: "*"
-            client_host: "127.0.0.1"
-            port: *DATAFACE_PORT
-        # The local implementation of the echolocator_dataface.
-        actual_echolocator_dataface_specification:
-            type: "echolocator_lib.echolocator_datafaces.aiosqlite"
-            database:
-                type: "echolocator_lib.echolocator_databases.aiosqlite"
-                filename: "${output_directory}/echolocator_dataface.sqlite"
-                log_level: "WARNING"
-    context:
-        start_as: process
-
 # The echolocator_gui specification.
 echolocator_gui_specification:
     type: "echolocator_lib.guis.aiohttp"
@@ -93,7 +74,7 @@ echolocator_gui_specification:
             cookie_specification:
                 type: "dls_servbase_lib.cookies.dataface"
                 type_specific_tbd:
-                    dataface_specification: *DLS_BILLY_DATAFACE_SPECIFICATION
+                    dataface_specification: *DLS_SERVBASE_DATAFACE_SPECIFICATION
     # The dataface which the gui talks to.
     echolocator_dataface_specification: *XCHEMBKU_DATAFACE_SPECIFICATION
     context:

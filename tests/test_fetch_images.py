@@ -144,7 +144,7 @@ class FetchImagesTester(Base):
         # Count the number of rows in the table.
         row_count = len(table.find_all("tr"))
 
-        # Assert that the row count is equal to the expected value.
+        # The table contains only the header and no data rows.
         assert row_count == 1 + 0
 
     # ----------------------------------------------------------------------------------------

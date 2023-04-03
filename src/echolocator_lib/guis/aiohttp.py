@@ -11,6 +11,9 @@ from dls_utilpack.thing import Thing
 
 # Global managers.
 from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
+from xchembku_api.models.crystal_well_droplocation_model import (
+    CrystalWellDroplocationModel,
+)
 from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
 
 # Base class for an aiohttp server.
@@ -287,20 +290,21 @@ class Aiohttp(Thing, BaseAiohttp):
     # ----------------------------------------------------------------------------------------
     async def _set_target_position(self, opaque, request_dict):
 
-        sql = (
-            f"UPDATE {Tablenames.ROCKMAKER_IMAGES}"
-            f" SET {ImageFieldnames.TARGET_POSITION_X} = ?,"
-            f" {ImageFieldnames.TARGET_POSITION_Y} = ?"
-            f" WHERE {ImageFieldnames.AUTOID} = ?"
+        target_position = require("ajax request", request_dict, "target_position")
+
+        model = CrystalWellDroplocationModel(
+            crystal_well_uuid=require(
+                "ajax request", request_dict, "crystal_well_uuid"
+            ),
+            confirmed_target_position_x=require(
+                "ajax request target_position", target_position, "x"
+            ),
+            confirmed_target_position_y=require(
+                "ajax request target_position", target_position, "y"
+            ),
         )
 
-        subs = []
-        target_position = require("ajax request", request_dict, "target_position")
-        subs.append(require("ajax request target_position", target_position, "x"))
-        subs.append(require("ajax request target_position", target_position, "y"))
-        subs.append(require("ajax request", request_dict, "autoid"))
-
-        await self.__xchembku.execute(sql, subs)
+        await self.__xchembku.upsert_crystal_well_droplocations([model])
 
         response = {"status": "ok"}
 

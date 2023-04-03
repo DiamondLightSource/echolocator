@@ -81,7 +81,7 @@ class Html(Thing):
             error = model.error
             if error is None:
                 error = "-"
-            html_lines.append(f"<tr uuid='{uuid}'>")
+            html_lines.append(f"<tr crystal_well_uuid='{uuid}'>")
             html_lines.append(f"<td>{uuid}</td>")
             html_lines.append(
                 f"<td class='T_filename'>{html.escape(model.filename)}</td>"
