@@ -219,7 +219,6 @@ class FetchImagesTester(Base):
                 crystal_well_uuid=m.uuid,
                 confirmed_target_position_x=self.injected_count * 10 + 3,
                 confirmed_target_position_y=self.injected_count * 10 + 4,
-                is_valid=True,
             )
 
             await xchembku.originate_crystal_well_droplocations([t])

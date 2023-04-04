@@ -193,7 +193,7 @@ class FetchImageTester(Base):
 
         record = response["record"]
         assert record["uuid"] == crystal_wells[3].uuid
-        assert record["is_valid"] is True
+        assert record["confirmed_target_position_x"] is not None
 
         # -------------------------------------------------------------------------------------
         # Same query again, but rely on cookies for values.
@@ -207,7 +207,7 @@ class FetchImageTester(Base):
 
         record = response["record"]
         assert record["uuid"] == crystal_wells[3].uuid
-        assert record["is_valid"] is True
+        assert record["confirmed_target_position_x"] is not None
 
     # ----------------------------------------------------------------------------------------
 
@@ -233,7 +233,7 @@ class FetchImageTester(Base):
 
         record = response["record"]
         assert record["uuid"] == crystal_wells[5].uuid
-        assert record["is_valid"] is None
+        assert record["confirmed_target_position_x"] is None
 
         # -------------------------------------------------------------------------------------
         # Same query again, but rely on cookies for values.
@@ -248,7 +248,7 @@ class FetchImageTester(Base):
 
         record = response["record"]
         assert record["uuid"] == crystal_wells[5].uuid
-        assert record["is_valid"] is None
+        assert record["confirmed_target_position_x"] is None
 
     # ----------------------------------------------------------------------------------------
 
@@ -281,7 +281,6 @@ class FetchImageTester(Base):
                 crystal_well_uuid=m.uuid,
                 confirmed_target_position_x=self.injected_count * 10 + 3,
                 confirmed_target_position_y=self.injected_count * 10 + 4,
-                is_valid=True,
             )
 
             await xchembku.originate_crystal_well_droplocations([t])

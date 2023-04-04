@@ -68,7 +68,5 @@ echolocator_gui_specification:
                 type: "dls_servbase_lib.cookies.dataface"
                 type_specific_tbd:
                     dataface_specification: *DLS_SERVBASE_DATAFACE_SPECIFICATION
-    # The dataface which the gui talks to.
-    echolocator_dataface_specification: *XCHEMBKU_DATAFACE_SPECIFICATION
     context:
         start_as: coro
