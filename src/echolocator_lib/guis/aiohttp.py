@@ -9,8 +9,8 @@ from dls_utilpack.require import require
 # Basic things.
 from dls_utilpack.thing import Thing
 
-# Global managers.
-from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
+# Things xchembku provides.
+from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
 from xchembku_api.models.crystal_well_droplocation_model import (
     CrystalWellDroplocationModel,
 )
@@ -49,6 +49,9 @@ class Aiohttp(Thing, BaseAiohttp):
             specification["type_specific_tbd"]["aiohttp_specification"],
             calling_file=__file__,
         )
+
+        self.__xchembku_client_context = None
+        self.__xchembku = None
 
     # ----------------------------------------------------------------------------------------
     def callsign(self):
@@ -108,9 +111,24 @@ class Aiohttp(Thing, BaseAiohttp):
                 )
                 echolocator_composers_set_default(echolocator_composer)
 
-            # Presume the xchembku client has already been established.
-            # Note: this doesn't work for direct xchembku when a new process has just been started.
-            self.__xchembku = xchembku_datafaces_get_default()
+            # Make the xchembku client context.
+            s = require(
+                f"{callsign(self)} specification",
+                self.specification(),
+                "type_specific_tbd",
+            )
+            s = require(
+                f"{callsign(self)} type_specific_tbd",
+                s,
+                "xchembku_dataface_specification",
+            )
+            self.__xchembku_client_context = XchembkuDatafaceClientContext(s)
+
+            # Activate the context.
+            await self.__xchembku_client_context.aenter()
+
+            # Get a reference to the xchembku interface provided by the context.
+            self.__xchembku = self.__xchembku_client_context.get_interface()
 
         except Exception:
             raise RuntimeError(f"unable to start {callsign(self)} server coro")
@@ -118,13 +136,32 @@ class Aiohttp(Thing, BaseAiohttp):
     # ----------------------------------------------------------------------------------------
     async def direct_shutdown(self):
         """"""
+        logger.debug(f"[ECHDON] {callsign(self)} in direct_shutdown")
 
-        # Let the base class stop the server looping.
+        # Forget we have an xchembku client reference.
+        self.__xchembku = None
+
+        if self.__xchembku_client_context is not None:
+            logger.debug(f"[ECHDON] {callsign(self)} exiting __xchembku_client_context")
+            await self.__xchembku_client_context.aexit()
+            logger.debug(f"[ECHDON] {callsign(self)} exited __xchembku_client_context")
+            self.__xchembku_client_context = None
+
+        # Let the base class stop the server event looping.
         await self.base_direct_shutdown()
+
+        logger.debug(f"[ECHDON] {callsign(self)} called base_direct_shutdown")
 
     # ----------------------------------------------------------------------------------------
     async def dispatch(self, request_dict, opaque):
         """"""
+
+        # Having no xchembku client reference means we must be shutting down.
+        if self.__xchembku is None:
+            raise RuntimeError(
+                "refusing to execute command %s because server is shutting down"
+                % (command)
+            )
 
         command = require("request json", request_dict, Keywords.COMMAND)
 

@@ -94,6 +94,9 @@ class FetchImageTester(Base):
                     # And the gui server context which starts the coro.
                     async with gui_server_context:
                         await self.__run_part1(constants, output_directory)
+                        logger.debug(
+                            "[ECHDON] finished running __run_part1, so gui_server_context going out of scope"
+                        )
 
     # ----------------------------------------------------------------------------------------
 
