@@ -43,10 +43,13 @@ class Context(ContextBase):
     # ----------------------------------------------------------------------------------------
     async def aexit(self):
         """ """
+        logger.debug(f"[ECHDON] {thing_type} aexit")
 
         if self.server is not None:
-            # Put in request to shutdown the server.
-            await self.server.client_shutdown()
+            if self.context_specification.get("start_as") == "process":
+                logger.debug(f"[ECHDON] {thing_type} calling client_shutdown")
+                # Put in request to shutdown the server.
+                await self.server.client_shutdown()
 
-            # Release a client connection if we had one.
-            await self.server.close_client_session()
+            if self.context_specification.get("start_as") == "coro":
+                await self.server.direct_shutdown()

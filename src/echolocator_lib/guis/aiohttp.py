@@ -6,14 +6,15 @@ import threading
 from dls_utilpack.callsign import callsign
 from dls_utilpack.require import require
 
-# Direct database queries (need to be deprecated).
-from echolocator_api.databases.constants import ImageFieldnames, Tablenames
-
-# Global managers.
-from echolocator_api.datafaces.datafaces import echolocator_datafaces_get_default
-
 # Basic things.
-from echolocator_api.thing import Thing
+from dls_utilpack.thing import Thing
+
+# Things xchembku provides.
+from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
+from xchembku_api.models.crystal_well_droplocation_model import (
+    CrystalWellDroplocationModel,
+)
+from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
 
 # Base class for an aiohttp server.
 from echolocator_lib.base_aiohttp import BaseAiohttp
@@ -48,6 +49,9 @@ class Aiohttp(Thing, BaseAiohttp):
             specification["type_specific_tbd"]["aiohttp_specification"],
             calling_file=__file__,
         )
+
+        self.__xchembku_client_context = None
+        self.__xchembku = None
 
     # ----------------------------------------------------------------------------------------
     def callsign(self):
@@ -107,19 +111,57 @@ class Aiohttp(Thing, BaseAiohttp):
                 )
                 echolocator_composers_set_default(echolocator_composer)
 
+            # Make the xchembku client context.
+            s = require(
+                f"{callsign(self)} specification",
+                self.specification(),
+                "type_specific_tbd",
+            )
+            s = require(
+                f"{callsign(self)} type_specific_tbd",
+                s,
+                "xchembku_dataface_specification",
+            )
+            self.__xchembku_client_context = XchembkuDatafaceClientContext(s)
+
+            # Activate the context.
+            await self.__xchembku_client_context.aenter()
+
+            # Get a reference to the xchembku interface provided by the context.
+            self.__xchembku = self.__xchembku_client_context.get_interface()
+
         except Exception:
             raise RuntimeError(f"unable to start {callsign(self)} server coro")
 
     # ----------------------------------------------------------------------------------------
     async def direct_shutdown(self):
         """"""
+        logger.debug(f"[ECHDON] {callsign(self)} in direct_shutdown")
 
-        # Let the base class stop the server looping.
+        # Forget we have an xchembku client reference.
+        self.__xchembku = None
+
+        if self.__xchembku_client_context is not None:
+            logger.debug(f"[ECHDON] {callsign(self)} exiting __xchembku_client_context")
+            await self.__xchembku_client_context.aexit()
+            logger.debug(f"[ECHDON] {callsign(self)} exited __xchembku_client_context")
+            self.__xchembku_client_context = None
+
+        # Let the base class stop the server event looping.
         await self.base_direct_shutdown()
+
+        logger.debug(f"[ECHDON] {callsign(self)} called base_direct_shutdown")
 
     # ----------------------------------------------------------------------------------------
     async def dispatch(self, request_dict, opaque):
         """"""
+
+        # Having no xchembku client reference means we must be shutting down.
+        if self.__xchembku is None:
+            raise RuntimeError(
+                "refusing to execute command %s because server is shutting down"
+                % (command)
+            )
 
         command = require("request json", request_dict, Keywords.COMMAND)
 
@@ -173,91 +215,53 @@ class Aiohttp(Thing, BaseAiohttp):
     # ----------------------------------------------------------------------------------------
     async def _fetch_image(self, opaque, request_dict):
 
-        # Get autoid from the cookie if it's not being posted here.
-        autoid = await self.set_or_get_cookie_content(
+        # Get uuid from the cookie if it's not being posted here.
+        uuid = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_EDIT_UX,
-            "autoid",
-            request_dict.get("autoid"),
+            "uuid",
+            request_dict.get("uuid"),
             "",
         )
 
         # Not able to get an image from posted value or cookie?
         # Usually first time visiting Image Details tab when no image picked from list.
-        if autoid == "":
+        if uuid == "":
             response = {"record": None}
             return response
 
-        autoid = int(autoid)
+        # Start a filter where we anchor on the given image.
+        filter = CrystalWellFilterModel(anchor=uuid, limit=1)
 
         # Image previous or next?
         direction = request_dict.get("direction", 0)
         if direction != 0:
-            records = await self._fetch_image_records(opaque)
-            # Look through the current list for our autoid.
-            for index in range(0, len(records)):
-                if records[index]["autoid"] == autoid:
-                    break
+            filter.direction = direction
 
-            if index >= len(records):
-                raise RuntimeError("image #{autoid} is no longer in the database")
+        should_show_only_undecided = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.IMAGE_LIST_UX,
+            "should_show_only_undecided",
+            request_dict.get("should_show_only_undecided"),
+            False,
+        )
+        if should_show_only_undecided:
+            filter.is_confirmed = False
 
-            index = index + direction
-            if index < 0:
-                index = len(records) - 1
-            if index == len(records):
-                index = 0
+        crystal_well_models = (
+            await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
+        )
 
-            # New image selected?
-            record = records[index]
+        if len(crystal_well_models) == 0:
+            response = {"record": None}
+            return response
 
-            # We moved to a new image?
-            if autoid != record["autoid"]:
-                self.set_cookie_content(
-                    opaque, Cookies.IMAGE_EDIT_UX, "autoid", record["autoid"]
-                )
-        else:
-            records = await echolocator_datafaces_get_default().query(
-                f"SELECT * FROM {Tablenames.ROCKMAKER_IMAGES} WHERE autoid = {autoid}"
-            )
-            record = records[0]
-
+        # Presumabley there is only one image of interest.
+        record = crystal_well_models[0].dict()
         record["filename"] = "filestore" + record["filename"]
         response = {"record": record}
 
         return response
-
-    # ----------------------------------------------------------------------------------------
-    async def _fetch_image_records(self, opaque):
-
-        name_pattern = await self.get_cookie_content(
-            opaque, Cookies.IMAGE_LIST_UX, "name_pattern", default=""
-        )
-        should_show_only_undecided = await self.get_cookie_content(
-            opaque, Cookies.IMAGE_LIST_UX, "should_show_only_undecided", default=""
-        )
-
-        where_and_sqls = []
-        where_and_subs = []
-        if name_pattern != "":
-            where_and_sqls.append("filename GLOB ?")
-            where_and_subs.append(name_pattern)
-        if should_show_only_undecided:
-            where_and_sqls.append(f"{ImageFieldnames.IS_USABLE} IS NULL")
-
-        if len(where_and_sqls) > 0:
-            where = " WHERE " + " AND ".join(where_and_sqls)
-        else:
-            where = ""
-
-        records = await echolocator_datafaces_get_default().query(
-            f"SELECT * FROM {Tablenames.ROCKMAKER_IMAGES}"
-            + where
-            + f" ORDER BY {ImageFieldnames.CREATED_ON} DESC",
-            subs=where_and_subs,
-        )
-
-        return records
 
     # ----------------------------------------------------------------------------------------
     async def _fetch_image_list(self, opaque, request_dict):
@@ -283,28 +287,31 @@ class Aiohttp(Thing, BaseAiohttp):
         )
 
         logger.debug(
-            f"fetching image records, name_pattern is '{name_pattern}', should_show_only_undecided is '{should_show_only_undecided}'"
+            f"fetching image records, name_pattern is '{name_pattern}' and "
+            f" should_show_only_undecided is '{should_show_only_undecided}'"
         )
 
-        where_and_sqls = []
-        where_and_subs = []
-        if name_pattern != "":
-            where_and_sqls.append("filename GLOB ?")
-            where_and_subs.append(name_pattern)
+        # Start a filter where we anchor on the given image.
+        filter = CrystalWellFilterModel(filename=name_pattern)
+
+        should_show_only_undecided = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.IMAGE_LIST_UX,
+            "should_show_only_undecided",
+            request_dict.get("should_show_only_undecided"),
+            False,
+        )
         if should_show_only_undecided:
-            where_and_sqls.append(f"{ImageFieldnames.IS_USABLE} IS NULL")
+            filter.is_confirmed = False
 
-        if len(where_and_sqls) > 0:
-            where = " WHERE " + " AND ".join(where_and_sqls)
-        else:
-            where = ""
-        records = await echolocator_datafaces_get_default().query(
-            f"SELECT * FROM {Tablenames.ROCKMAKER_IMAGES}"
-            + where
-            + f" ORDER BY {ImageFieldnames.CREATED_ON} DESC",
-            subs=where_and_subs,
+        # Fetch the list from the xchembku.
+        crystal_well_models = (
+            await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
         )
-        html = echolocator_composers_get_default().compose_image_list(records)
+
+        html = echolocator_composers_get_default().compose_image_list(
+            crystal_well_models
+        )
         filters = {
             "name_pattern": name_pattern,
             "should_show_only_undecided": should_show_only_undecided,
@@ -320,20 +327,21 @@ class Aiohttp(Thing, BaseAiohttp):
     # ----------------------------------------------------------------------------------------
     async def _set_target_position(self, opaque, request_dict):
 
-        sql = (
-            f"UPDATE {Tablenames.ROCKMAKER_IMAGES}"
-            f" SET {ImageFieldnames.TARGET_POSITION_X} = ?,"
-            f" {ImageFieldnames.TARGET_POSITION_Y} = ?"
-            f" WHERE {ImageFieldnames.AUTOID} = ?"
+        target_position = require("ajax request", request_dict, "target_position")
+
+        model = CrystalWellDroplocationModel(
+            crystal_well_uuid=require(
+                "ajax request", request_dict, "crystal_well_uuid"
+            ),
+            confirmed_target_position_x=require(
+                "ajax request target_position", target_position, "x"
+            ),
+            confirmed_target_position_y=require(
+                "ajax request target_position", target_position, "y"
+            ),
         )
 
-        subs = []
-        target_position = require("ajax request", request_dict, "target_position")
-        subs.append(require("ajax request target_position", target_position, "x"))
-        subs.append(require("ajax request target_position", target_position, "y"))
-        subs.append(require("ajax request", request_dict, "autoid"))
-
-        await echolocator_datafaces_get_default().execute(sql, subs)
+        await self.__xchembku.upsert_crystal_well_droplocations([model])
 
         response = {"status": "ok"}
 
@@ -355,7 +363,7 @@ class Aiohttp(Thing, BaseAiohttp):
         subs.append(require("ajax request", request_dict, "is_usable"))
         subs.append(require("ajax request", request_dict, "autoid"))
 
-        await echolocator_datafaces_get_default().execute(sql, subs)
+        await self.__xchembku.execute(sql, subs)
 
         # Fetch the next image record after the update.
         request_dict["direction"] = 1

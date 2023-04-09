@@ -8,11 +8,6 @@ class Envvar:
     """Class which covers environment variables, with default values."""
 
     ECHOLOCATOR_CONFIGFILE = "ECHOLOCATOR_CONFIGFILE"
-    XCHEM_BEFLOW_DATA = "XCHEM_BEFLOW_DATA"
-    XCHEM_BEFLOW_DLS_ROOT = "XCHEM_BEFLOW_DLS_ROOT"
-    BEAMLINE = "BEAMLINE"
-    VISIT_YEAR = "VISIT_YEAR"
-    VISIT = "VISIT"
 
     def __init__(self, name, **kwargs):
 

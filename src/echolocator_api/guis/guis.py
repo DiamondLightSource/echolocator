@@ -28,11 +28,6 @@ def echolocator_guis_get_default():
     return __default_echolocator_gui
 
 
-def echolocator_guis_has_default():
-    global __default_echolocator_gui
-    return __default_echolocator_gui is not None
-
-
 # -----------------------------------------------------------------------------------------
 
 
@@ -55,7 +50,7 @@ class Guis(Things):
             echolocator_gui_object = echolocator_gui_class(specification)
         except Exception as exception:
             raise RuntimeError(
-                "unable to build echolocator_gui object for type %s"
+                "unable to build echolocator gui object for type %s"
                 % (echolocator_gui_class)
             ) from exception
 
@@ -66,8 +61,8 @@ class Guis(Things):
         """"""
 
         if class_type == Types.AIOHTTP:
-            from echolocator_lib.guis.aiohttp import Aiohttp
+            from echolocator_api.guis.aiohttp import Aiohttp
 
             return Aiohttp
 
-        raise NotFound("unable to get echolocator_gui class for type %s" % (class_type))
+        raise NotFound(f"unable to get echolocator gui class for type {class_type}")

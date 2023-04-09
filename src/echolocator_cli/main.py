@@ -8,7 +8,7 @@ import multiprocessing
 from dls_mainiac_lib.mainiac import Mainiac
 
 # The subcommands.
-from echolocator_cli.subcommands.start_services import StartServices
+from echolocator_cli.subcommands.service import Service
 
 # The package version.
 from echolocator_cli.version import meta as version_meta
@@ -26,8 +26,8 @@ class Main(Mainiac):
     def run(self):
         """"""
 
-        if self._args.subcommand == "start_services":
-            StartServices(self._args, self).run()
+        if self._args.subcommand == "service":
+            Service(self._args, self).run()
 
         else:
             raise RuntimeError("unhandled subcommand %s" % (self._args.subcommand))
@@ -61,8 +61,8 @@ class Main(Mainiac):
         subparsers.required = True
 
         # --------------------------------------------------------------------
-        subparser = subparsers.add_parser("start_services", help="Start service(s).")
-        StartServices.add_arguments(subparser)
+        subparser = subparsers.add_parser("service", help="Start service (blocking).")
+        Service.add_arguments(subparser)
 
         return parser
 

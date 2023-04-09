@@ -1,7 +1,7 @@
 import logging
 
 # Base class for generic things.
-from echolocator_api.thing import Thing
+from dls_utilpack.thing import Thing
 
 # Class to do the work using prettytable.
 from echolocator_lib.composers.prettyhelper import PrettyHelper
