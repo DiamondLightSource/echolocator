@@ -265,7 +265,7 @@ class FetchImageTester(Base):
         # Write well record.
         m = CrystalWellModel(filename=filename)
 
-        await xchembku.originate_crystal_wells([m])
+        await xchembku.upsert_crystal_wells([m])
 
         if autolocation:
             # Add a crystal well autolocation.
