@@ -10,6 +10,7 @@ from dls_utilpack.describe import describe
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
 from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
+from xchembku_api.models.crystal_plate_model import CrystalPlateModel
 from xchembku_api.models.crystal_well_autolocation_model import (
     CrystalWellAutolocationModel,
 )
@@ -104,6 +105,17 @@ class FetchImageTester(Base):
         """ """
         # Reference the xchembku object which the context has set up as the default.
         xchembku = xchembku_datafaces_get_default()
+
+        # Make the plate on which the wells reside.
+        visit = "cm00001-1"
+        crystal_plate_model = CrystalPlateModel(
+            formulatrix__plate__id=10,
+            barcode="98ab",
+            visit=visit,
+        )
+
+        await xchembku.upsert_crystal_plates([crystal_plate_model])
+        self.__crystal_plate_uuid = crystal_plate_model.uuid
 
         crystal_wells = []
 
@@ -263,7 +275,9 @@ class FetchImageTester(Base):
         filename = "/tmp/%03d.jpg" % (self.injected_count)
 
         # Write well record.
-        m = CrystalWellModel(filename=filename)
+        m = CrystalWellModel(
+            filename=filename, crystal_plate_uuid=self.__crystal_plate_uuid
+        )
 
         await xchembku.upsert_crystal_wells([m])
 
