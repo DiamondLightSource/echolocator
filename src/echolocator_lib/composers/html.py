@@ -48,9 +48,7 @@ class Html(Thing):
 
         field_names = [
             {"text": "uuid", "class": "T_uuid"},
-            {"text": "filename", "class": "T_filename"},
-            {"text": "Barcode", "class": "T_barcode"},
-            {"text": "Subwell", "class": "T_plate_position"},
+            {"text": "well", "class": "T_well"},
             {"text": "#Crystals", "class": "T_number_of_crystals"},
             {"text": "Offset x (\u03BCm)", "class": "T_real_space_target_x"},
             {"text": "Offset y (\u03BCm)", "class": "T_real_space_target_y"},
@@ -82,20 +80,14 @@ class Html(Thing):
             if error is None:
                 error = "-"
             html_lines.append(f"<tr crystal_well_uuid='{uuid}'>")
-            html_lines.append(f"<td>{uuid}</td>")
-            html_lines.append(
-                f"<td class='T_filename'>{html.escape(model.filename)}</td>"
-            )
+            html_lines.append(f"<td class='T_uuid'>{uuid}</td>")
 
             # Extract derived info from filename
-            filename = Path(model.filename).name
-            barcode, plate_position = self.extract_plate_info_from_filename(
-                str(filename)
+            filestem = Path(model.filename).stem
+
+            html_lines.append(
+                f"<td class='T_filename' title='{html.escape(model.filename)}'>{html.escape(filestem)}</td>"
             )
-
-            html_lines.append(f"<td>{barcode}</td>")
-
-            html_lines.append(f"<td>{plate_position}</td>")
 
             t = model.number_of_crystals
             if t is None:
@@ -148,21 +140,6 @@ class Html(Thing):
         html_lines.append("</table>")
 
         return "\n".join(html_lines)
-
-    # ----------------------------------------------------------------------------------------
-    def extract_plate_info_from_filename(self, filename: str) -> tuple[str, str]:
-        barcode = None
-        position = None
-        subwell = None
-        pattern = re.compile(r"(\w{4})_(\w{3})_(\d).jpg")
-        match = re.findall(pattern, filename)
-        if match:
-            barcode, position, subwell = match[0]
-            position = f"{position[-1]}{position[:2]}_{subwell}"
-            return barcode, position
-        else:
-            logging.error("Unable to get barcode and position from filename!")
-            return "X", "X"
 
     # ----------------------------------------------------------------------------------------
     def calculate_realspace_offset(

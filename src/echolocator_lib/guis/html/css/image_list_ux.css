@@ -8,6 +8,9 @@
     color: red;
 }
 
+#image_list_ux_interaction_parent .T_uuid {
+    display: none;
+}
 
 #image_list_ux_interaction_parent TH,
 #image_list_ux_interaction_parent TD {
