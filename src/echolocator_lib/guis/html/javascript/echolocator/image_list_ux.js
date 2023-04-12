@@ -5,7 +5,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     FETCH_IMAGE_LIST = "echolocator_guis::commands::fetch_image_list";
 
     #jquery_objects = {};
-    #name_pattern = "undefined";
+    #barcode_filter = "undefined";
     #should_show_only_undecided = "undefined";
 
     constructor(runtime, plugin_link_name, $interaction_parent) {
@@ -23,11 +23,11 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         super.activate()
 
         this.#jquery_objects.$div = $(".T_composed", this.$interaction_parent);
-        this.#jquery_objects.$name_pattern = $(".T_name_pattern", this.$interaction_parent);
+        this.#jquery_objects.$barcode_filter = $(".T_barcode_filter", this.$interaction_parent);
         this.#jquery_objects.$should_show_only_undecided = $(".T_should_show_only_undecided", this.$interaction_parent);
 
         var that = this;
-        this.#jquery_objects.$name_pattern.change(
+        this.#jquery_objects.$barcode_filter.change(
             function (jquery_event_object) {
                 that._handle_filter_change(jquery_event_object);
             });
@@ -50,7 +50,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         json_object[this.COMMAND] = this.FETCH_IMAGE_LIST;
         json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME];
 
-        json_object["name_pattern"] = this.#name_pattern;
+        json_object["barcode_filter"] = this.#barcode_filter;
         json_object["should_show_only_undecided"] = this.#should_show_only_undecided;
 
         this.send(json_object);
@@ -69,10 +69,10 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         var filters = response.filters;
         if (filters !== undefined) {
             var t;
-            t = filters["name_pattern"];
+            t = filters["barcode_filter"];
             if (t === undefined)
                 t = "";
-            this.#jquery_objects.$name_pattern.val(t);
+            this.#jquery_objects.$barcode_filter.val(t);
             t = filters["should_show_only_undecided"];
             if (t === undefined)
                 t = false;
@@ -93,7 +93,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     _handle_filter_change(jquery_event_object) {
         var F = "echolocator__ImageListUx::_handle_filter_change"
 
-        this.#name_pattern = this.#jquery_objects.$name_pattern.val()
+        this.#barcode_filter = this.#jquery_objects.$barcode_filter.val()
         this.#should_show_only_undecided = this.#jquery_objects.$should_show_only_undecided.prop("checked")
         this.request_update()
 
