@@ -190,7 +190,7 @@ class Aiohttp(Thing, BaseAiohttp):
             return await self._export(opaque, request_dict)
 
         elif command == Commands.SET_TARGET_POSITION:
-            return await self._set_target_position(opaque, request_dict)
+            return await self._set_confirmed_target(opaque, request_dict)
 
         elif command == Commands.SET_IMAGE_IS_USABLE:
             return await self._set_image_is_usable(opaque, request_dict)
@@ -398,19 +398,19 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _set_target_position(self, opaque, request_dict):
+    async def _set_confirmed_target(self, opaque, request_dict):
 
-        target_position = require("ajax request", request_dict, "target_position")
+        confirmed_target = require("ajax request", request_dict, "confirmed_target")
 
         model = CrystalWellDroplocationModel(
             crystal_well_uuid=require(
                 "ajax request", request_dict, "crystal_well_uuid"
             ),
             confirmed_target_x=require(
-                "ajax request target_position", target_position, "x"
+                "ajax request confirmed_target", confirmed_target, "x"
             ),
             confirmed_target_y=require(
-                "ajax request target_position", target_position, "y"
+                "ajax request confirmed_target", confirmed_target, "y"
             ),
         )
 

@@ -154,7 +154,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             if (!is_usable) {
                 // Notify pixel_ux of requested change in position.
                 // TODO: Combine usable change with position change into single ajax.
-                this.#pixel_ux.set_crystal_well_uuid(this.#crystal_well_uuid, { x: 10, y: 10 });
+                this.#pixel_ux.set_uuid(this.#crystal_well_uuid, { x: 10, y: 10 });
 
                 // Tell pixel_ux to send change to the database.
                 this.#pixel_ux.update_database();
@@ -189,15 +189,15 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         }
 
         // Convert to target position before giving to pixel_ux.
-        var target_position = this.#transformer.view_to_data(view_position);
+        var confirmed_target = this.#transformer.view_to_data(view_position);
 
         console.log(F + ": clicked view_position" +
             " [" + view_position.x + ", " + view_position.y + "]" +
-            " transformed to target_position" +
-            " [" + target_position.x + ", " + target_position.y + "]");
+            " transformed to confirmed_target" +
+            " [" + confirmed_target.x + ", " + confirmed_target.y + "]");
 
         // Notify pixel_ux of requested change in position.
-        this.#pixel_ux.set_crystal_well_uuid(this.#crystal_well_uuid, target_position);
+        this.#pixel_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
 
         // Tell pixel_ux to send change to the database.
         this.#pixel_ux.update_database();
@@ -281,8 +281,11 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.#record = record;
 
         // The the pixel ux about the crystal_well_uuid so it can be included in sending changes.
-        var target_position = { x: record.target_position_x ? record.target_position_x : 10, y: record.target_position_y ? record.target_position_y : 10 }
-        this.#pixel_ux.set_crystal_well_uuid(this.#crystal_well_uuid, target_position);
+        var confirmed_target = {
+            x: record.confirmed_target_x ? record.confirmed_target_x : 10,
+            y: record.confirmed_target_y ? record.confirmed_target_y : 10
+        }
+        this.#pixel_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
 
         // Let the spreader calculate the available space for the image.
         // This will trigger a call to this.handle_spread_event().

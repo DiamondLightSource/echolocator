@@ -141,14 +141,15 @@ class Html(Thing):
     # ----------------------------------------------------------------------------------------
     def calculate_realspace_offset(
         self,
-        target_position: Sequence[int],
+        confirmed_target: Sequence[int],
         well_centre: Sequence[int],
         scale_factor: Sequence[float],
     ) -> Optional[int]:
-        if self.list_has_none(target_position) or self.list_has_none(well_centre):
+        if self.list_has_none(confirmed_target) or self.list_has_none(well_centre):
             return None
         return np.rint(
-            (np.array(target_position) - np.array(well_centre)) * np.array(scale_factor)
+            (np.array(confirmed_target) - np.array(well_centre))
+            * np.array(scale_factor)
         ).astype(int)
 
     # ----------------------------------------------------------------------------------------

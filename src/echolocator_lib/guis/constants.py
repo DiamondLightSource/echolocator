@@ -5,7 +5,7 @@ class Keywords:
 
 
 class Commands:
-    SET_TARGET_POSITION = "echolocator_guis::commands::set_target_position"
+    SET_TARGET_POSITION = "echolocator_guis::commands::set_confirmed_target"
     SET_IMAGE_IS_USABLE = "echolocator_guis::commands::set_image_is_usable"
     FETCH_IMAGE = "echolocator_guis::commands::fetch_image"
     FETCH_IMAGE_LIST = "echolocator_guis::commands::fetch_image_list"
