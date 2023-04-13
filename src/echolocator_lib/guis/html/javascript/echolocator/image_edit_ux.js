@@ -267,9 +267,9 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.#jquery_objects.$filename.text(record.filename);
         if (record.is_usable === null)
             record.is_usable = "-";
-        if (record.is_usable === 1)
+        if (record.is_usable === true)
             record.is_usable = "yes";
-        if (record.is_usable === 0)
+        if (record.is_usable === false)
             record.is_usable = "no";
 
         if (record.number_of_crystals === null)

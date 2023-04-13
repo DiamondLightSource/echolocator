@@ -189,7 +189,7 @@ class Aiohttp(Thing, BaseAiohttp):
         elif command == Commands.EXPORT:
             return await self._export(opaque, request_dict)
 
-        elif command == Commands.SET_TARGET_POSITION:
+        elif command == Commands.SET_TARGET:
             return await self._set_confirmed_target(opaque, request_dict)
 
         elif command == Commands.SET_IMAGE_IS_USABLE:
@@ -260,7 +260,7 @@ class Aiohttp(Thing, BaseAiohttp):
             False,
         )
         if should_show_only_undecided:
-            filter.is_confirmed = False
+            filter.is_decided = False
 
         crystal_well_models = (
             await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
@@ -316,7 +316,7 @@ class Aiohttp(Thing, BaseAiohttp):
             False,
         )
         if should_show_only_undecided:
-            filter.is_confirmed = False
+            filter.is_decided = False
 
         # Fetch the list from the xchembku.
         crystal_well_models = (
@@ -354,7 +354,7 @@ class Aiohttp(Thing, BaseAiohttp):
 
         # Get a filter for wells on the plate with this barcode.
         crystal_well_filter = CrystalWellFilterModel(
-            barcode=barcode_filter, is_confirmed=True
+            barcode=barcode_filter, is_decided=True
         )
 
         # Fetch the list of wells for this barcode.
@@ -400,18 +400,13 @@ class Aiohttp(Thing, BaseAiohttp):
     # ----------------------------------------------------------------------------------------
     async def _set_confirmed_target(self, opaque, request_dict):
 
-        confirmed_target = require("ajax request", request_dict, "confirmed_target")
+        target = require("ajax request", request_dict, "target")
 
         model = CrystalWellDroplocationModel(
-            crystal_well_uuid=require(
-                "ajax request", request_dict, "crystal_well_uuid"
-            ),
-            confirmed_target_x=require(
-                "ajax request confirmed_target", confirmed_target, "x"
-            ),
-            confirmed_target_y=require(
-                "ajax request confirmed_target", confirmed_target, "y"
-            ),
+            crystal_well_uuid=require("ajax request", request_dict, "uuid"),
+            confirmed_target_x=require("ajax request target x", target, "x"),
+            confirmed_target_y=require("ajax request target y", target, "y"),
+            is_usable=True,
         )
 
         await self.__xchembku.upsert_crystal_well_droplocations([model])
@@ -426,17 +421,14 @@ class Aiohttp(Thing, BaseAiohttp):
         Set the is_usable flag on the image given its autoid.
         """
 
-        sql = (
-            f"UPDATE {Tablenames.ROCKMAKER_IMAGES}"
-            f" SET {ImageFieldnames.IS_USABLE} = ?"
-            f" WHERE {ImageFieldnames.AUTOID} = ?"
+        model = CrystalWellDroplocationModel(
+            crystal_well_uuid=require(
+                "ajax request", request_dict, "crystal_well_uuid"
+            ),
+            is_usable=require("ajax request", request_dict, "is_usable"),
         )
 
-        subs = []
-        subs.append(require("ajax request", request_dict, "is_usable"))
-        subs.append(require("ajax request", request_dict, "autoid"))
-
-        await self.__xchembku.execute(sql, subs)
+        await self.__xchembku.upsert_crystal_well_droplocations([model])
 
         # Fetch the next image record after the update.
         request_dict["direction"] = 1

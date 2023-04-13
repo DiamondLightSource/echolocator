@@ -2,7 +2,7 @@ var echolocator__PixelUx__UserMotionEvent = "echolocator__PixelUx__UserMotionEve
 var echolocator__PixelUx__UserChangeEvent = "echolocator__PixelUx__UserChangeEvent";
 
 class echolocator__PixelUx extends echolocator__UxBase {
-    SET_TARGET_POSITION = "echolocator_guis::commands::set_target";
+    SET_TARGET = "echolocator_guis::commands::set_target";
 
     #raphael = null;
     #transformer = null;
@@ -133,7 +133,7 @@ class echolocator__PixelUx extends echolocator__UxBase {
         var F = "echolocator__PixelUx::update_database"
 
         var json_object = {}
-        json_object[this.COMMAND] = this.SET_TARGET_POSITION;
+        json_object[this.COMMAND] = this.SET_TARGET;
         json_object["uuid"] = this.#uuid;
         json_object["target"] = this.#target;
 

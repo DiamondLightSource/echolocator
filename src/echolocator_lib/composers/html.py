@@ -133,13 +133,7 @@ class Html(Thing):
                 t = "no"
             html_lines.append("<td id='is_drop'>" + str(t) + "</td>")
 
-            t = model.crystal_well_droplocation_uuid
-            if t is None:
-                t = "-"
-            elif model.confirmed_target_x is None or model.confirmed_target_y is None:
-                t = "no"
-            else:
-                t = "yes"
+            t = model.is_usable
             html_lines.append("<td id='is_usable'>" + str(t) + "</td>")
 
             html_lines.append("<td id='error'>" + html.escape(error) + "</td>")
