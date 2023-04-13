@@ -127,12 +127,14 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
 
         var $filename_row = $(jquery_event_object.target);
 
+        // User clicked on a cell within the row?
         if ($filename_row.get(0).tagName == "TD")
             $filename_row = $filename_row.parent();
 
-        var autoid = $filename_row.attr("autoid");
+        // The row has the attribute holding the crystal well of this row.
+        var crystal_well_uuid = $filename_row.attr("crystal_well_uuid");
 
-        this._load_image(autoid);
+        this._load_image(crystal_well_uuid);
 
         this.set_and_render_auto_update(false);
 
@@ -140,10 +142,10 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
 
     // -------------------------------------------------------------
 
-    _load_image(autoid) {
+    _load_image(crystal_well_uuid) {
         var F = "echolocator__ImageListUx::_load_image";
 
-        console.log(F + ": loading image " + autoid)
+        console.log(F + ": loading image for crystal_well_uuid " + crystal_well_uuid)
 
         //     this.$filename_rows.removeClass("T_picked");
         //     image_info.$filename_row.addClass("T_picked");
@@ -151,7 +153,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         // Trigger an event that the index.js will use to coordinate cross-widget changes.
         var custom_event = new CustomEvent(echolocator__Events_IMAGE_PICKED_EVENT,
             {
-                detail: { autoid: autoid }
+                detail: { crystal_well_uuid: crystal_well_uuid }
             });
 
         this.dispatchEvent(custom_event);

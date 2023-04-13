@@ -228,22 +228,24 @@ class Aiohttp(Thing, BaseAiohttp):
     async def _fetch_image(self, opaque, request_dict):
 
         # Get uuid from the cookie if it's not being posted here.
-        uuid = await self.set_or_get_cookie_content(
+        crystal_well_uuid = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_EDIT_UX,
-            "uuid",
-            request_dict.get("uuid"),
+            "crystal_well_uuid",
+            request_dict.get("crystal_well_uuid"),
             "",
         )
 
+        logger.info(f"fetching image for crystal_well_uuid {crystal_well_uuid}")
+
         # Not able to get an image from posted value or cookie?
         # Usually first time visiting Image Details tab when no image picked from list.
-        if uuid == "":
+        if crystal_well_uuid == "":
             response = {"record": None}
             return response
 
-        # Start a filter where we anchor on the given image.
-        filter = CrystalWellFilterModel(anchor=uuid, limit=1)
+        # Start a filter where we anchor on the given well.
+        filter = CrystalWellFilterModel(anchor=crystal_well_uuid, limit=1)
 
         # Image previous or next?
         direction = request_dict.get("direction", 0)

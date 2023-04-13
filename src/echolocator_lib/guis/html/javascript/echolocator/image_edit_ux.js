@@ -6,7 +6,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     SET_IMAGE_IS_USABLE = "echolocator_guis::commands::set_image_is_usable";
 
     #jquery_objects = {};
-    #autoid = null;
+    #crystal_well_uuid = null;
     #record = null;
     #raphael = null;
     #transformer = null;
@@ -114,13 +114,13 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     // When the selected filename changes, we get notified.
     // We will load the image into the display.
 
-    set_autoid(autoid) {
-        var F = "echolocator__ImageEditUx::set_autoid";
+    set_crystal_well_uuid(crystal_well_uuid) {
+        var F = "echolocator__ImageEditUx::set_crystal_well_uuid";
 
         // Remember the image info.
-        this.#autoid = autoid;
+        this.#crystal_well_uuid = crystal_well_uuid;
 
-        if (this.#autoid === undefined) {
+        if (this.#crystal_well_uuid === undefined) {
             this.display_ajax_error("there are no more images to view");
         }
         else {
@@ -139,13 +139,13 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     _handle_is_usable_change(is_usable) {
         var F = "echolocator__ImageEditUx::_handle_is_usable_change";
 
-        if (this.#autoid) {
+        if (this.#crystal_well_uuid) {
             // Build json request.
             var json_object = {}
             // TODO: Remove hardcoded "IMAGE_LIST_UX" in image edit's cookie list.
             json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME, "IMAGE_LIST_UX"]
             json_object[this.COMMAND] = this.SET_IMAGE_IS_USABLE;
-            json_object["autoid"] = this.#autoid;
+            json_object["crystal_well_uuid"] = this.#crystal_well_uuid;
             json_object["is_usable"] = is_usable;
 
             // Send request to update database immediately.
@@ -154,7 +154,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             if (!is_usable) {
                 // Notify pixel_ux of requested change in position.
                 // TODO: Combine usable change with position change into single ajax.
-                this.#pixel_ux.set_autoid(this.#autoid, { x: 10, y: 10 });
+                this.#pixel_ux.set_crystal_well_uuid(this.#crystal_well_uuid, { x: 10, y: 10 });
 
                 // Tell pixel_ux to send change to the database.
                 this.#pixel_ux.update_database();
@@ -197,7 +197,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             " [" + target_position.x + ", " + target_position.y + "]");
 
         // Notify pixel_ux of requested change in position.
-        this.#pixel_ux.set_autoid(this.#autoid, target_position);
+        this.#pixel_ux.set_crystal_well_uuid(this.#crystal_well_uuid, target_position);
 
         // Tell pixel_ux to send change to the database.
         this.#pixel_ux.update_database();
@@ -217,6 +217,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this._handle_is_usable_change(false)
 
     } // end method
+
     // -------------------------------------------------------------
     // Request update from database.
 
@@ -226,7 +227,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // TODO: Remove hardcoded "IMAGE_LIST_UX" in image edit's cookie list.
         json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME, "IMAGE_LIST_UX"]
         json_object[this.COMMAND] = this.FETCH_IMAGE;
-        json_object["autoid"] = this.#autoid;
+        json_object["crystal_well_uuid"] = this.#crystal_well_uuid;
         json_object["direction"] = direction;
 
         this.send(json_object);
@@ -254,14 +255,14 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             return;
         }
 
-        // Remember which autoid we are showing.
-        this.#autoid = record.autoid;
+        // Remember which crystal_well_uuid we are showing.
+        this.#crystal_well_uuid = record.crystal_well_uuid;
 
         // Update the display with the new file's contents.
         var src = record.filename;
         this.#jquery_objects.$image.prop("src", src)
 
-        // Render the autoid stuff.
+        // Render the crystal_well_uuid stuff.
         this.#jquery_objects.$filename.text(record.filename);
         if (record.is_usable === null)
             record.is_usable = "-";
@@ -279,9 +280,9 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // Keep the last record loaded.
         this.#record = record;
 
-        // The the pixel ux about the autoid so it can be included in sending changes.
+        // The the pixel ux about the crystal_well_uuid so it can be included in sending changes.
         var target_position = { x: record.target_position_x ? record.target_position_x : 10, y: record.target_position_y ? record.target_position_y : 10 }
-        this.#pixel_ux.set_autoid(this.#autoid, target_position);
+        this.#pixel_ux.set_crystal_well_uuid(this.#crystal_well_uuid, target_position);
 
         // Let the spreader calculate the available space for the image.
         // This will trigger a call to this.handle_spread_event().
