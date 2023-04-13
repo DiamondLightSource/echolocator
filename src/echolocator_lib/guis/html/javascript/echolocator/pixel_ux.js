@@ -2,13 +2,13 @@ var echolocator__PixelUx__UserMotionEvent = "echolocator__PixelUx__UserMotionEve
 var echolocator__PixelUx__UserChangeEvent = "echolocator__PixelUx__UserChangeEvent";
 
 class echolocator__PixelUx extends echolocator__UxBase {
-    SET_TARGET_POSITION = "echolocator_guis::commands::set_confirmed_target";
+    SET_TARGET_POSITION = "echolocator_guis::commands::set_target";
 
     #raphael = null;
     #transformer = null;
     #guide = null;
     #uuid = null;
-    #confirmed_target = null;
+    #target = null;
 
     constructor(runtime, plugin_link_name, $interaction_parent, raphael) {
         super(runtime);
@@ -53,12 +53,14 @@ class echolocator__PixelUx extends echolocator__UxBase {
     // We will move the guide to the image's target location.
     // We will update the x and y as the guid moves.
 
-    set_uuidx(uuid, confirmed_target) {
+    set_uuid(uuid, target) {
         var F = "echolocator__PixelUx::set_uuid"
 
         // Remember the image info.
         this.#uuid = uuid;
-        this.#confirmed_target = confirmed_target;
+        this.#target = target;
+
+        console.log(F + ": uuid " + this.#uuid + " is for target [" + this.#target.x + ", " + this.#target.y + "]")
 
         this.render();
 
@@ -69,9 +71,13 @@ class echolocator__PixelUx extends echolocator__UxBase {
     render(event) {
         var F = "echolocator__PixelUx::render"
 
+        console.log(F + ": rendering target [" + this.#target.x + ", " + this.#target.y + "]")
+
         // Everything we send or receive from the outside is data coordinates.
         // Convert it to view coordinates which is are used by the guide.
-        var view_position = this.#transformer.data_to_view(this.#confirmed_target);
+        var view_position = this.#transformer.data_to_view(this.#target);
+
+        console.log(F + ": rendering to view position [" + view_position.x + ", " + view_position.y + "]")
 
         // Move the guide to the canvas view location.
         this.#guide.set_box({ position: view_position })
@@ -100,19 +106,19 @@ class echolocator__PixelUx extends echolocator__UxBase {
         var view_position = this.#guide.get().position;
 
         // Everything we send or receive from the outside is data coordinates.
-        this.#confirmed_target = this.#transformer.view_to_data(view_position)
+        this.#target = this.#transformer.view_to_data(view_position)
 
         console.log(F + ": dragged view_position" +
             " [" + view_position.x + ", " + view_position.y + "]" +
-            " transformed to confirmed_target" +
-            " [" + this.#confirmed_target.x + ", " + this.#confirmed_target.y + "]");
+            " transformed to target" +
+            " [" + this.#target.x + ", " + this.#target.y + "]");
 
         this.update_database();
 
         // Trigger an event that image_edit.js will use to advance to the next image.
         var custom_event = new CustomEvent(echolocator__PixelUx__UserChangeEvent,
             {
-                detail: { confirmed_target: this.#confirmed_target }
+                detail: { target: this.#target }
             });
 
         this.dispatchEvent(custom_event);
@@ -129,7 +135,7 @@ class echolocator__PixelUx extends echolocator__UxBase {
         var json_object = {}
         json_object[this.COMMAND] = this.SET_TARGET_POSITION;
         json_object["uuid"] = this.#uuid;
-        json_object["confirmed_target"] = this.#confirmed_target;
+        json_object["target"] = this.#target;
 
         this.send(json_object);
 

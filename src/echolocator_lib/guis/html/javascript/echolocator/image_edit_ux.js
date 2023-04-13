@@ -281,10 +281,20 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.#record = record;
 
         // The the pixel ux about the crystal_well_uuid so it can be included in sending changes.
-        var confirmed_target = {
-            x: record.confirmed_target_x ? record.confirmed_target_x : 10,
-            y: record.confirmed_target_y ? record.confirmed_target_y : 10
-        }
+        var x = record.confirmed_target_x;
+        if (x === null)
+            x = record.auto_target_x;
+        if (x === null)
+            x = 10;
+
+        var y = record.confirmed_target_y;
+        if (y === null)
+            y = record.auto_target_y;
+        if (y === null)
+            y = 10;
+
+        var confirmed_target = { x: x, y: y };
+
         this.#pixel_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
 
         // Let the spreader calculate the available space for the image.

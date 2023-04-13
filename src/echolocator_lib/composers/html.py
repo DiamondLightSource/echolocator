@@ -52,6 +52,8 @@ class Html(Thing):
             {"text": "#Crystals", "class": "T_number_of_crystals"},
             {"text": "Offset x (\u03BCm)", "class": "T_real_space_target_x"},
             {"text": "Offset y (\u03BCm)", "class": "T_real_space_target_y"},
+            {"text": "auto x,y", "class": "T_auto_target__x_y"},
+            {"text": "confirmed x,y", "class": "T_confirmed_target_x_y"},
             {"text": "drop?", "class": "T_is_drop"},
             {"text": "use?", "class": "T_is_usable"},
         ]
@@ -105,8 +107,22 @@ class Html(Thing):
             )
             if t is None:
                 t = ["-", "-"]
-            html_lines.append("<td id='real_space_target_x'>" + str(t[1]) + "</td>")
-            html_lines.append("<td id='real_space_target_y'>" + str(t[0]) + "</td>")
+            html_lines.append(
+                "<td class='T_real_space_target_x' id='real_space_target_x'>"
+                + str(t[1])
+                + "</td>"
+            )
+            html_lines.append(
+                "<td class='T_real_space_target_y' id='real_space_target_y'>"
+                + str(t[0])
+                + "</td>"
+            )
+
+            t = f"{model.auto_target_x}, {model.auto_target_y}"
+            html_lines.append("<td class='T_auto_target_x_y'>" + t + "</td>")
+
+            t = f"{model.confirmed_target_x}, {model.confirmed_target_y}"
+            html_lines.append("<td class='T_confirmed_target_x_y'>" + t + "</td>")
 
             t = model.drop_detected
             if t is None:
