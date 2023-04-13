@@ -1,6 +1,8 @@
+import csv
 import logging
 import multiprocessing
 import threading
+from pathlib import Path
 
 # Utilities.
 from dls_utilpack.callsign import callsign
@@ -11,6 +13,7 @@ from dls_utilpack.thing import Thing
 
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
+from xchembku_api.models.crystal_plate_filter_model import CrystalPlateFilterModel
 from xchembku_api.models.crystal_well_droplocation_model import (
     CrystalWellDroplocationModel,
 )
@@ -130,6 +133,12 @@ class Aiohttp(Thing, BaseAiohttp):
             # Get a reference to the xchembku interface provided by the context.
             self.__xchembku = self.__xchembku_client_context.get_interface()
 
+            self.__export_directory = require(
+                f"{callsign(self)} specification",
+                self.specification(),
+                "export_directory",
+            )
+
         except Exception:
             raise RuntimeError(f"unable to start {callsign(self)} server coro")
 
@@ -176,6 +185,9 @@ class Aiohttp(Thing, BaseAiohttp):
 
         elif command == Commands.FETCH_IMAGE_LIST:
             return await self._fetch_image_list(opaque, request_dict)
+
+        elif command == Commands.EXPORT:
+            return await self._export(opaque, request_dict)
 
         elif command == Commands.SET_TARGET_POSITION:
             return await self._set_target_position(opaque, request_dict)
@@ -325,6 +337,65 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
+    async def _export(self, opaque, request_dict):
+
+        barcode_filter = request_dict.get("barcode_filter")
+
+        if barcode_filter is None:
+            raise RuntimeError(
+                "barcode_filter not submitted with request (programming error)"
+            )
+
+        barcode_filter = barcode_filter.strip()
+        if barcode_filter == "":
+            raise RuntimeError("please enter a barcode")
+
+        # Get a filter for wells on the plate with this barcode.
+        crystal_well_filter = CrystalWellFilterModel(
+            barcode=barcode_filter, is_confirmed=True
+        )
+
+        # Fetch the list of wells for this barcode.
+        crystal_well_models = (
+            await self.__xchembku.fetch_crystal_wells_needing_droplocation(
+                crystal_well_filter
+            )
+        )
+
+        # Fetch the plate record for barcode.
+        crystal_plate_filter = CrystalPlateFilterModel(barcode=barcode_filter)
+        crystal_plate_models = await self.__xchembku.fetch_crystal_plates(
+            crystal_plate_filter
+        )
+
+        if len(crystal_plate_models) == 0:
+            raise RuntimeError(
+                f"no plate for barcode {barcode_filter} (database integrity error)"
+            )
+
+        # Use the stem from the rockmaker Luigi pipeline to form the csv filename.
+        filename = f"{self.__export_directory}/{crystal_plate_models[0].rockminer_collected_stem}_targets.csv"
+
+        directory = Path(filename).parent
+        directory.mkdir(parents=True, exist_ok=True)
+
+        with open(filename, "w", newline="") as f:
+            writer = csv.writer(f)
+
+            for m in crystal_well_models:
+                row = []
+                row.append(m.position)
+                row.append(m.confirmed_target_x or "")
+                row.append(m.confirmed_target_y or "")
+                writer.writerow(row)
+
+        response = {
+            "confirmation": f"exported {len(crystal_well_models)} rows to {filename}"
+        }
+
+        return response
+
+    # ----------------------------------------------------------------------------------------
     async def _set_target_position(self, opaque, request_dict):
 
         target_position = require("ajax request", request_dict, "target_position")
@@ -333,10 +404,10 @@ class Aiohttp(Thing, BaseAiohttp):
             crystal_well_uuid=require(
                 "ajax request", request_dict, "crystal_well_uuid"
             ),
-            confirmed_target_position_x=require(
+            confirmed_target_x=require(
                 "ajax request target_position", target_position, "x"
             ),
-            confirmed_target_position_y=require(
+            confirmed_target_y=require(
                 "ajax request target_position", target_position, "y"
             ),
         )

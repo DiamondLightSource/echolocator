@@ -94,8 +94,8 @@ class Html(Thing):
                 t = "-"
             html_lines.append("<td id='number_of_crystals'>" + str(t) + "</td>")
 
-            target_x = model.auto_target_position_x
-            target_y = model.auto_target_position_y
+            target_x = model.auto_target_x
+            target_y = model.auto_target_y
             well_centre_x = model.well_centroid_x
             well_centre_y = model.well_centroid_y
             t = self.calculate_realspace_offset(
@@ -120,10 +120,7 @@ class Html(Thing):
             t = model.crystal_well_droplocation_uuid
             if t is None:
                 t = "-"
-            elif (
-                model.confirmed_target_position_x is None
-                or model.confirmed_target_position_y is None
-            ):
+            elif model.confirmed_target_x is None or model.confirmed_target_y is None:
                 t = "no"
             else:
                 t = "yes"

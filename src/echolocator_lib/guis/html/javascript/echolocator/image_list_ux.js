@@ -3,6 +3,7 @@
 class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     COOKIE_NAME = "IMAGE_LIST_UX";
     FETCH_IMAGE_LIST = "echolocator_guis::commands::fetch_image_list";
+    EXPORT = "echolocator_guis::commands::export";
 
     #jquery_objects = {};
     #barcode_filter = "undefined";
@@ -25,6 +26,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         this.#jquery_objects.$div = $(".T_composed", this.$interaction_parent);
         this.#jquery_objects.$barcode_filter = $(".T_barcode_filter", this.$interaction_parent);
         this.#jquery_objects.$should_show_only_undecided = $(".T_should_show_only_undecided", this.$interaction_parent);
+        this.#jquery_objects.$export_button = $(".T_export_button", this.$interaction_parent);
 
         var that = this;
         this.#jquery_objects.$barcode_filter.change(
@@ -37,7 +39,10 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
                 that._handle_filter_change(jquery_event_object);
             });
 
-        // this.request_update();
+        this.#jquery_objects.$export_button.click(
+            function (jquery_event_object) {
+                that._handle_export_clicked(jquery_event_object);
+            });
 
     } // end method
 
@@ -96,6 +101,23 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         this.#barcode_filter = this.#jquery_objects.$barcode_filter.val()
         this.#should_show_only_undecided = this.#jquery_objects.$should_show_only_undecided.prop("checked")
         this.request_update()
+
+    } // end method
+
+    // -------------------------------------------------------------
+
+    _handle_export_clicked(jquery_event_object) {
+        var F = "echolocator__ImageListUx::_handle_export_clicked"
+
+        this.#barcode_filter = this.#jquery_objects.$barcode_filter.val()
+
+        // Enable no cookie for this request.
+        var json_object = {}
+        json_object[this.COMMAND] = this.EXPORT;
+
+        json_object["barcode_filter"] = this.#barcode_filter;
+
+        this.send(json_object);
 
     } // end method
 

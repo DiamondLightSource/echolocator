@@ -1,3 +1,4 @@
+import csv
 import logging
 from pathlib import Path
 
@@ -41,12 +42,12 @@ logger = logging.getLogger(__name__)
 
 
 # ----------------------------------------------------------------------------------------
-class TestFetchImages:
+class TestExport:
     def test(self, constants, logging_setup, output_directory):
         """ """
 
         configuration_file = "tests/configurations/service.yaml"
-        FetchImagesTester().main(
+        ExportTester().main(
             constants,
             configuration_file,
             output_directory,
@@ -54,7 +55,7 @@ class TestFetchImages:
 
 
 # ----------------------------------------------------------------------------------------
-class FetchImagesTester(Base):
+class ExportTester(Base):
     """
     Class to test the gui fetch_image endpoint.
     """
@@ -106,18 +107,23 @@ class FetchImagesTester(Base):
         # Reference the xchembku object which the context has set up as the default.
         xchembku = xchembku_datafaces_get_default()
 
-        await self.__request_initial()
+        self.__visit = "cm00001-1"
+        self.__barcode = "98ab"
+        self.__rockminer_collected_stem = "98ab_2022-05-09_RI1000-0276-3drop"
+        self.__output_directory = output_directory
 
         # Make the plate on which the wells reside.
-        visit = "cm00001-1"
         crystal_plate_model = CrystalPlateModel(
             formulatrix__plate__id=10,
-            barcode="98ab",
-            visit=visit,
+            barcode=self.__barcode,
+            rockminer_collected_stem=self.__rockminer_collected_stem,
+            visit=self.__visit,
         )
 
         await xchembku.upsert_crystal_plates([crystal_plate_model])
         self.__crystal_plate_uuid = crystal_plate_model.uuid
+
+        await self.__export_initial()
 
         crystal_wells = []
 
@@ -129,77 +135,79 @@ class FetchImagesTester(Base):
         crystal_wells.append(await self.__inject(xchembku, True, True))
         crystal_wells.append(await self.__inject(xchembku, True, False))
 
-        await self.__request_all(crystal_wells)
+        await self.__export_wells(crystal_wells)
 
     # ----------------------------------------------------------------------------------------
 
-    async def __request_initial(self):
+    async def __export_initial(self):
         """ """
 
         request = {
-            ProtocoljKeywords.ENABLE_COOKIES: [
-                Cookies.IMAGE_LIST_UX,
-            ],
-            Keywords.COMMAND: Commands.FETCH_IMAGE_LIST,
+            Keywords.COMMAND: Commands.EXPORT,
+            "barcode_filter": self.__barcode,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
             request, cookies={}
         )
 
-        logger.debug(describe("first fetch_image response", response))
+        # Expect confirmation message in response.
+        assert "confirmation" in response
+        assert "exported 0" in response["confirmation"]
 
-        soup = BeautifulSoup(response["html"], "html.parser")
-
-        # Find the table element.
-        table = soup.find("table")
-
-        # Count the number of rows in the table.
-        row_count = len(table.find_all("tr"))
-
-        # The table contains only the header and no data rows.
-        assert row_count == 1 + 0
+        # Check the csv file got written with no lines.
+        csv = (
+            Path(self.__output_directory)
+            / "exports"
+            / f"{self.__rockminer_collected_stem}_targets.csv"
+        )
+        assert csv.exists()
+        assert csv.stat().st_size == 0
 
     # ----------------------------------------------------------------------------------------
 
-    async def __request_all(self, crystal_wells):
+    async def __export_wells(self, crystal_wells):
         """ """
 
         request = {
-            ProtocoljKeywords.ENABLE_COOKIES: [
-                Cookies.IMAGE_LIST_UX,
-            ],
-            Keywords.COMMAND: Commands.FETCH_IMAGE_LIST,
+            Keywords.COMMAND: Commands.EXPORT,
+            "barcode_filter": self.__barcode,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
             request, cookies={}
         )
 
-        logger.debug(describe("fetch_image response", response))
+        # Expect confirmation message in response.
+        assert "confirmation" in response
+        assert "exported 3" in response["confirmation"]
 
-        soup = BeautifulSoup(response["html"], "html.parser")
+        # Check the csv file got written.
+        csv_path = (
+            Path(self.__output_directory)
+            / "exports"
+            / f"{self.__rockminer_collected_stem}_targets.csv"
+        )
+        assert csv_path.exists()
 
-        # Find the table element.
-        table = soup.find("table")
+        # Read the csv file into an array.
+        rows = []
+        with open(csv_path, "r", newline="") as csv_file:
+            reader = csv.reader(csv_file)
+            for row in reader:
+                rows.append(row)
 
-        # Count the number of rows in the table.
-        rows = table.find_all("tr")
+        # Check row count we read.
+        assert len(rows) == 3
 
-        # Assert that the row count is equal to the expected value.
-        assert len(rows) == 1 + 5
+        # Check each row has 3 parts.
+        for row in rows:
+            assert len(row) == 3
 
-        # Check the first row's filename.
-        row = rows[1]
-        columns = row.find_all(class_="T_filename")
-        assert len(columns) == 1
-        assert columns[0].get_text() == Path(crystal_wells[1].filename).stem
-
-        # Check the last row's filename.
-        row = rows[5]
-        columns = row.find_all(class_="T_filename")
-        assert len(columns) == 1
-        assert columns[0].get_text() == Path(crystal_wells[5].filename).stem
+        # Check the well positions are those that are considered "confirmed".
+        assert rows[0][0] == "02A_1"
+        assert rows[1][0] == "04A_1"
+        assert rows[2][0] == "05A_1"
 
     # ----------------------------------------------------------------------------------------
 
@@ -212,7 +220,7 @@ class FetchImagesTester(Base):
 
         # Write well record.
         m = CrystalWellModel(
-            position="01A_1",
+            position="%02dA_1" % (self.injected_count + 1),
             filename=filename,
             crystal_plate_uuid=self.__crystal_plate_uuid,
         )

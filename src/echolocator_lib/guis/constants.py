@@ -9,6 +9,7 @@ class Commands:
     SET_IMAGE_IS_USABLE = "echolocator_guis::commands::set_image_is_usable"
     FETCH_IMAGE = "echolocator_guis::commands::fetch_image"
     FETCH_IMAGE_LIST = "echolocator_guis::commands::fetch_image_list"
+    EXPORT = "echolocator_guis::commands::export"
     LOAD_TABS = "echolocator_guis::commands::load_tabs"
     SELECT_TAB = "echolocator_guis::commands::select_tab"
 

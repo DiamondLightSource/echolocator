@@ -208,7 +208,7 @@ class FetchImageTester(Base):
 
         record = response["record"]
         assert record["uuid"] == crystal_wells[3].uuid
-        assert record["confirmed_target_position_x"] is not None
+        assert record["confirmed_target_x"] is not None
 
         # -------------------------------------------------------------------------------------
         # Same query again, but rely on cookies for values.
@@ -222,7 +222,7 @@ class FetchImageTester(Base):
 
         record = response["record"]
         assert record["uuid"] == crystal_wells[3].uuid
-        assert record["confirmed_target_position_x"] is not None
+        assert record["confirmed_target_x"] is not None
 
     # ----------------------------------------------------------------------------------------
 
@@ -248,7 +248,7 @@ class FetchImageTester(Base):
 
         record = response["record"]
         assert record["uuid"] == crystal_wells[5].uuid
-        assert record["confirmed_target_position_x"] is None
+        assert record["confirmed_target_x"] is None
 
         # -------------------------------------------------------------------------------------
         # Same query again, but rely on cookies for values.
@@ -263,7 +263,7 @@ class FetchImageTester(Base):
 
         record = response["record"]
         assert record["uuid"] == crystal_wells[5].uuid
-        assert record["confirmed_target_position_x"] is None
+        assert record["confirmed_target_x"] is None
 
     # ----------------------------------------------------------------------------------------
 
@@ -276,7 +276,9 @@ class FetchImageTester(Base):
 
         # Write well record.
         m = CrystalWellModel(
-            filename=filename, crystal_plate_uuid=self.__crystal_plate_uuid
+            position="01A_1",
+            filename=filename,
+            crystal_plate_uuid=self.__crystal_plate_uuid,
         )
 
         await xchembku.upsert_crystal_wells([m])
@@ -286,8 +288,8 @@ class FetchImageTester(Base):
             t = CrystalWellAutolocationModel(
                 crystal_well_uuid=m.uuid,
                 number_of_crystals=self.injected_count,
-                auto_target_position_x=self.injected_count * 10 + 1,
-                auto_target_position_y=self.injected_count * 10 + 2,
+                auto_target_x=self.injected_count * 10 + 1,
+                auto_target_y=self.injected_count * 10 + 2,
             )
 
             await xchembku.originate_crystal_well_autolocations([t])
@@ -296,8 +298,8 @@ class FetchImageTester(Base):
             # Add a crystal well droplocation.
             t = CrystalWellDroplocationModel(
                 crystal_well_uuid=m.uuid,
-                confirmed_target_position_x=self.injected_count * 10 + 3,
-                confirmed_target_position_y=self.injected_count * 10 + 4,
+                confirmed_target_x=self.injected_count * 10 + 3,
+                confirmed_target_y=self.injected_count * 10 + 4,
             )
 
             await xchembku.originate_crystal_well_droplocations([t])
