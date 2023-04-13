@@ -31,6 +31,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.image1_spreader = new webviz__Spreader(this);
 
         // Make a raphael drawing object.
+        // TODO: Make Raphael drawing object big enough for future jumbo-size images.
         this.#raphael = Raphael("raphael1_paper", 4000, 4000);
 
         // For transforming coordinates between data and view.
@@ -256,7 +257,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         }
 
         // Remember which crystal_well_uuid we are showing.
-        this.#crystal_well_uuid = record.crystal_well_uuid;
+        this.#crystal_well_uuid = record.uuid;
 
         // Update the display with the new file's contents.
         var src = record.filename;
