@@ -1,9 +1,10 @@
-import copy
 import csv
 import logging
 import multiprocessing
 import threading
 from pathlib import Path
+
+from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 
 # Utilities.
 from dls_utilpack.callsign import callsign
@@ -190,11 +191,8 @@ class Aiohttp(Thing, BaseAiohttp):
         elif command == Commands.EXPORT:
             return await self._export(opaque, request_dict)
 
-        elif command == Commands.SET_TARGET:
-            return await self._set_confirmed_target(opaque, request_dict)
-
-        elif command == Commands.SET_IMAGE_IS_USABLE:
-            return await self._set_image_is_usable(opaque, request_dict)
+        elif command == Commands.UPDATE:
+            return await self._update(opaque, request_dict)
 
         else:
             raise RuntimeError("invalid command %s" % (command))
@@ -399,34 +397,43 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _set_confirmed_target(self, opaque, request_dict):
+    async def _update(self, opaque, request_dict):
 
-        target = require("ajax request", request_dict, "target")
+        t = require("ajax request", request_dict, "crystal_well_droplocation_model")
 
-        model = CrystalWellDroplocationModel(
-            crystal_well_uuid=require(
-                "ajax request", request_dict, "crystal_well_uuid"
-            ),
-            confirmed_target_x=require("ajax request target x", target, "x"),
-            confirmed_target_y=require("ajax request target y", target, "y"),
-            is_usable=True,
+        # Wrap a model around the posted fields.
+        crystal_well_droplocation_model = CrystalWellDroplocationModel(**t)
+
+        # Update the database record.
+        await self.__xchembku.upsert_crystal_well_droplocations(
+            [crystal_well_droplocation_model],
+            only_fields=list(t.keys()),
         )
 
-        await self.__xchembku.upsert_crystal_well_droplocations([model])
+        # Caller wants to select the next image automatically?
+        if request_dict.get(Keywords.SHOULD_ADVANCE, False):
+            # Advance by fetching the next image record after the update.
+            next_request_dict = {
+                ProtocoljKeywords.ENABLE_COOKIES: [
+                    Cookies.IMAGE_EDIT_UX,
+                    Cookies.IMAGE_LIST_UX,
+                ],
+                Keywords.COMMAND: Commands.FETCH_IMAGE,
+                "crystal_well_uuid": crystal_well_droplocation_model.crystal_well_uuid,
+                "direction": 1,
+            }
+            response = await self._fetch_image(opaque, next_request_dict)
 
-        next_request_dict = copy.deepcopy(request_dict)
-        # Fetch the next image record after the update.
-        next_request_dict["direction"] = 1
-        response = await self._fetch_image(opaque, next_request_dict)
-
-        if response.get("record") is not None:
-            response[
-                "confirmation"
-            ] = "drop location has been set and view advanced to next image"
+            if response.get("record") is not None:
+                response[
+                    "confirmation"
+                ] = "drop location has been updated and view advanced to next image"
+            else:
+                response[
+                    "confirmation"
+                ] = "drop location has been updated and there are no more images in the list"
         else:
-            response[
-                "confirmation"
-            ] = "drop location has been set and there are no more images in the list"
+            response = {"confirmation": "drop location has been updated"}
 
         return response
 

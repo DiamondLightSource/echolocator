@@ -2,11 +2,11 @@ class Keywords:
     COMMAND = "echolocator_guis::keywords::command"
     PAYLOAD = "echolocator_guis::keywords::payload"
     TAB_ID = "echolocator_guis::keywords::tab_id"
+    SHOULD_ADVANCE = "echolocator_guis::keywords::should_advance"
 
 
 class Commands:
-    SET_TARGET = "echolocator_guis::commands::set_target"
-    SET_IMAGE_IS_USABLE = "echolocator_guis::commands::set_image_is_usable"
+    UPDATE = "echolocator_guis::commands::update"
     FETCH_IMAGE = "echolocator_guis::commands::fetch_image"
     FETCH_IMAGE_LIST = "echolocator_guis::commands::fetch_image_list"
     EXPORT = "echolocator_guis::commands::export"

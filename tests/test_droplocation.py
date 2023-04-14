@@ -130,6 +130,9 @@ class DroplocationTester(Base):
         await self.__set_confirmed_target(xchembku, crystal_wells, 1, 2)
         await self.__set_confirmed_target(xchembku, crystal_wells, 2, None)
 
+        await self.__set_is_usable(xchembku, crystal_wells, 0, False)
+        await self.__set_is_usable(xchembku, crystal_wells, 0, True)
+
     # ----------------------------------------------------------------------------------------
 
     async def __set_confirmed_target(
@@ -144,9 +147,14 @@ class DroplocationTester(Base):
                 Cookies.IMAGE_EDIT_UX,
                 Cookies.IMAGE_LIST_UX,
             ],
-            Keywords.COMMAND: Commands.SET_TARGET,
-            "crystal_well_uuid": crystal_well_models[index1].uuid,
-            "target": {"x": x, "y": y},
+            Keywords.COMMAND: Commands.UPDATE,
+            Keywords.SHOULD_ADVANCE: True,
+            "crystal_well_droplocation_model": {
+                "crystal_well_uuid": crystal_well_models[index1].uuid,
+                "confirmed_target_x": x,
+                "confirmed_target_y": y,
+                "is_usable": True,
+            },
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
@@ -160,8 +168,9 @@ class DroplocationTester(Base):
         assert "record" in response
         record = response["record"]
         assert "confirmation" in response
-        assert "has been set" in response["confirmation"]
+        assert "has been updated" in response["confirmation"]
         if index2 is not None:
+            assert record is not None, f"index {index1}"
             assert record["uuid"] == crystal_well_models[index2].uuid, f"index {index1}"
             assert "advanced" in response["confirmation"]
         else:
@@ -177,24 +186,52 @@ class DroplocationTester(Base):
         assert fetched_models[0].confirmed_target_y == y, f"index {index1}"
         assert fetched_models[0].is_usable is True, f"index {index1}"
 
-        # request = {
-        #     ProtocoljKeywords.ENABLE_COOKIES: [
-        #         Cookies.IMAGE_EDIT_UX,
-        #         Cookies.IMAGE_LIST_UX,
-        #     ],
-        #     Keywords.COMMAND: Commands.FETCH_IMAGE,
-        #     "direction": 0,
-        # }
+    # ----------------------------------------------------------------------------------------
 
-        # response = await echolocator_guis_get_default().client_protocolj(
-        #     request, cookies=response["__cookies"]
-        # )
+    async def __set_is_usable(
+        self,
+        xchembku,
+        crystal_well_models,
+        index1,
+        is_usable,
+    ):
+        """ """
 
-        # logger.debug(describe("fetch_image response", response))
+        # Build the request to change only the is_usable field.
+        request = {
+            ProtocoljKeywords.ENABLE_COOKIES: [
+                Cookies.IMAGE_EDIT_UX,
+                Cookies.IMAGE_LIST_UX,
+            ],
+            Keywords.COMMAND: Commands.UPDATE,
+            Keywords.SHOULD_ADVANCE: False,
+            "crystal_well_droplocation_model": {
+                "crystal_well_uuid": crystal_well_models[index1].uuid,
+                "is_usable": is_usable,
+            },
+        }
 
-        # record = response["record"]
-        # assert record["uuid"] == crystal_wells[3].uuid
-        # assert record["confirmed_target_x"] is not None
+        # Send the ajax request to the gui.
+        response = await echolocator_guis_get_default().client_protocolj(
+            request, cookies=self.__cookies
+        )
+
+        assert "record" not in response
+        assert "confirmation" in response
+        assert "has been updated" in response["confirmation"]
+
+        # Fetch the record which should have been updated.
+        fetched_models = await xchembku.fetch_crystal_wells_needing_droplocation(
+            CrystalWellFilterModel(anchor=crystal_well_models[index1].uuid)
+        )
+
+        # These should remain changed from when we set them previously in the test.
+        x = 100 + index1
+        y = 200 + index1
+
+        assert fetched_models[0].confirmed_target_x == x, f"index {index1}"
+        assert fetched_models[0].confirmed_target_y == y, f"index {index1}"
+        assert fetched_models[0].is_usable is is_usable, f"index {index1}"
 
     # ----------------------------------------------------------------------------------------
 
