@@ -99,6 +99,17 @@ INPUT[type=checkbox] {
 }
 
 /* --------------------------------------------------------------------------- */
+.T_ajax_confirmation_message_container {
+  border-radius: 4px;
+  border: 1px solid darkgreen;
+  color: darkgreen;
+}
+
+.T_ajax_confirmation_message {
+  margin: 4px;
+}
+
+/* --------------------------------------------------------------------------- */
 .T_ajax_error_message_container {
   border-radius: 4px;
   border: 1px solid orangered;

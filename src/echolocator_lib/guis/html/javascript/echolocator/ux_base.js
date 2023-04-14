@@ -26,6 +26,40 @@ class echolocator__UxBase extends common__Base {
 
     activate() {
 
+        // Activate confirmation message display place on the UX.
+        this.activate_confirmation_message();
+
+        // Activate error message display place on the UX.
+        this.activate_error_message();
+
+    } // end method
+
+    // -------------------------------------------------------------
+    // Activate confirmation message display place on the UX.
+
+    activate_confirmation_message() {
+
+        var cm_class = "T_ajax_confirmation_message";
+        var $cm_container = $("." + cm_class + "_container", this.$interaction_parent);
+        var $cm = $("." + cm_class, this.$interaction_parent);
+
+        if ($cm_container.length == 0) {
+            this.$interaction_parent.prepend("<div class='" + cm_class + "_container'><div class='" + cm_class + "'></div></div>");
+            $cm_container = $("." + cm_class + "_container", this.$interaction_parent);
+            $cm = $("." + cm_class, this.$interaction_parent);
+        }
+
+        $cm_container.hide();
+        this.#jquery_objects.$confirmation_message_container = $cm_container;
+        this.#jquery_objects.$confirmation_message = $cm;
+
+    } // end method
+
+    // -------------------------------------------------------------
+    // Activate error message display place on the UX.
+
+    activate_error_message() {
+
         var em_class = "T_ajax_error_message";
         var $em_container = $("." + em_class + "_container", this.$interaction_parent);
         var $em = $("." + em_class, this.$interaction_parent);
@@ -49,19 +83,28 @@ class echolocator__UxBase extends common__Base {
         var F = "echolocator__UxBase::handle_ajax_success[" + this.plugin_link_name + "]";
 
         var error_message = null;
+        var confirmation_message = null;
         var http_code = jqXHR.status;
 
-        // If not 200, then we don't likely have response as json.
-        if (http_code !== 200) {
-            error_message = "error " + http_code + " (" + status + ")" + "\n" + response;
-        }
-        // Presumably we got a cogent json response, so check if the content has an error field.
-        else {
+        // With 200, we presumably we probably got a cogent json response.
+        if (http_code === 200) {
+            // Check if the content has an error field.
             if (response.exception || response.error) {
                 error_message = "exception in server response\n" + JSON.stringify(response);
             }
+
+            // Check if the content has a confirmation field.
+            // We could, theoretically, have both an error and a confirmation.
+            if (response.confirmation) {
+                confirmation_message = response.confirmation;
+            }
+        }
+        // If not 200, then we don't likely have response as json.
+        else {
+            error_message = "error " + http_code + " (" + status + ")" + "\n" + response;
         }
 
+        this.display_ajax_confirmation(confirmation_message);
         this.display_ajax_error(error_message);
 
         return error_message;
@@ -91,6 +134,22 @@ class echolocator__UxBase extends common__Base {
     }
 
     // -------------------------------------------------------------
+    // Display any confirmation from ajax response.
+    display_ajax_confirmation(confirmation_message) {
+        var F = "echolocator__UxBase::display_ajax_confirmation[" + this.plugin_link_name + "]";
+
+        if (confirmation_message === null) {
+            this.#jquery_objects.$confirmation_message_container.hide();
+        }
+        else {
+            console.log(F + ": displaying confirmation " + confirmation_message);
+
+            this.#jquery_objects.$confirmation_message.text(confirmation_message);
+            this.#jquery_objects.$confirmation_message_container.show();
+        }
+    }
+
+    // -------------------------------------------------------------
     // Display any error from ajax response.
     display_ajax_error(error_message) {
         var F = "echolocator__UxBase::display_ajax_error[" + this.plugin_link_name + "]";
@@ -99,7 +158,7 @@ class echolocator__UxBase extends common__Base {
             this.#jquery_objects.$error_message_container.hide();
         }
         else {
-            console.log(F + ": displaying " + error_message);
+            console.log(F + ": displaying error " + error_message);
 
             this.#jquery_objects.$error_message.text(error_message);
             this.#jquery_objects.$error_message_container.show();

@@ -1,3 +1,4 @@
+import copy
 import csv
 import logging
 import multiprocessing
@@ -403,7 +404,9 @@ class Aiohttp(Thing, BaseAiohttp):
         target = require("ajax request", request_dict, "target")
 
         model = CrystalWellDroplocationModel(
-            crystal_well_uuid=require("ajax request", request_dict, "uuid"),
+            crystal_well_uuid=require(
+                "ajax request", request_dict, "crystal_well_uuid"
+            ),
             confirmed_target_x=require("ajax request target x", target, "x"),
             confirmed_target_y=require("ajax request target y", target, "y"),
             is_usable=True,
@@ -411,7 +414,19 @@ class Aiohttp(Thing, BaseAiohttp):
 
         await self.__xchembku.upsert_crystal_well_droplocations([model])
 
-        response = {"status": "ok"}
+        next_request_dict = copy.deepcopy(request_dict)
+        # Fetch the next image record after the update.
+        next_request_dict["direction"] = 1
+        response = await self._fetch_image(opaque, next_request_dict)
+
+        if response.get("record") is not None:
+            response[
+                "confirmation"
+            ] = "drop location has been set and view advanced to next image"
+        else:
+            response[
+                "confirmation"
+            ] = "drop location has been set and there are no more images in the list"
 
         return response
 

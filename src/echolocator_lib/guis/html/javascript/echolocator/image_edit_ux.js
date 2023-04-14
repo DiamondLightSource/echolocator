@@ -241,7 +241,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     handle_ajax_success(response, status, jqXHR) {
         var F = "echolocator__ImageEditUx::_handle_ajax_success";
 
-        // Let the base class check for and display any error in the response.
+        // Let the base class check for and display any error or confirmation in the response.
         var error_message = super.handle_ajax_success(response, status, jqXHR);
 
         if (error_message !== null)

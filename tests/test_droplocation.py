@@ -17,6 +17,7 @@ from xchembku_api.models.crystal_well_autolocation_model import (
 from xchembku_api.models.crystal_well_droplocation_model import (
     CrystalWellDroplocationModel,
 )
+from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
 from xchembku_api.models.crystal_well_model import CrystalWellModel
 
 # Client context creator.
@@ -38,12 +39,12 @@ logger = logging.getLogger(__name__)
 
 
 # ----------------------------------------------------------------------------------------
-class TestFetchImage:
+class TestDroplocation:
     def test(self, constants, logging_setup, output_directory):
         """ """
 
         configuration_file = "tests/configurations/service.yaml"
-        FetchImageTester().main(
+        DroplocationTester().main(
             constants,
             configuration_file,
             output_directory,
@@ -51,7 +52,7 @@ class TestFetchImage:
 
 
 # ----------------------------------------------------------------------------------------
-class FetchImageTester(Base):
+class DroplocationTester(Base):
     """
     Class to test the gui fetch_image endpoint.
     """
@@ -119,151 +120,81 @@ class FetchImageTester(Base):
 
         crystal_wells = []
 
+        self.__cookies = {}
         # Inject some wells.
-        crystal_wells.append(await self.__inject(xchembku, False, False))
-        crystal_wells.append(await self.__inject(xchembku, True, True))
         crystal_wells.append(await self.__inject(xchembku, True, False))
-        crystal_wells.append(await self.__inject(xchembku, True, True))
-        crystal_wells.append(await self.__inject(xchembku, True, True))
+        crystal_wells.append(await self.__inject(xchembku, True, False))
         crystal_wells.append(await self.__inject(xchembku, True, False))
 
-        await self.__request_initial(crystal_wells)
-        await self.__request_anchor(crystal_wells)
-        await self.__request_forward(crystal_wells)
-        await self.__request_forward_undecided(crystal_wells)
+        await self.__set_confirmed_target(xchembku, crystal_wells, 0, 1)
+        await self.__set_confirmed_target(xchembku, crystal_wells, 1, 2)
+        await self.__set_confirmed_target(xchembku, crystal_wells, 2, None)
 
     # ----------------------------------------------------------------------------------------
 
-    async def __request_initial(self, crystal_wells):
+    async def __set_confirmed_target(
+        self, xchembku, crystal_well_models, index1, index2
+    ):
         """ """
 
-        # --------------------------------------------------------------------
-        # Do what the Image Details tab does when it loads.
-
-        # json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME, "IMAGE_LIST_UX"]
-        # json_object[this.COMMAND] = this.FETCH_IMAGE;
-        # json_object["uuid"] = this.#uuid;
-        # json_object["direction"] = direction;
-
+        x = 100 + index1
+        y = 200 + index1
         request = {
             ProtocoljKeywords.ENABLE_COOKIES: [
                 Cookies.IMAGE_EDIT_UX,
                 Cookies.IMAGE_LIST_UX,
             ],
-            Keywords.COMMAND: Commands.FETCH_IMAGE,
+            Keywords.COMMAND: Commands.SET_TARGET,
+            "crystal_well_uuid": crystal_well_models[index1].uuid,
+            "target": {"x": x, "y": y},
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies={}
+            request, cookies=self.__cookies
         )
 
-        logger.debug(describe("first fetch_image response", response))
+        self.__cookies = response["__cookies"]
 
+        logger.debug(describe("first set_target response", response))
+
+        assert "record" in response
         record = response["record"]
-        assert record is None
+        assert "confirmation" in response
+        assert "has been set" in response["confirmation"]
+        if index2 is not None:
+            assert record["uuid"] == crystal_well_models[index2].uuid, f"index {index1}"
+            assert "advanced" in response["confirmation"]
+        else:
+            assert record is None
+            assert "no more images" in response["confirmation"]
 
-    # ----------------------------------------------------------------------------------------
-
-    async def __request_anchor(self, crystal_wells):
-        """ """
-
-        request = {
-            ProtocoljKeywords.ENABLE_COOKIES: [
-                Cookies.IMAGE_EDIT_UX,
-                Cookies.IMAGE_LIST_UX,
-            ],
-            Keywords.COMMAND: Commands.FETCH_IMAGE,
-            "crystal_well_uuid": crystal_wells[2].uuid,
-        }
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies={}
+        # Fetch the record which should have been updated.
+        fetched_models = await xchembku.fetch_crystal_wells_needing_droplocation(
+            CrystalWellFilterModel(anchor=crystal_well_models[index1].uuid)
         )
 
-        logger.debug(describe("first fetch_image response", response))
+        assert fetched_models[0].confirmed_target_x == x, f"index {index1}"
+        assert fetched_models[0].confirmed_target_y == y, f"index {index1}"
+        assert fetched_models[0].is_usable is True, f"index {index1}"
 
-        record = response["record"]
-        assert record["uuid"] == crystal_wells[2].uuid
+        # request = {
+        #     ProtocoljKeywords.ENABLE_COOKIES: [
+        #         Cookies.IMAGE_EDIT_UX,
+        #         Cookies.IMAGE_LIST_UX,
+        #     ],
+        #     Keywords.COMMAND: Commands.FETCH_IMAGE,
+        #     "direction": 0,
+        # }
 
-    # ----------------------------------------------------------------------------------------
+        # response = await echolocator_guis_get_default().client_protocolj(
+        #     request, cookies=response["__cookies"]
+        # )
 
-    async def __request_forward(self, crystal_wells):
-        """ """
+        # logger.debug(describe("fetch_image response", response))
 
-        request = {
-            ProtocoljKeywords.ENABLE_COOKIES: [
-                Cookies.IMAGE_EDIT_UX,
-                Cookies.IMAGE_LIST_UX,
-            ],
-            Keywords.COMMAND: Commands.FETCH_IMAGE,
-            "crystal_well_uuid": crystal_wells[2].uuid,
-            "direction": 1,
-        }
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies={}
-        )
-
-        logger.debug(describe("fetch_image response", response))
-
-        record = response["record"]
-        assert record["uuid"] == crystal_wells[3].uuid
-        assert record["confirmed_target_x"] is not None
-
-        # -------------------------------------------------------------------------------------
-        # Same query again, but rely on cookies for values.
-        request.pop("crystal_well_uuid")
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies=response["__cookies"]
-        )
-
-        logger.debug(describe("fetch_image response", response))
-
-        record = response["record"]
-        assert record["uuid"] == crystal_wells[3].uuid
-        assert record["confirmed_target_x"] is not None
-
-    # ----------------------------------------------------------------------------------------
-
-    async def __request_forward_undecided(self, crystal_wells):
-        """ """
-
-        request = {
-            ProtocoljKeywords.ENABLE_COOKIES: [
-                Cookies.IMAGE_EDIT_UX,
-                Cookies.IMAGE_LIST_UX,
-            ],
-            Keywords.COMMAND: Commands.FETCH_IMAGE,
-            "crystal_well_uuid": crystal_wells[2].uuid,
-            "direction": 1,
-            "should_show_only_undecided": True,
-        }
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies={}
-        )
-
-        logger.debug(describe("fetch_image response", response))
-
-        record = response["record"]
-        assert record["uuid"] == crystal_wells[5].uuid
-        assert record["confirmed_target_x"] is None
-
-        # -------------------------------------------------------------------------------------
-        # Same query again, but rely on cookies for values.
-        request.pop("crystal_well_uuid")
-        request.pop("should_show_only_undecided")
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies=response["__cookies"]
-        )
-
-        logger.debug(describe("fetch_image response", response))
-
-        record = response["record"]
-        assert record["uuid"] == crystal_wells[5].uuid
-        assert record["confirmed_target_x"] is None
+        # record = response["record"]
+        # assert record["uuid"] == crystal_wells[3].uuid
+        # assert record["confirmed_target_x"] is not None
 
     # ----------------------------------------------------------------------------------------
 
@@ -272,11 +203,13 @@ class FetchImageTester(Base):
         if not hasattr(self, "injected_count"):
             self.injected_count = 0
 
+        self.injected_count += 1
+
         filename = "/tmp/%03d.jpg" % (self.injected_count)
 
         # Write well record.
         m = CrystalWellModel(
-            position="01A_1",
+            position="%2dA_1" % (self.injected_count),
             filename=filename,
             crystal_plate_uuid=self.__crystal_plate_uuid,
         )
@@ -288,8 +221,8 @@ class FetchImageTester(Base):
             t = CrystalWellAutolocationModel(
                 crystal_well_uuid=m.uuid,
                 number_of_crystals=self.injected_count,
-                auto_target_x=self.injected_count * 10 + 1,
-                auto_target_y=self.injected_count * 10 + 2,
+                auto_target_x=self.injected_count * 10 + 0,
+                auto_target_y=self.injected_count * 10 + 1,
             )
 
             await xchembku.originate_crystal_well_autolocations([t])
@@ -298,12 +231,10 @@ class FetchImageTester(Base):
             # Add a crystal well droplocation.
             t = CrystalWellDroplocationModel(
                 crystal_well_uuid=m.uuid,
-                confirmed_target_x=self.injected_count * 10 + 3,
-                confirmed_target_y=self.injected_count * 10 + 4,
+                confirmed_target_x=self.injected_count * 10 + 2,
+                confirmed_target_y=self.injected_count * 10 + 3,
             )
 
             await xchembku.originate_crystal_well_droplocations([t])
-
-        self.injected_count += 1
 
         return m
