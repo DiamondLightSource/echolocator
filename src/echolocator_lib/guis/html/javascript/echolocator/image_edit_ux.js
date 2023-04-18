@@ -210,7 +210,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         var confirmed_target = pixel_ux__user_change_event.detail.target;
 
-        // Mark image usable.
+        // Mark image usable and save target location.
         this._send_update(true, confirmed_target)
 
     } // end method
@@ -232,7 +232,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // Notify pixel_ux of requested change in position.
         this.#pixel_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
 
-        // Mark image usable.
+        // Mark image usable and save target location.
         this._send_update(true, confirmed_target)
 
     } // end method
