@@ -8,6 +8,14 @@ from dls_multiconf_lib.constants import ThingTypes as MulticonfThingTypes
 
 # Configurator.
 from dls_multiconf_lib.multiconfs import Multiconfs, multiconfs_set_default
+from xchembku_api.models.crystal_plate_model import CrystalPlateModel
+from xchembku_api.models.crystal_well_autolocation_model import (
+    CrystalWellAutolocationModel,
+)
+from xchembku_api.models.crystal_well_droplocation_model import (
+    CrystalWellDroplocationModel,
+)
+from xchembku_api.models.crystal_well_model import CrystalWellModel
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +29,12 @@ class Base:
     def __init__(self):
         self.tasks_execution_outputs = {}
         self.residuals = ["stdout.txt", "stderr.txt", "main.log"]
+
+        self.injected_count = 0
+        self.visit = "cm00001-1"
+        self.barcode = "98ab"
+        self.crystal_plate_uuid = None
+        self.rockminer_collected_stem = None
 
     def main(self, constants, configuration_file, output_directory):
         """
@@ -74,3 +88,64 @@ class Base:
         multiconfs_set_default(rockingest_multiconf)
 
         return rockingest_multiconf
+
+    # ----------------------------------------------------------------------------------------
+
+    async def inject_plate(self, xchembku):
+        """ """
+
+        # Make the plate on which the wells reside.
+        crystal_plate_model = CrystalPlateModel(
+            formulatrix__plate__id=10,
+            barcode=self.barcode,
+            rockminer_collected_stem=self.rockminer_collected_stem,
+            visit=self.visit,
+        )
+
+        await xchembku.upsert_crystal_plates([crystal_plate_model])
+        self.crystal_plate_uuid = crystal_plate_model.uuid
+
+    # ----------------------------------------------------------------------------------------
+
+    async def inject(self, xchembku, autolocation: bool, droplocation: bool):
+        """ """
+
+        if self.crystal_plate_uuid is None:
+            await self.inject_plate(xchembku)
+
+        self.injected_count += 1
+
+        filename = "/tmp/%03d.jpg" % (self.injected_count)
+
+        # Write well record.
+        m = CrystalWellModel(
+            position="%02dA_1" % (self.injected_count),
+            filename=filename,
+            crystal_plate_uuid=self.crystal_plate_uuid,
+        )
+
+        await xchembku.upsert_crystal_wells([m])
+
+        if autolocation:
+            # Add a crystal well autolocation.
+            t = CrystalWellAutolocationModel(
+                crystal_well_uuid=m.uuid,
+                number_of_crystals=self.injected_count,
+                auto_target_x=self.injected_count * 10 + 0,
+                auto_target_y=self.injected_count * 10 + 1,
+            )
+
+            await xchembku.originate_crystal_well_autolocations([t])
+
+        if droplocation:
+            # Add a crystal well droplocation.
+            t = CrystalWellDroplocationModel(
+                crystal_well_uuid=m.uuid,
+                confirmed_target_x=self.injected_count * 10 + 2,
+                confirmed_target_y=self.injected_count * 10 + 3,
+                is_usable=True,
+            )
+
+            await xchembku.originate_crystal_well_droplocations([t])
+
+        return m

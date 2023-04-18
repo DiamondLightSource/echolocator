@@ -10,15 +10,7 @@ from dls_utilpack.describe import describe
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
 from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
-from xchembku_api.models.crystal_plate_model import CrystalPlateModel
-from xchembku_api.models.crystal_well_autolocation_model import (
-    CrystalWellAutolocationModel,
-)
-from xchembku_api.models.crystal_well_droplocation_model import (
-    CrystalWellDroplocationModel,
-)
 from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
-from xchembku_api.models.crystal_well_model import CrystalWellModel
 
 # Client context creator.
 from echolocator_api.guis.context import Context as GuiClientContext
@@ -107,24 +99,13 @@ class DroplocationTester(Base):
         # Reference the xchembku object which the context has set up as the default.
         xchembku = xchembku_datafaces_get_default()
 
-        # Make the plate on which the wells reside.
-        visit = "cm00001-1"
-        crystal_plate_model = CrystalPlateModel(
-            formulatrix__plate__id=10,
-            barcode="98ab",
-            visit=visit,
-        )
-
-        await xchembku.upsert_crystal_plates([crystal_plate_model])
-        self.__crystal_plate_uuid = crystal_plate_model.uuid
-
         crystal_wells = []
 
         self.__cookies = {}
         # Inject some wells.
-        crystal_wells.append(await self.__inject(xchembku, True, False))
-        crystal_wells.append(await self.__inject(xchembku, True, False))
-        crystal_wells.append(await self.__inject(xchembku, True, False))
+        crystal_wells.append(await self.inject(xchembku, True, False))
+        crystal_wells.append(await self.inject(xchembku, True, False))
+        crystal_wells.append(await self.inject(xchembku, True, False))
 
         await self.__set_confirmed_target(xchembku, crystal_wells, 0, 1)
         await self.__set_confirmed_target(xchembku, crystal_wells, 1, 2)
@@ -232,46 +213,3 @@ class DroplocationTester(Base):
         assert fetched_models[0].confirmed_target_x == x, f"index {index1}"
         assert fetched_models[0].confirmed_target_y == y, f"index {index1}"
         assert fetched_models[0].is_usable is is_usable, f"index {index1}"
-
-    # ----------------------------------------------------------------------------------------
-
-    async def __inject(self, xchembku, autolocation: bool, droplocation: bool):
-        """ """
-        if not hasattr(self, "injected_count"):
-            self.injected_count = 0
-
-        self.injected_count += 1
-
-        filename = "/tmp/%03d.jpg" % (self.injected_count)
-
-        # Write well record.
-        m = CrystalWellModel(
-            position="%2dA_1" % (self.injected_count),
-            filename=filename,
-            crystal_plate_uuid=self.__crystal_plate_uuid,
-        )
-
-        await xchembku.upsert_crystal_wells([m])
-
-        if autolocation:
-            # Add a crystal well autolocation.
-            t = CrystalWellAutolocationModel(
-                crystal_well_uuid=m.uuid,
-                number_of_crystals=self.injected_count,
-                auto_target_x=self.injected_count * 10 + 0,
-                auto_target_y=self.injected_count * 10 + 1,
-            )
-
-            await xchembku.originate_crystal_well_autolocations([t])
-
-        if droplocation:
-            # Add a crystal well droplocation.
-            t = CrystalWellDroplocationModel(
-                crystal_well_uuid=m.uuid,
-                confirmed_target_x=self.injected_count * 10 + 2,
-                confirmed_target_y=self.injected_count * 10 + 3,
-            )
-
-            await xchembku.originate_crystal_well_droplocations([t])
-
-        return m

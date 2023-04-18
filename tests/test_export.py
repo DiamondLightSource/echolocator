@@ -5,7 +5,6 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 # API constants.
-from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 from dls_servbase_lib.datafaces.context import Context as DlsServbaseDatafaceContext
 
 # Utilities.
@@ -14,14 +13,6 @@ from dls_utilpack.describe import describe
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
 from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
-from xchembku_api.models.crystal_plate_model import CrystalPlateModel
-from xchembku_api.models.crystal_well_autolocation_model import (
-    CrystalWellAutolocationModel,
-)
-from xchembku_api.models.crystal_well_droplocation_model import (
-    CrystalWellDroplocationModel,
-)
-from xchembku_api.models.crystal_well_model import CrystalWellModel
 
 # Client context creator.
 from echolocator_api.guis.context import Context as GuiClientContext
@@ -107,33 +98,21 @@ class ExportTester(Base):
         # Reference the xchembku object which the context has set up as the default.
         xchembku = xchembku_datafaces_get_default()
 
-        self.__visit = "cm00001-1"
-        self.__barcode = "98ab"
-        self.__rockminer_collected_stem = "98ab_2022-05-09_RI1000-0276-3drop"
         self.__output_directory = output_directory
 
-        # Make the plate on which the wells reside.
-        crystal_plate_model = CrystalPlateModel(
-            formulatrix__plate__id=10,
-            barcode=self.__barcode,
-            rockminer_collected_stem=self.__rockminer_collected_stem,
-            visit=self.__visit,
-        )
-
-        await xchembku.upsert_crystal_plates([crystal_plate_model])
-        self.__crystal_plate_uuid = crystal_plate_model.uuid
+        await self.inject_plate(xchembku)
 
         await self.__export_initial()
 
         crystal_wells = []
 
         # Inject some wells.
-        crystal_wells.append(await self.__inject(xchembku, False, False))
-        crystal_wells.append(await self.__inject(xchembku, True, True))
-        crystal_wells.append(await self.__inject(xchembku, True, False))
-        crystal_wells.append(await self.__inject(xchembku, True, True))
-        crystal_wells.append(await self.__inject(xchembku, True, True))
-        crystal_wells.append(await self.__inject(xchembku, True, False))
+        crystal_wells.append(await self.inject(xchembku, False, False))
+        crystal_wells.append(await self.inject(xchembku, True, True))
+        crystal_wells.append(await self.inject(xchembku, True, False))
+        crystal_wells.append(await self.inject(xchembku, True, True))
+        crystal_wells.append(await self.inject(xchembku, True, True))
+        crystal_wells.append(await self.inject(xchembku, True, False))
 
         await self.__export_wells(crystal_wells)
 
@@ -144,7 +123,7 @@ class ExportTester(Base):
 
         request = {
             Keywords.COMMAND: Commands.EXPORT,
-            "barcode_filter": self.__barcode,
+            "barcode_filter": self.barcode,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
@@ -159,7 +138,7 @@ class ExportTester(Base):
         csv = (
             Path(self.__output_directory)
             / "exports"
-            / f"{self.__rockminer_collected_stem}_targets.csv"
+            / f"{self.rockminer_collected_stem}_targets.csv"
         )
         assert csv.exists()
         assert csv.stat().st_size == 0
@@ -171,7 +150,7 @@ class ExportTester(Base):
 
         request = {
             Keywords.COMMAND: Commands.EXPORT,
-            "barcode_filter": self.__barcode,
+            "barcode_filter": self.barcode,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
@@ -186,7 +165,7 @@ class ExportTester(Base):
         csv_path = (
             Path(self.__output_directory)
             / "exports"
-            / f"{self.__rockminer_collected_stem}_targets.csv"
+            / f"{self.rockminer_collected_stem}_targets.csv"
         )
         assert csv_path.exists()
 
@@ -208,46 +187,3 @@ class ExportTester(Base):
         assert rows[0][0] == "02A_1"
         assert rows[1][0] == "04A_1"
         assert rows[2][0] == "05A_1"
-
-    # ----------------------------------------------------------------------------------------
-
-    async def __inject(self, xchembku, autolocation: bool, droplocation: bool):
-        """ """
-        if not hasattr(self, "injected_count"):
-            self.injected_count = 0
-
-        filename = "/tmp/aaaa_%03d_1.jpg" % (self.injected_count)
-
-        # Write well record.
-        m = CrystalWellModel(
-            position="%02dA_1" % (self.injected_count + 1),
-            filename=filename,
-            crystal_plate_uuid=self.__crystal_plate_uuid,
-        )
-
-        await xchembku.upsert_crystal_wells([m])
-
-        if autolocation:
-            # Add a crystal well autolocation.
-            t = CrystalWellAutolocationModel(
-                crystal_well_uuid=m.uuid,
-                number_of_crystals=self.injected_count,
-                auto_target_x=self.injected_count * 10 + 1,
-                auto_target_y=self.injected_count * 10 + 2,
-            )
-
-            await xchembku.originate_crystal_well_autolocations([t])
-
-        if droplocation:
-            # Add a crystal well droplocation.
-            t = CrystalWellDroplocationModel(
-                crystal_well_uuid=m.uuid,
-                confirmed_target_x=self.injected_count * 10 + 3,
-                confirmed_target_y=self.injected_count * 10 + 4,
-            )
-
-            await xchembku.originate_crystal_well_droplocations([t])
-
-        self.injected_count += 1
-
-        return m
