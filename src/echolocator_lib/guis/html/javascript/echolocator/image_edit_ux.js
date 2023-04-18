@@ -3,7 +3,8 @@
 class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     COOKIE_NAME = "IMAGE_EDIT_UX";
     FETCH_IMAGE = "echolocator_guis::commands::fetch_image";
-    SET_IMAGE_IS_USABLE = "echolocator_guis::commands::set_image_is_usable";
+    UPDATE = "echolocator_guis::commands::update";
+    SHOULD_ADVANCE = "echolocator_guis::keywords::should_advance";
 
     #jquery_objects = {};
     #crystal_well_uuid = null;
@@ -42,6 +43,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         this.#jquery_objects.$raphael1_paper = $("#raphael1_paper SVG", this.$interaction_parent);
         this.#jquery_objects.$image = $("IMG", this.$interaction_parent);
+        this.#jquery_objects.$hide_when_no_image = $(".T_hide_when_no_image", this.$interaction_parent);
         this.#jquery_objects.$filename = $(".T_filename", this.$interaction_parent);
         this.#jquery_objects.$number_of_crystals = $(".T_number_of_crystals", this.$interaction_parent);
         this.#jquery_objects.$is_usable = $(".T_is_usable", this.$interaction_parent);
@@ -145,21 +147,29 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             var json_object = {}
             // TODO: Remove hardcoded "IMAGE_LIST_UX" in image edit's cookie list.
             json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME, "IMAGE_LIST_UX"]
-            json_object[this.COMMAND] = this.SET_IMAGE_IS_USABLE;
-            json_object["crystal_well_uuid"] = this.#crystal_well_uuid;
-            json_object["is_usable"] = is_usable;
+            json_object[this.COMMAND] = this.UPDATE;
+
+            // We pass the fields of the database we want updated.
+            json_object["crystal_well_droplocation_model"] =
+            {
+                "crystal_well_uuid": this.#crystal_well_uuid,
+                "is_usable": is_usable
+            }
+
+            // Tell server to add response["html"] for next image in series.
+            json_object[this.SHOULD_ADVANCE] = true;
 
             // Send request to update database immediately.
             this.send(json_object);
 
-            if (!is_usable) {
-                // Notify pixel_ux of requested change in position.
-                // TODO: Combine usable change with position change into single ajax.
-                this.#pixel_ux.set_uuid(this.#crystal_well_uuid, { x: 10, y: 10 });
+            // if (!is_usable) {
+            //     // Notify pixel_ux of requested change in position.
+            //     // TODO: Combine usable change with position change into single ajax.
+            //     this.#pixel_ux.set_uuid(this.#crystal_well_uuid, { x: 10, y: 10 });
 
-                // Tell pixel_ux to send change to the database.
-                this.#pixel_ux.update_database();
-            }
+            //     // Tell pixel_ux to send change to the database.
+            //     this.#pixel_ux.update_confirmed_target();
+            // }
 
             // Move to next image.
             this.request_update(1);
@@ -201,7 +211,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.#pixel_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
 
         // Tell pixel_ux to send change to the database.
-        this.#pixel_ux.update_database();
+        this.#pixel_ux.update_confirmed_target();
 
         // Mark image usable.
         this._handle_is_usable_change(true)
@@ -251,10 +261,15 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         var record = response.record;
 
         if (record === null) {
-            console.log(F + ": response record had value of null");
-            this.display_ajax_error("Please choose an image.");
+            if (response.confirmation === undefined) {
+                console.log(F + ": response record had value of null");
+                this.display_ajax_error("Please choose an image.");
+            }
+            this.#jquery_objects.$hide_when_no_image.hide();
             return;
         }
+
+        this.#jquery_objects.$hide_when_no_image.show();
 
         // Remember which crystal_well_uuid we are showing.
         this.#crystal_well_uuid = record.uuid;

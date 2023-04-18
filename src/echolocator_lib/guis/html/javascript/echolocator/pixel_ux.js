@@ -2,7 +2,7 @@ var echolocator__PixelUx__UserMotionEvent = "echolocator__PixelUx__UserMotionEve
 var echolocator__PixelUx__UserChangeEvent = "echolocator__PixelUx__UserChangeEvent";
 
 class echolocator__PixelUx extends echolocator__UxBase {
-    SET_TARGET = "echolocator_guis::commands::set_target";
+    UPDATE = "echolocator_guis::commands::update";
 
     #raphael = null;
     #transformer = null;
@@ -113,7 +113,7 @@ class echolocator__PixelUx extends echolocator__UxBase {
             " transformed to target" +
             " [" + this.#target.x + ", " + this.#target.y + "]");
 
-        this.update_database();
+        this.update_confirmed_target();
 
         // Trigger an event that image_edit.js will use to advance to the next image.
         var custom_event = new CustomEvent(echolocator__PixelUx__UserChangeEvent,
@@ -129,13 +129,19 @@ class echolocator__PixelUx extends echolocator__UxBase {
     // Called after guide changed by a user action.
     // Also can be called by image_edit_ux after click on canvas has set a new position.
 
-    update_database(event) {
-        var F = "echolocator__PixelUx::update_database"
+    update_confirmed_target(event) {
+        var F = "echolocator__PixelUx::update_confirmed_target"
 
         var json_object = {}
-        json_object[this.COMMAND] = this.SET_TARGET;
-        json_object["uuid"] = this.#uuid;
-        json_object["target"] = this.#target;
+        json_object[this.COMMAND] = this.UPDATE;
+
+        // We pass the fields of the database we want updated.
+        json_object["crystal_well_droplocation_model"] =
+        {
+            "crystal_well_uuid": this.#uuid,
+            "confirmed_target_x": this.#target.x,
+            "confirmed_target_y": this.#target.y,
+        }
 
         this.send(json_object);
 

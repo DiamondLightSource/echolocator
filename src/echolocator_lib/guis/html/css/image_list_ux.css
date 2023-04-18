@@ -60,3 +60,12 @@
 #image_list_ux_interaction_parent .T_barcode_filter {
     width: 320px;
 }
+
+#image_list_ux_interaction_parent .T_is_drop {
+    display: none;
+}
+
+#image_list_ux_interaction_parent .T_real_space_target_x,
+#image_list_ux_interaction_parent .T_real_space_target_y {
+    display: none;
+}

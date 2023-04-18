@@ -267,9 +267,11 @@ class Aiohttp(Thing, BaseAiohttp):
 
         if len(crystal_well_models) == 0:
             response = {"record": None}
+            if direction != 0:
+                response["confirmation"] = "there are no more images in this direction"
             return response
 
-        # Presumabley there is only one image of interest.
+        # Presumably there is only one image of interest.
         record = crystal_well_models[0].dict()
         record["filename"] = "filestore" + record["filename"]
         response = {"record": record}
@@ -434,27 +436,6 @@ class Aiohttp(Thing, BaseAiohttp):
                 ] = "drop location has been updated and there are no more images in the list"
         else:
             response = {"confirmation": "drop location has been updated"}
-
-        return response
-
-    # ----------------------------------------------------------------------------------------
-    async def _set_image_is_usable(self, opaque, request_dict):
-        """
-        Set the is_usable flag on the image given its autoid.
-        """
-
-        model = CrystalWellDroplocationModel(
-            crystal_well_uuid=require(
-                "ajax request", request_dict, "crystal_well_uuid"
-            ),
-            is_usable=require("ajax request", request_dict, "is_usable"),
-        )
-
-        await self.__xchembku.upsert_crystal_well_droplocations([model])
-
-        # Fetch the next image record after the update.
-        request_dict["direction"] = 1
-        response = await self._fetch_image(opaque, request_dict)
 
         return response
 
