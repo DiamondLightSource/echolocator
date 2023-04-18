@@ -131,6 +131,8 @@ class Base:
             t = CrystalWellAutolocationModel(
                 crystal_well_uuid=m.uuid,
                 number_of_crystals=self.injected_count,
+                well_centroid_x=400,
+                well_centroid_y=500,
                 auto_target_x=self.injected_count * 10 + 0,
                 auto_target_y=self.injected_count * 10 + 1,
             )
@@ -141,8 +143,8 @@ class Base:
             # Add a crystal well droplocation.
             t = CrystalWellDroplocationModel(
                 crystal_well_uuid=m.uuid,
-                confirmed_target_x=self.injected_count * 10 + 2,
-                confirmed_target_y=self.injected_count * 10 + 3,
+                confirmed_target_x=self.injected_count * 100 + 2,
+                confirmed_target_y=self.injected_count * 100 + 3,
                 is_usable=True,
             )
 

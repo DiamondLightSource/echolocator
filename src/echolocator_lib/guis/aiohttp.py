@@ -340,6 +340,47 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
+    async def _update(self, opaque, request_dict):
+
+        t = require("ajax request", request_dict, "crystal_well_droplocation_model")
+
+        # Wrap a model around the posted fields.
+        crystal_well_droplocation_model = CrystalWellDroplocationModel(**t)
+
+        # Update the database record.
+        await self.__xchembku.upsert_crystal_well_droplocations(
+            [crystal_well_droplocation_model],
+            only_fields=list(t.keys()),
+        )
+
+        # Caller wants to select the next image automatically?
+        if request_dict.get(Keywords.SHOULD_ADVANCE, False):
+            # Advance by fetching the next image record after the update.
+            next_request_dict = {
+                ProtocoljKeywords.ENABLE_COOKIES: [
+                    Cookies.IMAGE_EDIT_UX,
+                    Cookies.IMAGE_LIST_UX,
+                ],
+                Keywords.COMMAND: Commands.FETCH_IMAGE,
+                "crystal_well_uuid": crystal_well_droplocation_model.crystal_well_uuid,
+                "direction": 1,
+            }
+            response = await self._fetch_image(opaque, next_request_dict)
+
+            if response.get("record") is not None:
+                response[
+                    "confirmation"
+                ] = "drop location has been updated and view advanced to next image"
+            else:
+                response[
+                    "confirmation"
+                ] = "drop location has been updated and there are no more images in the list"
+        else:
+            response = {"confirmation": "drop location has been updated"}
+
+        return response
+
+    # ----------------------------------------------------------------------------------------
     async def _export(self, opaque, request_dict):
 
         barcode_filter = request_dict.get("barcode_filter")
@@ -388,54 +429,13 @@ class Aiohttp(Thing, BaseAiohttp):
             for m in crystal_well_models:
                 row = []
                 row.append(m.position)
-                row.append(m.confirmed_target_x or "")
-                row.append(m.confirmed_target_y or "")
+                row.append(m.echo_coordinate_x or "")
+                row.append(m.echo_coordinate_y or "")
                 writer.writerow(row)
 
         response = {
             "confirmation": f"exported {len(crystal_well_models)} rows to {filename}"
         }
-
-        return response
-
-    # ----------------------------------------------------------------------------------------
-    async def _update(self, opaque, request_dict):
-
-        t = require("ajax request", request_dict, "crystal_well_droplocation_model")
-
-        # Wrap a model around the posted fields.
-        crystal_well_droplocation_model = CrystalWellDroplocationModel(**t)
-
-        # Update the database record.
-        await self.__xchembku.upsert_crystal_well_droplocations(
-            [crystal_well_droplocation_model],
-            only_fields=list(t.keys()),
-        )
-
-        # Caller wants to select the next image automatically?
-        if request_dict.get(Keywords.SHOULD_ADVANCE, False):
-            # Advance by fetching the next image record after the update.
-            next_request_dict = {
-                ProtocoljKeywords.ENABLE_COOKIES: [
-                    Cookies.IMAGE_EDIT_UX,
-                    Cookies.IMAGE_LIST_UX,
-                ],
-                Keywords.COMMAND: Commands.FETCH_IMAGE,
-                "crystal_well_uuid": crystal_well_droplocation_model.crystal_well_uuid,
-                "direction": 1,
-            }
-            response = await self._fetch_image(opaque, next_request_dict)
-
-            if response.get("record") is not None:
-                response[
-                    "confirmation"
-                ] = "drop location has been updated and view advanced to next image"
-            else:
-                response[
-                    "confirmation"
-                ] = "drop location has been updated and there are no more images in the list"
-        else:
-            response = {"confirmation": "drop location has been updated"}
 
         return response
 

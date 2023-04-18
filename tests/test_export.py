@@ -185,5 +185,11 @@ class ExportTester(Base):
 
         # Check the well positions are those that are considered "confirmed".
         assert rows[0][0] == "02A_1"
+        assert int(rows[0][1]) == -198
+        assert int(rows[0][2]) == -297
         assert rows[1][0] == "04A_1"
+        assert int(rows[1][1]) == 2
+        assert int(rows[1][2]) == -97
         assert rows[2][0] == "05A_1"
+        assert int(rows[2][1]) == 102
+        assert int(rows[2][2]) == 3
