@@ -108,7 +108,7 @@ class echolocator__PixelUx extends echolocator__UxBase {
         // Everything we send or receive from the outside is data coordinates.
         this.#target = this.#transformer.view_to_data(view_position)
 
-        console.log(F + ": dragged view_position" +
+        console.log(F + ": [INTERPI] dragged view_position" +
             " [" + view_position.x + ", " + view_position.y + "]" +
             " transformed to target" +
             " [" + this.#target.x + ", " + this.#target.y + "]");

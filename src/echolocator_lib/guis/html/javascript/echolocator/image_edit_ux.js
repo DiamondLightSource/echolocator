@@ -203,11 +203,15 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
     // -------------------------------------------------------------
     // Handle where the user has moved the crosshairs, event comes from pixel_ux widget.
+    // Units are transformed to underlying image pixel target.
 
     _handle_pixel_ux_change_event(pixel_ux__user_change_event) {
         var F = "echolocator__ImageEditUx::_handle_pixel_ux_change_event";
 
-        this._handle_target_pixel_change(pixel_ux__user_change_event.target);
+        var confirmed_target = pixel_ux__user_change_event.detail.target;
+
+        // Mark image usable.
+        this._send_update(true, confirmed_target)
 
     } // end method
 
@@ -222,23 +226,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             y: jquery_event_object.offsetY
         }
 
-        this._handle_target_pixel_change(view_position);
-
-    } // end method
-
-    // -------------------------------------------------------------
-    // Handle change to pixel position of the target.
-
-    _handle_target_pixel_change(pixel_position) {
-        var F = "echolocator__ImageEditUx::_handle_target_pixel_change";
-
         // Convert to target position before giving to pixel_ux.
-        var confirmed_target = this.#transformer.view_to_data(pixel_position);
-
-        console.log(F + ": [INTERPI] new pixel_position" +
-            " [" + pixel_position.x + ", " + pixel_position.y + "]" +
-            " transformed to confirmed_target" +
-            " [" + confirmed_target.x + ", " + confirmed_target.y + "]");
+        var confirmed_target = this.#transformer.view_to_data(view_position);
 
         // Notify pixel_ux of requested change in position.
         this.#pixel_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
