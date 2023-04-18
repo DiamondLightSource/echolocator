@@ -113,37 +113,13 @@ class echolocator__PixelUx extends echolocator__UxBase {
             " transformed to target" +
             " [" + this.#target.x + ", " + this.#target.y + "]");
 
-        this.update_confirmed_target();
-
-        // Trigger an event that image_edit.js will use to advance to the next image.
+        // Trigger an event that image_edit.js will use to save the target and advance to the next image.
         var custom_event = new CustomEvent(echolocator__PixelUx__UserChangeEvent,
             {
                 detail: { target: this.#target }
             });
 
         this.dispatchEvent(custom_event);
-
-    } // end method
-
-    // -----------------------------------------------------------------------
-    // Called after guide changed by a user action.
-    // Also can be called by image_edit_ux after click on canvas has set a new position.
-
-    update_confirmed_target(event) {
-        var F = "echolocator__PixelUx::update_confirmed_target"
-
-        var json_object = {}
-        json_object[this.COMMAND] = this.UPDATE;
-
-        // We pass the fields of the database we want updated.
-        json_object["crystal_well_droplocation_model"] =
-        {
-            "crystal_well_uuid": this.#uuid,
-            "confirmed_target_x": this.#target.x,
-            "confirmed_target_y": this.#target.y,
-        }
-
-        this.send(json_object);
 
     } // end method
 

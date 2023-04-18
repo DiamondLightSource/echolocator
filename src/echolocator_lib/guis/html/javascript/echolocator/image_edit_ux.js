@@ -81,17 +81,17 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         this.#jquery_objects.accept_button.click(
             function (jquery_event_object) {
-                that._handle_is_usable_change(true);
+                that._send_update(true);
             });
 
         this.#jquery_objects.reject_button.click(
             function (jquery_event_object) {
-                that._handle_is_usable_change(false);
+                that._send_update(false);
             });
 
         this.#jquery_objects.reset_button.click(
             function (jquery_event_object) {
-                that._handle_is_usable_change(null);
+                that._send_update(null);
             });
 
         this.#jquery_objects.next_button.click(
@@ -103,6 +103,11 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             self.runtime,
             "pixel",
             $("#pixel_ux_interaction_parent"));
+
+        // User moves the crosshair, event comes from pixel_ux widget.
+        this.#pixel_ux.addEventListener(
+            echolocator__PixelUx__UserChangeEvent,
+            function (event) { that._handle_pixel_ux_change_event(event); });
 
         // Activate the spreader to react on window size changes.
         this.image1_spreader.activate($("#image1"), window);
@@ -139,7 +144,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     // -------------------------------------------------------------
     // Handle accept or reject button click.
 
-    _handle_is_usable_change(is_usable) {
+    _send_update(is_usable, confirmed_target) {
         var F = "echolocator__ImageEditUx::_handle_is_usable_change";
 
         if (this.#crystal_well_uuid) {
@@ -150,11 +155,19 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             json_object[this.COMMAND] = this.UPDATE;
 
             // We pass the fields of the database we want updated.
-            json_object["crystal_well_droplocation_model"] =
+            var model =
             {
                 "crystal_well_uuid": this.#crystal_well_uuid,
                 "is_usable": is_usable
             }
+
+            if (confirmed_target !== undefined) {
+                model["confirmed_target_x"] = confirmed_target.x;
+                model["confirmed_target_y"] = confirmed_target.y;
+
+            }
+
+            json_object["crystal_well_droplocation_model"] = model;
 
             // Tell server to add response["html"] for next image in series.
             json_object[this.SHOULD_ADVANCE] = true;
@@ -189,6 +202,16 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     } // end method
 
     // -------------------------------------------------------------
+    // Handle where the user has moved the crosshairs, event comes from pixel_ux widget.
+
+    _handle_pixel_ux_change_event(pixel_ux__user_change_event) {
+        var F = "echolocator__ImageEditUx::_handle_pixel_ux_change_event";
+
+        this._handle_target_pixel_change(pixel_ux__user_change_event.target);
+
+    } // end method
+
+    // -------------------------------------------------------------
     // Handle left click on the raphael paper.
 
     _handle_canvas_left_click(jquery_event_object) {
@@ -199,22 +222,29 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             y: jquery_event_object.offsetY
         }
 
-        // Convert to target position before giving to pixel_ux.
-        var confirmed_target = this.#transformer.view_to_data(view_position);
+        this._handle_target_pixel_change(view_position);
 
-        console.log(F + ": clicked view_position" +
-            " [" + view_position.x + ", " + view_position.y + "]" +
+    } // end method
+
+    // -------------------------------------------------------------
+    // Handle change to pixel position of the target.
+
+    _handle_target_pixel_change(pixel_position) {
+        var F = "echolocator__ImageEditUx::_handle_target_pixel_change";
+
+        // Convert to target position before giving to pixel_ux.
+        var confirmed_target = this.#transformer.view_to_data(pixel_position);
+
+        console.log(F + ": [INTERPI] new pixel_position" +
+            " [" + pixel_position.x + ", " + pixel_position.y + "]" +
             " transformed to confirmed_target" +
             " [" + confirmed_target.x + ", " + confirmed_target.y + "]");
 
         // Notify pixel_ux of requested change in position.
         this.#pixel_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
 
-        // Tell pixel_ux to send change to the database.
-        this.#pixel_ux.update_confirmed_target();
-
         // Mark image usable.
-        this._handle_is_usable_change(true)
+        this._send_update(true, confirmed_target)
 
     } // end method
 
@@ -225,7 +255,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         var F = "echolocator__ImageEditUx::_handle_canvas_right_click";
 
         // Mark image unusable.
-        this._handle_is_usable_change(false)
+        this._send_update(false)
 
     } // end method
 
