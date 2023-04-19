@@ -8,6 +8,7 @@ from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 
 # Utilities.
 from dls_utilpack.callsign import callsign
+from dls_utilpack.describe import describe
 from dls_utilpack.require import require
 
 # Basic things.
@@ -292,6 +293,14 @@ class Aiohttp(Thing, BaseAiohttp):
             opaque, request_dict, Cookies.IMAGE_LIST_UX
         )
 
+        visit = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.IMAGE_LIST_UX,
+            "visit",
+            request_dict.get("visit"),
+            None,
+        )
+
         barcode_filter = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_LIST_UX,
@@ -334,6 +343,7 @@ class Aiohttp(Thing, BaseAiohttp):
             crystal_well_models
         )
         filters = {
+            "visit": visit,
             "barcode_filter": barcode_filter,
             "should_show_only_undecided": should_show_only_undecided,
         }
@@ -396,7 +406,8 @@ class Aiohttp(Thing, BaseAiohttp):
 
         visit = visit.strip()
         if visit == "":
-            raise RuntimeError("please enter a visit")
+            response = {"error": "blank visit was given"}
+            return response
 
         barcode_filter = request_dict.get("barcode_filter")
 
@@ -407,11 +418,14 @@ class Aiohttp(Thing, BaseAiohttp):
 
         barcode_filter = barcode_filter.strip()
         if barcode_filter == "":
-            raise RuntimeError("please enter a barcode")
+            response = {"error": "blank barcode was given"}
+            return response
 
         # Get a filter for wells on the plate with this barcode.
         crystal_well_filter = CrystalWellFilterModel(
-            barcode=barcode_filter, is_decided=True
+            barcode=barcode_filter,
+            is_decided=True,
+            is_usable=True,
         )
 
         # Fetch the list of wells for this barcode.
@@ -433,15 +447,23 @@ class Aiohttp(Thing, BaseAiohttp):
             )
 
         # Use the stem from the rockmaker Luigi pipeline to form the csv filename.
+        logger.debug(describe("self.__export_directory", self.__export_directory))
+        logger.debug(describe("self.__export_subdirectory", self.__export_subdirectory))
+        logger.debug(describe("visit", visit))
         xchem_directory = Path(get_xchem_directory(self.__export_directory, visit))
+        logger.debug(describe("xchem_directory", xchem_directory))
         targets_directory = xchem_directory / self.__export_subdirectory
+        logger.debug(describe("targets_directory", targets_directory))
 
         filename = (
             targets_directory
             / f"{crystal_plate_models[0].rockminer_collected_stem}_targets.csv"
         )
+        logger.debug(describe("filename", filename))
 
-        directory = filename.parent
+        if not filename.parent.is_dir():
+            raise RuntimeError(f"the directory does not exist: {str(filename.parent)}")
+
         # directory.mkdir(parents=True, exist_ok=True)
 
         with open(filename, "w", newline="") as f:

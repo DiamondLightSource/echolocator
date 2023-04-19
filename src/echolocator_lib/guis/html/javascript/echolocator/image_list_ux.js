@@ -6,6 +6,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     EXPORT = "echolocator_guis::commands::export";
 
     #jquery_objects = {};
+    #visit = "undefined";
     #barcode_filter = "undefined";
     #should_show_only_undecided = "undefined";
 
@@ -24,11 +25,17 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         super.activate()
 
         this.#jquery_objects.$div = $(".T_composed", this.$interaction_parent);
+        this.#jquery_objects.$visit = $(".T_visit", this.$interaction_parent);
         this.#jquery_objects.$barcode_filter = $(".T_barcode_filter", this.$interaction_parent);
         this.#jquery_objects.$should_show_only_undecided = $(".T_should_show_only_undecided", this.$interaction_parent);
         this.#jquery_objects.$export_button = $(".T_export_button", this.$interaction_parent);
 
         var that = this;
+        this.#jquery_objects.$visit.change(
+            function (jquery_event_object) {
+                that._handle_filter_change(jquery_event_object);
+            });
+
         this.#jquery_objects.$barcode_filter.change(
             function (jquery_event_object) {
                 that._handle_filter_change(jquery_event_object);
@@ -55,6 +62,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         json_object[this.COMMAND] = this.FETCH_IMAGE_LIST;
         json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME];
 
+        json_object["visit"] = this.#visit;
         json_object["barcode_filter"] = this.#barcode_filter;
         json_object["should_show_only_undecided"] = this.#should_show_only_undecided;
 
@@ -74,6 +82,10 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         var filters = response.filters;
         if (filters !== undefined) {
             var t;
+            t = filters["visit"];
+            if (t === undefined)
+                t = "";
+            this.#jquery_objects.$visit.val(t);
             t = filters["barcode_filter"];
             if (t === undefined)
                 t = "";
@@ -98,6 +110,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     _handle_filter_change(jquery_event_object) {
         var F = "echolocator__ImageListUx::_handle_filter_change"
 
+        this.#visit = this.#jquery_objects.$visit.val()
         this.#barcode_filter = this.#jquery_objects.$barcode_filter.val()
         this.#should_show_only_undecided = this.#jquery_objects.$should_show_only_undecided.prop("checked")
         this.request_update()
@@ -109,12 +122,14 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     _handle_export_clicked(jquery_event_object) {
         var F = "echolocator__ImageListUx::_handle_export_clicked"
 
+        this.#visit = this.#jquery_objects.$visit.val()
         this.#barcode_filter = this.#jquery_objects.$barcode_filter.val()
 
         // Enable no cookie for this request.
         var json_object = {}
         json_object[this.COMMAND] = this.EXPORT;
 
+        json_object["visit"] = this.#visit;
         json_object["barcode_filter"] = this.#barcode_filter;
 
         this.send(json_object);
