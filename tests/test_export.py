@@ -2,13 +2,9 @@ import csv
 import logging
 from pathlib import Path
 
-from bs4 import BeautifulSoup
-
 # API constants.
 from dls_servbase_lib.datafaces.context import Context as DlsServbaseDatafaceContext
-
-# Utilities.
-from dls_utilpack.describe import describe
+from dls_utilpack.visit import get_xchem_subdirectory
 
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
@@ -18,7 +14,7 @@ from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
 from echolocator_api.guis.context import Context as GuiClientContext
 
 # GUI constants.
-from echolocator_lib.guis.constants import Commands, Cookies, Keywords
+from echolocator_lib.guis.constants import Commands, Keywords
 
 # Server context creator.
 from echolocator_lib.guis.context import Context as GuiServerContext
@@ -103,7 +99,10 @@ class ExportTester(Base):
         await self.inject_plate(xchembku)
 
         self.__crystal_targets_directory = (
-            Path(self.__output_directory) / "exports/crystal-targets"
+            Path(self.__output_directory)
+            / "exports"
+            / get_xchem_subdirectory(self.visit)
+            / "crystal-targets"
         )
 
         self.__crystal_targets_directory.mkdir(parents=True)

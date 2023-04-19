@@ -141,6 +141,11 @@ class Aiohttp(Thing, BaseAiohttp):
                 self.specification(),
                 "export_directory",
             )
+            self.__export_subdirectory = require(
+                f"{callsign(self)} specification",
+                self.specification(),
+                "export_subdirectory",
+            )
 
         except Exception:
             raise RuntimeError(f"unable to start {callsign(self)} server coro")
