@@ -114,17 +114,28 @@ class echolocator__UxBase extends common__Base {
     // Handle the response failure if it comes.
     handle_ajax_failure(jqXHR, status, error_thrown) {
         var F = "echolocator__UxBase::handle_ajax_failure[" + this.plugin_link_name + "]";
+        // console.log(F + ": status \"" + status + "\"");
+        // console.log(F + ": error_thrown \"" + error_thrown + "\"");
+        // console.log(F + ": jqXHR.responseText \"" + jqXHR.responseText + "\"");
+        // console.log(F + ": jqXHR.statusText \"" + jqXHR.statusText + "\"");
+        // console.log(F + ": jqXHR.status \"" + jqXHR.status + "\"");
+        // console.log(F + ": jqXHR.getAllResponseHeaders() \"" + jqXHR.getAllResponseHeaders() + "\"");
 
+        if (status == "error") {
+            error_message = "the server is unreachable";
+        }
+        else {
 
-        var http_code = jqXHR.status;
-        var error_message = null;
+            var http_code = jqXHR.status;
+            var error_message = null;
 
-        if (error_thrown.name != undefined)
-            error_message = error_thrown.name + ": " + error_thrown.message;
-        else
-            error_message = error_thrown;
+            if (error_thrown.name != undefined)
+                error_message = error_thrown.name + ": " + error_thrown.message;
+            else
+                error_message = error_thrown;
 
-        error_message = "error " + http_code + " " + error_message + "\n" + jqXHR.responseText;
+            error_message = "error " + http_code + " " + error_message + "\n" + jqXHR.responseText;
+        }
 
         console.log(F + ": " + error_message);
 

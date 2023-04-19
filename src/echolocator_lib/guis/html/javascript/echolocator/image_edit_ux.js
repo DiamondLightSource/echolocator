@@ -265,6 +265,19 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     } // end method
 
     // -------------------------------------------------------------
+    // Handle an error response.
+
+    handle_ajax_failure(response, status, jqXHR) {
+        var F = "echolocator__ImageEditUx::handle_ajax_failure";
+
+        // Let the base class check for and display any error or confirmation in the response.
+        super.handle_ajax_failure(response, status, jqXHR);
+
+        this.#jquery_objects.$hide_when_no_image.hide();
+
+    } // end method
+
+    // -------------------------------------------------------------
     // Handle the response when it comes.
 
     handle_ajax_success(response, status, jqXHR) {
@@ -273,8 +286,10 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // Let the base class check for and display any error or confirmation in the response.
         var error_message = super.handle_ajax_success(response, status, jqXHR);
 
-        if (error_message !== null)
+        if (error_message !== null) {
+            this.#jquery_objects.$hide_when_no_image.hide();
             return;
+        }
 
         // Response is expected to contain the database record.
         var record = response.record;
@@ -282,7 +297,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         if (record === null) {
             if (response.confirmation === undefined) {
                 console.log(F + ": response record had value of null");
-                this.display_ajax_error("Please choose an image.");
+                this.display_ajax_error("no image has been selected from the image list tab");
             }
             this.#jquery_objects.$hide_when_no_image.hide();
             return;
