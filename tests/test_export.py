@@ -102,6 +102,12 @@ class ExportTester(Base):
 
         await self.inject_plate(xchembku)
 
+        self.__crystal_targets_directory = (
+            Path(self.__output_directory) / "exports/crystal-targets"
+        )
+
+        self.__crystal_targets_directory.mkdir(parents=True)
+
         await self.__export_initial()
 
         crystal_wells = []
@@ -123,6 +129,7 @@ class ExportTester(Base):
 
         request = {
             Keywords.COMMAND: Commands.EXPORT,
+            "visit": self.visit,
             "barcode_filter": self.barcode,
         }
 
@@ -136,10 +143,10 @@ class ExportTester(Base):
 
         # Check the csv file got written with no lines.
         csv = (
-            Path(self.__output_directory)
-            / "exports"
+            self.__crystal_targets_directory
             / f"{self.rockminer_collected_stem}_targets.csv"
         )
+
         assert csv.exists()
         assert csv.stat().st_size == 0
 
@@ -150,6 +157,7 @@ class ExportTester(Base):
 
         request = {
             Keywords.COMMAND: Commands.EXPORT,
+            "visit": self.visit,
             "barcode_filter": self.barcode,
         }
 
@@ -163,8 +171,7 @@ class ExportTester(Base):
 
         # Check the csv file got written.
         csv_path = (
-            Path(self.__output_directory)
-            / "exports"
+            self.__crystal_targets_directory
             / f"{self.rockminer_collected_stem}_targets.csv"
         )
         assert csv_path.exists()

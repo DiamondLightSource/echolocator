@@ -66,6 +66,7 @@ xchembku_dataface_specification: &XCHEMBKU_DATAFACE_SPECIFICATION
 echolocator_gui_specification:
     type: "echolocator_lib.guis.aiohttp"
     export_directory: "${output_directory}/exports"
+    export_subdirectory: "crystal-targets"
     type_specific_tbd:
         # The remote echolocator_gui server access.
         aiohttp_specification:

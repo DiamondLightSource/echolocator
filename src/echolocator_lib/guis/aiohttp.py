@@ -12,6 +12,7 @@ from dls_utilpack.require import require
 
 # Basic things.
 from dls_utilpack.thing import Thing
+from dls_utilpack.visit import get_xchem_directory
 
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
@@ -383,6 +384,15 @@ class Aiohttp(Thing, BaseAiohttp):
     # ----------------------------------------------------------------------------------------
     async def _export(self, opaque, request_dict):
 
+        visit = request_dict.get("visit")
+
+        if visit is None:
+            raise RuntimeError("visit not submitted with request (programming error)")
+
+        visit = visit.strip()
+        if visit == "":
+            raise RuntimeError("please enter a visit")
+
         barcode_filter = request_dict.get("barcode_filter")
 
         if barcode_filter is None:
@@ -418,10 +428,16 @@ class Aiohttp(Thing, BaseAiohttp):
             )
 
         # Use the stem from the rockmaker Luigi pipeline to form the csv filename.
-        filename = f"{self.__export_directory}/{crystal_plate_models[0].rockminer_collected_stem}_targets.csv"
+        xchem_directory = Path(get_xchem_directory(self.__export_directory, visit))
+        targets_directory = xchem_directory / self.__export_subdirectory
 
-        directory = Path(filename).parent
-        directory.mkdir(parents=True, exist_ok=True)
+        filename = (
+            targets_directory
+            / f"{crystal_plate_models[0].rockminer_collected_stem}_targets.csv"
+        )
+
+        directory = filename.parent
+        # directory.mkdir(parents=True, exist_ok=True)
 
         with open(filename, "w", newline="") as f:
             writer = csv.writer(f)
