@@ -15,8 +15,8 @@ class webviz__hair__Guide2 extends common__Base {
 
     // -------------------------------------------------------------
 
-    activate(raphael, color) {
-        var F = "webviz__hair__Guide2::activate";
+    activate(raphael, color, is_draggable) {
+        var F = "webviz__hair__Guide2[" + this.name + "]::activate";
 
         this._raphael = raphael
 
@@ -62,14 +62,15 @@ class webviz__hair__Guide2 extends common__Base {
         this._ball._group = this._group;
         this._ball._parent_object = this;
 
-        this._group.drag(this._drag_move, this._drag_start, this._drag_stop);
+        if (is_draggable)
+            this._group.drag(this._drag_move, this._drag_start, this._drag_stop);
 
-        console.log(F + " activated")
+        console.log(F + ": activated")
     } // end method
 
     // -------------------------------------------------------------
     set_box(settings) {
-        var F = "webviz__hair__Guide2::set_box";
+        var F = "webviz__hair__Guide2[" + this.name + "]::set_box";
 
         for (var k in settings) {
             var setting = settings[k];
@@ -109,7 +110,7 @@ class webviz__hair__Guide2 extends common__Base {
     // Returns the currents settings in a JSON-serializable structure.
 
     get() {
-        var F = "webviz__hair__Guide2::get";
+        var F = "webviz__hair__Guide2[" + this.name + "]::get";
 
         var settings = {};
 
@@ -134,9 +135,9 @@ class webviz__hair__Guide2 extends common__Base {
 
     // -------------------------------------------------------------
     _drag_start() {
-        var F = "webviz__hair__Guide2::_drag_start";
+        var F = "webviz__hair__Guide2[" + this._parent_object.name + "]::_drag_start";
 
-        console.log(F + " drag start")
+        console.log(F + ": drag start")
 
         // var keys = new Array();
         // for (var k in this)
@@ -152,11 +153,11 @@ class webviz__hair__Guide2 extends common__Base {
 
     // -------------------------------------------------------------
     _drag_stop() {
-        var F = "webviz__hair__Guide2::_drag_stop";
+        var F = "webviz__hair__Guide2[" + this._parent_object.name + "]::_drag_stop";
 
         // Not yet started the timeout?
         if (this.timeout === undefined) {
-            console.log(F + " drag stop");
+            console.log(F + ": drag stop");
             var that = this;
             // Notify listeners in separate thread.
             this.timeout = setTimeout(function () {
@@ -167,10 +168,10 @@ class webviz__hair__Guide2 extends common__Base {
 
     // -------------------------------------------------------------
     _trigger_change_event(event, detail) {
-        var F = "webviz__hair__Guide2::_trigger_change_event";
+        var F = "webviz__hair__Guide2[" + this.name + "]::_trigger_change_event";
 
         if (event == webviz__hair__Guide2__UserChangeEvent)
-            console.log(F + " triggering " + event);
+            console.log(F + ": triggering " + event);
 
         // Trigger an event that the index.js will use to coordinate cross-widget changes.
         var custom_event = new CustomEvent(event,

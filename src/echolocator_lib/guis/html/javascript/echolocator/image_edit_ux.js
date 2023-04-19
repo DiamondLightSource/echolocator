@@ -10,8 +10,10 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     #crystal_well_uuid = null;
     #record = null;
     #raphael = null;
+    #is_dragging = null;
     #transformer = null;
-    #pixel_ux = null;
+    #confirmed_target_ux = null;
+    #well_centroid_ux = null;
 
 
     constructor(runtime, plugin_link_name, $interaction_parent) {
@@ -34,6 +36,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // Make a raphael drawing object.
         // TODO: Make Raphael drawing object big enough for future jumbo-size images.
         this.#raphael = Raphael("raphael1_paper", 4000, 4000);
+
+        this.#is_dragging = false;
 
         // For transforming coordinates between data and view.
         this.#transformer = new webviz__Transformer(this.runtime);
@@ -61,10 +65,11 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             webviz__Spreader__SpreadEvent,
             function (event) { that.handle_spread_event(event); });
 
-        // Set up jquery event handling for DOM elements.
+        // A click on the "paper" <div> sets the target location, unless dragging.
         this.#jquery_objects.$raphael1_paper.click(
             function (jquery_event_object) {
-                that._handle_canvas_left_click(jquery_event_object);
+                if (!that.#is_dragging)
+                    that._handle_canvas_left_click(jquery_event_object);
             });
 
         // Disable context menu for right-click on the image.
@@ -73,6 +78,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             return false;
         });
 
+        // Set up jquery event handling for DOM elements.
         this.#jquery_objects.previous_button.click(
             function (jquery_event_object) {
                 console.log(F + ": clicked previous");
@@ -99,20 +105,43 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
                 that._handle_previous_or_next(1);
             });
 
-        this.#pixel_ux = new echolocator__PixelUx(
-            self.runtime,
-            "pixel",
-            $("#pixel_ux_interaction_parent"));
 
-        // User moves the crosshair, event comes from pixel_ux widget.
-        this.#pixel_ux.addEventListener(
+        // ----------------------------------------------------------
+        // Make the draggable crosshair for the target location.
+        this.#confirmed_target_ux = new echolocator__PixelUx(
+            self.runtime,
+            "confirmed_target",
+            this.$interaction_parent,
+            "yellowgreen",
+            true);
+
+        // Handle when user has finished moving the crosshair, event comes from pixel_ux widget.
+        this.#confirmed_target_ux.addEventListener(
             echolocator__PixelUx__UserChangeEvent,
-            function (event) { that._handle_pixel_ux_change_event(event); });
+            function (event) { that._handle_confirmed_target_ux_change_event(event); that.#is_dragging = false; });
+
+        // Handle when user is moving the crosshair.
+        this.#confirmed_target_ux.addEventListener(
+            echolocator__PixelUx__UserMotionEvent,
+            function (event) { that.#is_dragging = true; });
+
+        // ----------------------------------------------------------
+        // Make the crosshair for the well centroid, but it is not draggable.
+        this.#well_centroid_ux = new echolocator__PixelUx(
+            self.runtime,
+            "well_centroid",
+            this.$interaction_parent,
+            "lightblue",
+            false);
+
+        // ----------------------------------------------------------
 
         // Activate the spreader to react on window size changes.
         this.image1_spreader.activate($("#image1"), window);
 
-        this.#pixel_ux.activate(this.#raphael);
+        // Activate well_centroid first, so it lies "under" the confirmed target in case they overlap.
+        this.#well_centroid_ux.activate(this.#raphael);
+        this.#confirmed_target_ux.activate(this.#raphael);
 
         this.request_update()
     } // end method
@@ -175,15 +204,6 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             // Send request to update database immediately.
             this.send(json_object);
 
-            // if (!is_usable) {
-            //     // Notify pixel_ux of requested change in position.
-            //     // TODO: Combine usable change with position change into single ajax.
-            //     this.#pixel_ux.set_uuid(this.#crystal_well_uuid, { x: 10, y: 10 });
-
-            //     // Tell pixel_ux to send change to the database.
-            //     this.#pixel_ux.update_confirmed_target();
-            // }
-
             // Move to next image.
             this.request_update(1);
         }
@@ -205,8 +225,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     // Handle where the user has moved the crosshairs, event comes from pixel_ux widget.
     // Units are transformed to underlying image pixel target.
 
-    _handle_pixel_ux_change_event(pixel_ux__user_change_event) {
-        var F = "echolocator__ImageEditUx::_handle_pixel_ux_change_event";
+    _handle_confirmed_target_ux_change_event(pixel_ux__user_change_event) {
+        var F = "echolocator__ImageEditUx::_handle_confirmed_target_ux_change_event";
 
         var confirmed_target = pixel_ux__user_change_event.detail.target;
 
@@ -221,6 +241,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     _handle_canvas_left_click(jquery_event_object) {
         var F = "echolocator__ImageEditUx::_handle_canvas_left_click";
 
+        console.log(F + ": seeing canvas left click");
+
         var view_position = {
             x: jquery_event_object.offsetX,
             y: jquery_event_object.offsetY
@@ -230,7 +252,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         var confirmed_target = this.#transformer.view_to_data(view_position);
 
         // Notify pixel_ux of requested change in position.
-        this.#pixel_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
+        this.#confirmed_target_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
 
         // Mark image usable and save target location.
         this._send_update(true, confirmed_target)
@@ -345,7 +367,24 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         var confirmed_target = { x: x, y: y };
 
-        this.#pixel_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
+        this.#confirmed_target_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
+
+        // The the pixel ux about the crystal_well_uuid so it can be included in sending changes.
+        var x = record.well_centroid_x;
+        if (x === null)
+            x = record.auto_target_x;
+        if (x === null)
+            x = 10;
+
+        var y = record.well_centroid_y;
+        if (y === null)
+            y = record.auto_target_y;
+        if (y === null)
+            y = 10;
+
+        var well_centroid = { x: x, y: y };
+
+        this.#well_centroid_ux.set_uuid(this.#crystal_well_uuid, well_centroid);
 
         // Let the spreader calculate the available space for the image.
         // This will trigger a call to this.handle_spread_event().
@@ -388,7 +427,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.resize_image()
 
         // Tell pixel_ux to render under the new transformer.
-        this.#pixel_ux.render()
+        this.#confirmed_target_ux.render()
+        this.#well_centroid_ux.render()
 
     } // end method
 

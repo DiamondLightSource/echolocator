@@ -5,16 +5,20 @@ class echolocator__PixelUx extends echolocator__UxBase {
     UPDATE = "echolocator_guis::commands::update";
 
     #raphael = null;
+    #color = null;
+    #is_draggable = null;
     #transformer = null;
     #guide = null;
     #uuid = null;
     #target = null;
 
-    constructor(runtime, plugin_link_name, $interaction_parent, raphael) {
+    constructor(runtime, plugin_link_name, $interaction_parent, color, is_draggable) {
         super(runtime);
 
         this.plugin_link_name = plugin_link_name;
         this.$interaction_parent = $interaction_parent;
+        this.#color = color;
+        this.#is_draggable = is_draggable;
     }
 
     // -------------------------------------------------------------
@@ -41,7 +45,7 @@ class echolocator__PixelUx extends echolocator__UxBase {
             webviz__hair__Guide2__UserChangeEvent,
             function (event) { that.handle_guide_change_event(event); });
 
-        this.#guide.activate(this.#raphael, "yellowgreen");
+        this.#guide.activate(this.#raphael, this.#color, this.#is_draggable);
 
         // Set box to appear guaranteed on-screen somewhere.
         this.#guide.set_box({ position: { x: 110, y: 220 }, visible: true });
@@ -54,7 +58,7 @@ class echolocator__PixelUx extends echolocator__UxBase {
     // We will update the x and y as the guid moves.
 
     set_uuid(uuid, target) {
-        var F = "echolocator__PixelUx::set_uuid"
+        var F = "echolocator__PixelUx[" + this.plugin_link_name + "]::set_uuid"
 
         // Remember the image info.
         this.#uuid = uuid;
@@ -69,7 +73,7 @@ class echolocator__PixelUx extends echolocator__UxBase {
     // -----------------------------------------------------------------------
     // Render the viewable things according to the current tranformer settings.
     render(event) {
-        var F = "echolocator__PixelUx::render"
+        var F = "echolocator__PixelUx[" + this.plugin_link_name + "]::render"
 
         console.log(F + ": rendering target [" + this.#target.x + ", " + this.#target.y + "]")
 
@@ -87,9 +91,15 @@ class echolocator__PixelUx extends echolocator__UxBase {
     // -----------------------------------------------------------------------
     // Guide is moving (dragging).
     handle_guide_motion_event(event) {
-        var F = "echolocator__PixelUx::handle_guide_motion_event"
+        var F = "echolocator__PixelUx[" + this.plugin_link_name + "]::handle_guide_motion_event"
 
-        // console.log(F + " guide moving")
+        // Trigger an event that image_edit.js will use to avoid handling the click on the paper.
+        var custom_event = new CustomEvent(echolocator__PixelUx__UserMotionEvent,
+            {
+                detail: {}
+            });
+
+        this.dispatchEvent(custom_event);
 
     } // end method
 
@@ -98,7 +108,7 @@ class echolocator__PixelUx extends echolocator__UxBase {
     // Guide has changed (mouse up after dragging).
     // Also can be called by image_edit_ux after click on canvas.
     handle_guide_change_event(event) {
-        var F = "echolocator__PixelUx::handle_guide_change_event"
+        var F = "echolocator__PixelUx[" + this.plugin_link_name + "]::handle_guide_change_event"
 
         console.log(F + " guide changed")
 
