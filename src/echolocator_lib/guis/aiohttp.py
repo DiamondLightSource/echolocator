@@ -15,6 +15,11 @@ from dls_utilpack.require import require
 from dls_utilpack.thing import Thing
 from dls_utilpack.visit import get_xchem_directory
 
+# The model which describes the crystal wells to be injected into soakdb3.
+from soakdb3_api.models.crystal_well_model import (
+    CrystalWellModel as Soakdb3CrystalWellModel,
+)
+
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
 from xchembku_api.models.crystal_plate_filter_model import CrystalPlateFilterModel
@@ -446,18 +451,20 @@ class Aiohttp(Thing, BaseAiohttp):
                 f"no plate for barcode {barcode_filter} (database integrity error)"
             )
 
+        crystal_plate_model = crystal_plate_models[0]
+
         # Use the stem from the rockmaker Luigi pipeline to form the csv filename.
         logger.debug(describe("self.__export_directory", self.__export_directory))
         logger.debug(describe("self.__export_subdirectory", self.__export_subdirectory))
         logger.debug(describe("visit", visit))
-        xchem_directory = Path(get_xchem_directory(self.__export_directory, visit))
-        logger.debug(describe("xchem_directory", xchem_directory))
-        targets_directory = xchem_directory / self.__export_subdirectory
+        visit_directory = Path(get_xchem_directory(self.__export_directory, visit))
+        logger.debug(describe("xchem_directory", visit_directory))
+        targets_directory = visit_directory / self.__export_subdirectory
         logger.debug(describe("targets_directory", targets_directory))
 
         filename = (
             targets_directory
-            / f"{crystal_plate_models[0].rockminer_collected_stem}_targets.csv"
+            / f"{crystal_plate_model.rockminer_collected_stem}_targets.csv"
         )
         logger.debug(describe("filename", filename))
 
@@ -479,6 +486,23 @@ class Aiohttp(Thing, BaseAiohttp):
         response = {
             "confirmation": f"exported {len(crystal_well_models)} rows to {filename}"
         }
+
+        soakdb3_crystal_well_models = []
+        for m in crystal_well_models:
+            soakdb3_crystal_well_models.append(
+                Soakdb3CrystalWellModel(
+                    LabVisit=visit,
+                    CrystalPlate=crystal_plate_model.rockminer_collected_stem,
+                    CrystalWell=m.position,
+                    EchoX=m.echo_coordinate_x,
+                    EchoY=m.echo_coordinate_y,
+                )
+            )
+
+            # Append well records to soakdb3 database.
+            await self.__xchembku.append_soakdb3_crystal_wells(
+                str(visit_directory), soakdb3_crystal_well_models
+            )
 
         return response
 

@@ -34,7 +34,7 @@ class Base:
         self.visit = "cm00001-1"
         self.barcode = "98ab"
         self.crystal_plate_uuid = None
-        self.rockminer_collected_stem = None
+        self.rockminer_collected_stem = "98ab_2021-09-14_RI1000-0276-3drop"
 
     def main(self, constants, configuration_file, output_directory):
         """

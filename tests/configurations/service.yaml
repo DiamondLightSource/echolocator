@@ -32,10 +32,39 @@ logging_settings:
 external_access_bits:
     dls_servbase_dataface_server: &DLS_SERVBASE_DATAFACE_SERVER http://*:27620
     dls_servbase_dataface_client: &DLS_SERVBASE_DATAFACE_CLIENT http://localhost:27620
-    dataface_port: &DATAFACE_PORT 27621
     echolocator_gui_server: &ECHOLOCATOR_GUI_SERVER http://*:27622
     echolocator_gui_client: &ECHOLOCATOR_GUI_CLIENT http://127.0.0.1:27622
 
+# -----------------------------------------------------------------------------
+# The soakdb3 dataface via direct.
+soakdb3_dataface_specification: &SOAKDB3_DATAFACE_SPECIFICATION
+    type: "soakdb3_lib.datafaces.aiosqlite"
+    type_specific_tbd:
+        visitid_mappings:
+            - action: "regex_replace"
+              pattern: "^[Cc][:]"
+              replace: ""
+            - action: "regex_replace"
+              pattern: "^[Yy][:]"
+              replace: "/dls/labxchem/"
+        database:
+            type: "soakdb3_lib.databases.aiosqlite"
+            filename: "set by code"
+            backup_directory: "set by code"
+            log_level: "WARNING"
+
+# -----------------------------------------------------------------------------
+
+# The xchembku_dataface direct access.
+xchembku_dataface_specification: &XCHEMBKU_DATAFACE_SPECIFICATION
+    type: "xchembku_lib.xchembku_datafaces.direct"
+    soakdb3_dataface_specification: *SOAKDB3_DATAFACE_SPECIFICATION
+    database:
+        type: "xchembku_lib.xchembku_databases.normsql"
+        filename: "${output_directory}/xchembku.sqlite"
+        log_level: "WARNING"
+
+# -----------------------------------------------------------------------------
 # The dls_servbase_dataface client/server composite.
 dls_servbase_dataface_specification: &DLS_SERVBASE_DATAFACE_SPECIFICATION
     type: "dls_servbase_lib.datafaces.aiohttp"
@@ -54,14 +83,7 @@ dls_servbase_dataface_specification: &DLS_SERVBASE_DATAFACE_SPECIFICATION
     context:
         start_as: process
 
-# The xchembku_dataface direct access.
-xchembku_dataface_specification: &XCHEMBKU_DATAFACE_SPECIFICATION
-    type: "xchembku_lib.xchembku_datafaces.direct"
-    database:
-        type: "xchembku_lib.xchembku_databases.normsql"
-        filename: "${output_directory}/xchembku.sqlite"
-        log_level: "WARNING"
-
+# -----------------------------------------------------------------------------
 # The echolocator_gui specification.
 echolocator_gui_specification:
     type: "echolocator_lib.guis.aiohttp"

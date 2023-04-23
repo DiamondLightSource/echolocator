@@ -2,9 +2,13 @@ import csv
 import logging
 from pathlib import Path
 
+# Base class for the tester.
 # API constants.
 from dls_servbase_lib.datafaces.context import Context as DlsServbaseDatafaceContext
 from dls_utilpack.visit import get_xchem_subdirectory
+
+# The service process startup/teardown context.
+from soakdb3_lib.datafaces.context import Context as Soakdb3DatafaceServerContext
 
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
@@ -53,6 +57,16 @@ class ExportTester(Base):
         multiconf = self.get_multiconf()
         multiconf_dict = await multiconf.load()
 
+        # Reference the dict entry for the soakdb3 dataface.
+        soakdb3_dataface_specification = multiconf_dict[
+            "soakdb3_dataface_specification"
+        ]
+
+        # Make the soakdb3 server context.
+        soakdb3_server_context = Soakdb3DatafaceServerContext(
+            soakdb3_dataface_specification
+        )
+
         # Reference the dict entry for the xchembku dataface.
         xchembku_dataface_specification = multiconf_dict[
             "xchembku_dataface_specification"
@@ -77,33 +91,36 @@ class ExportTester(Base):
         # Make the client context.
         gui_client_context = GuiClientContext(gui_specification)
 
-        # Start the client context for the direct access to the xchembku.
-        async with xchembku_client_context:
-            # Start the dataface the gui uses for cookies.
-            async with servbase_dataface_context:
-                # Start the gui client context.
-                async with gui_client_context:
-                    # And the gui server context which starts the coro.
-                    async with gui_server_context:
-                        await self.__run_part1(constants, output_directory)
+        # Start the soakdb3 server context which includes the direct or network-addressable service.
+        async with soakdb3_server_context:
+            # Start the client context for the direct access to the xchembku.
+            async with xchembku_client_context:
+                # Start the dataface the gui uses for cookies.
+                async with servbase_dataface_context:
+                    # Start the gui client context.
+                    async with gui_client_context:
+                        # And the gui server context which starts the coro.
+                        async with gui_server_context:
+                            await self.__run_part1(constants, output_directory)
 
     # ----------------------------------------------------------------------------------------
 
     async def __run_part1(self, constants, output_directory):
         """ """
         # Reference the xchembku object which the context has set up as the default.
-        xchembku = xchembku_datafaces_get_default()
+        self.__xchembku = xchembku_datafaces_get_default()
 
         self.__output_directory = output_directory
 
-        await self.inject_plate(xchembku)
+        await self.inject_plate(self.__xchembku)
 
-        self.__crystal_targets_directory = (
+        self.__visit_directory = (
             Path(self.__output_directory)
             / "exports"
             / get_xchem_subdirectory(self.visit)
-            / "crystal-targets"
         )
+
+        self.__crystal_targets_directory = self.__visit_directory / "crystal-targets"
 
         self.__crystal_targets_directory.mkdir(parents=True)
 
@@ -112,12 +129,12 @@ class ExportTester(Base):
         crystal_wells = []
 
         # Inject some wells.
-        crystal_wells.append(await self.inject(xchembku, False, False))
-        crystal_wells.append(await self.inject(xchembku, True, True))
-        crystal_wells.append(await self.inject(xchembku, True, False))
-        crystal_wells.append(await self.inject(xchembku, True, True))
-        crystal_wells.append(await self.inject(xchembku, True, True))
-        crystal_wells.append(await self.inject(xchembku, True, False))
+        crystal_wells.append(await self.inject(self.__xchembku, False, False))
+        crystal_wells.append(await self.inject(self.__xchembku, True, True))
+        crystal_wells.append(await self.inject(self.__xchembku, True, False))
+        crystal_wells.append(await self.inject(self.__xchembku, True, True))
+        crystal_wells.append(await self.inject(self.__xchembku, True, True))
+        crystal_wells.append(await self.inject(self.__xchembku, True, False))
 
         await self.__export_wells(crystal_wells)
 
@@ -199,3 +216,18 @@ class ExportTester(Base):
         assert rows[2][0] == "05A_1"
         assert int(rows[2][1]) == 102
         assert int(rows[2][2]) == 3
+
+        # Check the results stored in soakdbb3, there should be no change to the first ones.
+        queried_models = await self.__xchembku.fetch_soakdb3_crystal_wells(
+            str(self.__visit_directory)
+        )
+        assert len(queried_models) == 3
+        assert queried_models[0].CrystalWell == "02A_1"
+        assert int(queried_models[0].EchoX) == -198
+        assert int(queried_models[0].EchoY) == -297
+        assert queried_models[1].CrystalWell == "04A_1"
+        assert int(queried_models[1].EchoX) == 2
+        assert int(queried_models[1].EchoY) == -97
+        assert queried_models[2].CrystalWell == "05A_1"
+        assert int(queried_models[2].EchoX) == 102
+        assert int(queried_models[2].EchoY) == 3
