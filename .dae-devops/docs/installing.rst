@@ -1,5 +1,5 @@
 .. # ********** Please don't edit this file!
-.. # ********** It has been generated automatically by dae_devops version 0.5.1.
+.. # ********** It has been generated automatically by dae_devops version 0.5.2.
 .. # ********** For repository_name echolocator
 
 Installing
@@ -40,4 +40,4 @@ You can check the version that has been installed by typing::
     $ echolocator --version
     $ echolocator --version-json
 
-.. # dae_devops_fingerprint 3b5d52d009337767488822fafe22e1e7
+.. # dae_devops_fingerprint c6472f1053e4ee44f3e70cc67c9fbddd

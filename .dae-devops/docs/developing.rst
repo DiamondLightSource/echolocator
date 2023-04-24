@@ -1,5 +1,5 @@
 .. # ********** Please don't edit this file!
-.. # ********** It has been generated automatically by dae_devops version 0.5.1.
+.. # ********** It has been generated automatically by dae_devops version 0.5.2.
 .. # ********** For repository_name echolocator
 
 Developing
@@ -36,4 +36,4 @@ If you plan to modify the docs, you will need to::
     
 
 
-.. # dae_devops_fingerprint c3acd7bd04d4c567174c7ba12f90efb0
+.. # dae_devops_fingerprint 8802592ab610cd9de3e657aeacb9c8c1

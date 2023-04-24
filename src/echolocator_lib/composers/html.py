@@ -1,19 +1,17 @@
 import html
 import logging
-import re
 from pathlib import Path
-from typing import Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
 import numpy as np
 
 # Base class for generic things.
 from dls_utilpack.thing import Thing
+
+# Models which we can compose.
 from xchembku_api.models.crystal_well_needing_droplocation_model import (
     CrystalWellNeedingDroplocationModel,
 )
-
-# Database record field names coming from database fields.
-from echolocator_api.databases.constants import ImageFieldnames
 
 # Class to do the work using prettytable.
 from echolocator_lib.composers.prettyhelper import PrettyHelper
@@ -41,7 +39,7 @@ class Html(Thing):
         self.__indent = 0
 
     # ----------------------------------------------------------------------------------------
-    def compose_image_list(self, models: [CrystalWellNeedingDroplocationModel]):
+    def compose_image_list(self, models: List[CrystalWellNeedingDroplocationModel]):
         """
         Compose the image list as an html table.
         """

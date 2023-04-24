@@ -179,14 +179,14 @@ class Aiohttp(Thing, BaseAiohttp):
     async def dispatch(self, request_dict, opaque):
         """"""
 
+        command = require("request json", request_dict, Keywords.COMMAND)
+
         # Having no xchembku client reference means we must be shutting down.
         if self.__xchembku is None:
             raise RuntimeError(
                 "refusing to execute command %s because server is shutting down"
                 % (command)
             )
-
-        command = require("request json", request_dict, Keywords.COMMAND)
 
         if command == Commands.LOAD_TABS:
             return await self._load_tabs(opaque, request_dict)
