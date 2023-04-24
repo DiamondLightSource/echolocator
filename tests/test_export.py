@@ -116,11 +116,13 @@ class ExportTester(Base):
 
         self.__visit_directory = (
             Path(self.__output_directory)
-            / "exports"
+            / "labxchem"
             / get_xchem_subdirectory(self.visit)
         )
 
-        self.__crystal_targets_directory = self.__visit_directory / "crystal-targets"
+        self.__crystal_targets_directory = (
+            self.__visit_directory / "processing/lab36/crystal-targets"
+        )
 
         self.__crystal_targets_directory.mkdir(parents=True)
 
@@ -219,7 +221,7 @@ class ExportTester(Base):
 
         # Check the results stored in soakdbb3, there should be no change to the first ones.
         queried_models = await self.__xchembku.fetch_soakdb3_crystal_wells(
-            str(self.__visit_directory)
+            str(self.__visit_directory / "processing")
         )
         assert len(queried_models) == 3
         assert queried_models[0].CrystalWell == "02A_1"

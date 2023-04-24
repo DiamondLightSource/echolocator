@@ -87,8 +87,8 @@ dls_servbase_dataface_specification: &DLS_SERVBASE_DATAFACE_SPECIFICATION
 # The echolocator_gui specification.
 echolocator_gui_specification:
     type: "echolocator_lib.guis.aiohttp"
-    export_directory: "${output_directory}/exports"
-    export_subdirectory: "crystal-targets"
+    export_directory: "${output_directory}/labxchem"
+    export_subdirectory: "processing/lab36/crystal-targets"
     type_specific_tbd:
         # The remote echolocator_gui server access.
         aiohttp_specification:

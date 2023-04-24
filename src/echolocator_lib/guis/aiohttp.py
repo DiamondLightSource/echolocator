@@ -500,8 +500,9 @@ class Aiohttp(Thing, BaseAiohttp):
             )
 
             # Append well records to soakdb3 database.
-            await self.__xchembku.append_soakdb3_crystal_wells(
-                str(visit_directory), soakdb3_crystal_well_models
+            # Soakdb3 wants the "/processing" to be on the end of the visitid.
+            await self.__xchembku.inject_soakdb3_crystal_wells(
+                str(visit_directory / "processing"), soakdb3_crystal_well_models
             )
 
         return response
