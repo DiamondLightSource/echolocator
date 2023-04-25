@@ -2,10 +2,18 @@ import csv
 import logging
 from pathlib import Path
 
-# Base class for the tester.
 # API constants.
 from dls_servbase_lib.datafaces.context import Context as DlsServbaseDatafaceContext
 from dls_utilpack.visit import get_xchem_subdirectory
+
+# Soakdb3 database.
+from soakdb3_api.databases.constants import Tablenames
+
+# Client for direct access to the soakdb3 database for seeding it.
+from soakdb3_api.datafaces.context import Context as Soakdb3DatafaceClientContext
+from soakdb3_api.datafaces.datafaces import (
+    datafaces_get_default as soakdb3_datafaces_get_default,
+)
 
 # The service process startup/teardown context.
 from soakdb3_lib.datafaces.context import Context as Soakdb3DatafaceServerContext
@@ -67,6 +75,11 @@ class ExportTester(Base):
             soakdb3_dataface_specification
         )
 
+        # Make the soakdb3 CLIENT context.
+        soakdb3_client_context = Soakdb3DatafaceClientContext(
+            soakdb3_dataface_specification
+        )
+
         # Reference the dict entry for the xchembku dataface.
         xchembku_dataface_specification = multiconf_dict[
             "xchembku_dataface_specification"
@@ -93,20 +106,26 @@ class ExportTester(Base):
 
         # Start the soakdb3 server context which includes the direct or network-addressable service.
         async with soakdb3_server_context:
-            # Start the client context for the direct access to the xchembku.
-            async with xchembku_client_context:
-                # Start the dataface the gui uses for cookies.
-                async with servbase_dataface_context:
-                    # Start the gui client context.
-                    async with gui_client_context:
-                        # And the gui server context which starts the coro.
-                        async with gui_server_context:
-                            await self.__run_part1(constants, output_directory)
+            # Client for direct access to the soakdb3 database for seeding it.
+            async with soakdb3_client_context:
+                # Start the client context for the direct access to the xchembku.
+                async with xchembku_client_context:
+                    # Start the dataface the gui uses for cookies.
+                    async with servbase_dataface_context:
+                        # Start the gui client context.
+                        async with gui_client_context:
+                            # And the gui server context which starts the coro.
+                            async with gui_server_context:
+                                await self.__run_part1(constants, output_directory)
 
     # ----------------------------------------------------------------------------------------
 
     async def __run_part1(self, constants, output_directory):
         """ """
+
+        # Reference the soakdb3 dataface object which the context has set up as the default.
+        soakdb3_dataface = soakdb3_datafaces_get_default()
+
         # Reference the xchembku object which the context has set up as the default.
         self.__xchembku = xchembku_datafaces_get_default()
 
@@ -120,11 +139,35 @@ class ExportTester(Base):
             / get_xchem_subdirectory(self.visit)
         )
 
+        # Soakdb3 expects visitid to be a visit directory.
+        # This is because of how the soadkb3 VBA in the Excel works.
+        visitid = str(self.__visit_directory / "processing")
+
         self.__crystal_targets_directory = (
             self.__visit_directory / "processing/lab36/crystal-targets"
         )
 
         self.__crystal_targets_directory.mkdir(parents=True)
+
+        # ----------------------------------------------------------------
+        # Seed the necessary fields in the head table.
+
+        protein = "P1"
+        drop_volume = 3.1
+
+        head_record = {
+            "Protein": protein,
+            "DropVolume": drop_volume,
+        }
+
+        # Insert these fields as the (single) row in the soakdb3 database's head table.
+        await soakdb3_dataface.insert(  # type: ignore
+            visitid,
+            Tablenames.HEAD,
+            [head_record],
+        )
+
+        # ----------------------------------------------------------------
 
         await self.__export_initial()
 
