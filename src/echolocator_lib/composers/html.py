@@ -52,7 +52,7 @@ class Html(Thing):
             {"text": "Offset y (\u03BCm)", "class": "T_real_space_target_y"},
             {"text": "drop", "class": "T_is_drop"},
             {"text": "well centroid x,y", "class": "T_well_centroid_x_y"},
-            {"text": "auto x,y", "class": "T_auto_target__x_y"},
+            {"text": "auto x,y", "class": "T_auto_target_x_y"},
             {"text": "confirmed x,y", "class": "T_confirmed_target_x_y"},
             {"text": "echo coordinate x,y", "class": "T_echo_coordinate_x_y"},
             {"text": "use", "class": "T_is_usable"},
@@ -128,10 +128,16 @@ class Html(Thing):
                 t = "no"
             html_lines.append("<td class='T_is_drop'>" + str(t) + "</td>")
 
-            t = f"{model.well_centroid_x}, {model.well_centroid_y}"
+            if model.well_centroid_x is None or model.well_centroid_y is None:
+                t = "-"
+            else:
+                t = f"{model.well_centroid_x}, {model.well_centroid_y}"
             html_lines.append("<td class='T_well_centroid_x_y'>" + t + "</td>")
 
-            t = f"{model.auto_target_x}, {model.auto_target_y}"
+            if model.auto_target_x is None or model.auto_target_y is None:
+                t = "-"
+            else:
+                t = f"{model.auto_target_x}, {model.auto_target_y}"
             html_lines.append("<td class='T_auto_target_x_y'>" + t + "</td>")
 
             if model.confirmed_target_x is None or model.confirmed_target_y is None:
