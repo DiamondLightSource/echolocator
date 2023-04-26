@@ -78,6 +78,39 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             return false;
         });
 
+        // Key down anywhere in the tab.
+        this.$interaction_parent.on("keydown", function (jquery_event_object) {
+            // Don't pass the event onward, such as allowing the Tab key to select an element in the tab.
+            if (jquery_event_object.keyCode === 9) {
+                jquery_event_object.preventDefault();
+            }
+
+            console.log(F + ": [KYDOEV]" +
+                " jquery_event_object.keyCode " + jquery_event_object.keyCode +
+                " jquery_event_object.target " + that.node_description(jquery_event_object.target));
+
+            // Left arrow?
+            if (jquery_event_object.keyCode === 37) {
+                that._handle_previous_or_next(-1);
+            }
+            // Space bar?
+            if (jquery_event_object.keyCode === 32) {
+                that._send_update(true);
+            }
+            // X key?
+            if (jquery_event_object.keyCode === 88) {
+                that._send_update(false);
+            }
+            // - key?
+            if (jquery_event_object.keyCode === 189) {
+                that._send_update(null);
+            }
+            // Right arrow?
+            if (jquery_event_object.keyCode === 39) {
+                that._handle_previous_or_next(1);
+            }
+        });
+
         // Set up jquery event handling for DOM elements.
         this.#jquery_objects.previous_button.click(
             function (jquery_event_object) {
@@ -87,6 +120,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         this.#jquery_objects.accept_button.click(
             function (jquery_event_object) {
+                console.log(F + ": clicked accept");
                 that._send_update(true);
             });
 
@@ -429,6 +463,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // Tell pixel_ux to render under the new transformer.
         this.#confirmed_target_ux.render()
         this.#well_centroid_ux.render()
+
+        this.$interaction_parent.focus();
 
     } // end method
 

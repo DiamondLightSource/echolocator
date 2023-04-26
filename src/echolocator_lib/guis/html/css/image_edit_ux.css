@@ -1,1 +1,15 @@
 #image_edit_ux_interaction_parent {}
+
+/* We give focus to the image_edit when its tab is selected so we can capture keystrokes. */
+#image_edit_ux_interaction_parent:focus {
+    outline: none;
+}
+
+#image_edit_ux_interaction_parent BUTTON {
+    width: 220px;
+}
+
+#image_edit_ux_interaction_parent BUTTON .T_hint {
+    font-size: smaller;
+    font-style: italic;
+}
