@@ -227,7 +227,15 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             if (confirmed_target !== undefined) {
                 model["confirmed_target_x"] = confirmed_target.x;
                 model["confirmed_target_y"] = confirmed_target.y;
-
+            }
+            // Caller is confirming the drop target?
+            else if (is_usable === true) {
+                // But no previous drop target has been set?
+                if (this.#record["confirmed_target_x"] === null) {
+                    // Take the confirmed drop target from the auto target.
+                    model["confirmed_target_x"] = this.#record["auto_target_x"];
+                    model["confirmed_target_y"] = this.#record["auto_target_y"];
+                }
             }
 
             json_object["crystal_well_droplocation_model"] = model;
@@ -406,15 +414,11 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // The the pixel ux about the crystal_well_uuid so it can be included in sending changes.
         var x = record.well_centroid_x;
         if (x === null)
-            x = record.auto_target_x;
-        if (x === null)
-            x = 10;
+            x = 100;
 
         var y = record.well_centroid_y;
         if (y === null)
-            y = record.auto_target_y;
-        if (y === null)
-            y = 10;
+            y = 100;
 
         var well_centroid = { x: x, y: y };
         var image_size = {
