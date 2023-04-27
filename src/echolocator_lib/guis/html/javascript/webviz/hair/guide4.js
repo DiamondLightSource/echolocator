@@ -9,7 +9,7 @@ webviz__hair__Guide4.prototype = new maxiv__common__Base();
 webviz__hair__Guide4.prototype.constructor = webviz__hair__Guide4;
 
 // -------------------------------------------------------------------------------
-// constructor (functioning as a prototype, this constructor cannot take arguments)
+// Constructor.
 
 function webviz__hair__Guide4(page, name, classname) {
     // we are not doing a prototype construction?

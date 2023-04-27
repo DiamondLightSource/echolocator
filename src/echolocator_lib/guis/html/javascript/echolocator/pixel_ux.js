@@ -75,13 +75,13 @@ class echolocator__PixelUx extends echolocator__UxBase {
     render(event) {
         var F = "echolocator__PixelUx[" + this.plugin_link_name + "]::render"
 
-        console.log(F + ": rendering target [" + this.#target.x + ", " + this.#target.y + "]")
+        // console.log(F + ": [INTERPI] rendering target [" + this.#target.x + ", " + this.#target.y + "]")
 
         // Everything we send or receive from the outside is data coordinates.
         // Convert it to view coordinates which is are used by the guide.
         var view_position = this.#transformer.data_to_view(this.#target);
 
-        console.log(F + ": rendering to view position [" + view_position.x + ", " + view_position.y + "]")
+        // console.log(F + ": [INTERPI] rendering to view position [" + view_position.x + ", " + view_position.y + "]")
 
         // Move the guide to the canvas view location.
         this.#guide.set_box({ position: view_position })

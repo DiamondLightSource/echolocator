@@ -161,7 +161,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         // ----------------------------------------------------------
         // Make the crosshair for the well centroid, but it is not draggable.
-        this.#well_centroid_ux = new echolocator__PixelUx(
+        this.#well_centroid_ux = new echolocator__CentroidUx(
             self.runtime,
             "well_centroid",
             this.$interaction_parent,
@@ -417,8 +417,12 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             y = 10;
 
         var well_centroid = { x: x, y: y };
+        var image_size = {
+            w: record.width ? record.width : 100,
+            h: record.height ? record.height : 100
+        };
 
-        this.#well_centroid_ux.set_uuid(this.#crystal_well_uuid, well_centroid);
+        this.#well_centroid_ux.set(well_centroid, image_size);
 
         // Let the spreader calculate the available space for the image.
         // This will trigger a call to this.handle_spread_event().
