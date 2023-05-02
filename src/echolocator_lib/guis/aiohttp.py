@@ -479,8 +479,8 @@ class Aiohttp(Thing, BaseAiohttp):
             for m in crystal_well_models:
                 row = []
                 row.append(m.position)
-                row.append(m.echo_coordinate_x or "")
-                row.append(m.echo_coordinate_y or "")
+                row.append(m.confirmed_microns_x or "")
+                row.append(m.confirmed_microns_y or "")
                 writer.writerow(row)
 
         response = {
@@ -494,8 +494,8 @@ class Aiohttp(Thing, BaseAiohttp):
                     LabVisit=visit,
                     CrystalPlate=crystal_plate_model.rockminer_collected_stem,
                     CrystalWell=m.position,
-                    EchoX=m.echo_coordinate_x,
-                    EchoY=m.echo_coordinate_y,
+                    EchoX=m.confirmed_microns_x,
+                    EchoY=m.confirmed_microns_y,
                 )
             )
 

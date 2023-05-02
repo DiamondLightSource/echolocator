@@ -54,7 +54,7 @@ class Html(Thing):
             {"text": "well centroid x,y", "class": "T_well_centroid_x_y"},
             {"text": "auto x,y", "class": "T_auto_target_x_y"},
             {"text": "confirmed x,y", "class": "T_confirmed_target_x_y"},
-            {"text": "echo coordinate x,y", "class": "T_echo_coordinate_x_y"},
+            {"text": "echo coordinate x,y", "class": "T_confirmed_microns_x_y"},
             {"text": "use", "class": "T_is_usable"},
             {"text": "error", "class": "T_error"},
         ]
@@ -146,11 +146,11 @@ class Html(Thing):
                 t = f"{model.confirmed_target_x}, {model.confirmed_target_y}"
             html_lines.append("<td class='T_confirmed_target_x_y'>" + t + "</td>")
 
-            if model.echo_coordinate_x is None or model.echo_coordinate_y is None:
+            if model.confirmed_microns_x is None or model.confirmed_microns_y is None:
                 t = "-"
             else:
-                t = f"{model.echo_coordinate_x}, {model.echo_coordinate_y}"
-            html_lines.append("<td class='T_echo_coordinate_x_y'>" + t + "</td>")
+                t = f"{model.confirmed_microns_x}, {model.confirmed_microns_y}"
+            html_lines.append("<td class='T_confirmed_microns_x_y'>" + t + "</td>")
 
             t = model.is_usable
             if t is None:

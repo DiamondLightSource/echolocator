@@ -8,6 +8,11 @@ from dls_multiconf_lib.constants import ThingTypes as MulticonfThingTypes
 
 # Configurator.
 from dls_multiconf_lib.multiconfs import Multiconfs, multiconfs_set_default
+
+# Types which the CrystalPlateObjects factory can use to build an instance.
+from xchembku_api.crystal_plate_objects.constants import (
+    ThingTypes as CrystalPlateObjectThingTypes,
+)
 from xchembku_api.models.crystal_plate_model import CrystalPlateModel
 from xchembku_api.models.crystal_well_autolocation_model import (
     CrystalWellAutolocationModel,
@@ -100,6 +105,7 @@ class Base:
             barcode=self.barcode,
             rockminer_collected_stem=self.rockminer_collected_stem,
             visit=self.visit,
+            thing_type=CrystalPlateObjectThingTypes.SWISS3,
         )
 
         await xchembku.upsert_crystal_plates([crystal_plate_model])
