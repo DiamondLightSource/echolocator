@@ -154,6 +154,6 @@ class Base:
                 is_usable=True,
             )
 
-            await xchembku.originate_crystal_well_droplocations([t])
+            await xchembku.upsert_crystal_well_droplocations([t])
 
         return m

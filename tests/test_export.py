@@ -252,15 +252,16 @@ class ExportTester(Base):
             assert len(row) == 3
 
         # Check the well positions are those that are considered "confirmed".
+        # The position constants are fromt the Swiss3 microns computation.
         assert rows[0][0] == "02A_1"
-        assert int(rows[0][1]) == -198
-        assert int(rows[0][2]) == -297
+        assert int(rows[0][1]) == -561
+        assert int(rows[0][2]) == -842
         assert rows[1][0] == "04A_1"
-        assert int(rows[1][1]) == 2
-        assert int(rows[1][2]) == -97
+        assert int(rows[1][1]) == 6
+        assert int(rows[1][2]) == -274
         assert rows[2][0] == "05A_1"
-        assert int(rows[2][1]) == 102
-        assert int(rows[2][2]) == 3
+        assert int(rows[2][1]) == 289
+        assert int(rows[2][2]) == 9
 
         # Check the results stored in soakdbb3, there should be no change to the first ones.
         queried_models = await self.__xchembku.fetch_soakdb3_crystal_wells(
@@ -268,11 +269,11 @@ class ExportTester(Base):
         )
         assert len(queried_models) == 3
         assert queried_models[0].CrystalWell == "02A_1"
-        assert int(queried_models[0].EchoX) == -198
-        assert int(queried_models[0].EchoY) == -297
+        assert int(queried_models[0].EchoX) == -561
+        assert int(queried_models[0].EchoY) == -842
         assert queried_models[1].CrystalWell == "04A_1"
-        assert int(queried_models[1].EchoX) == 2
-        assert int(queried_models[1].EchoY) == -97
+        assert int(queried_models[1].EchoX) == 6
+        assert int(queried_models[1].EchoY) == -274
         assert queried_models[2].CrystalWell == "05A_1"
-        assert int(queried_models[2].EchoX) == 102
-        assert int(queried_models[2].EchoY) == 3
+        assert int(queried_models[2].EchoX) == 289
+        assert int(queried_models[2].EchoY) == 9

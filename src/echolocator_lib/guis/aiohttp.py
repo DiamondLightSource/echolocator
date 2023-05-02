@@ -414,6 +414,7 @@ class Aiohttp(Thing, BaseAiohttp):
             response = {"error": "blank visit was given"}
             return response
 
+        # Get the barcode string submitted from the html form.
         barcode_filter = request_dict.get("barcode_filter")
 
         if barcode_filter is None:
