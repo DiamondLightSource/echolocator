@@ -3,6 +3,7 @@ import logging
 import multiprocessing
 import threading
 from pathlib import Path
+from typing import List
 
 from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 
@@ -27,6 +28,9 @@ from xchembku_api.models.crystal_well_droplocation_model import (
     CrystalWellDroplocationModel,
 )
 from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
+from xchembku_api.models.crystal_well_needing_droplocation_model import (
+    CrystalWellNeedingDroplocationModel,
+)
 
 # Base class for an aiohttp server.
 from echolocator_lib.base_aiohttp import BaseAiohttp
@@ -200,8 +204,11 @@ class Aiohttp(Thing, BaseAiohttp):
         elif command == Commands.FETCH_IMAGE_LIST:
             return await self._fetch_image_list(opaque, request_dict)
 
-        elif command == Commands.EXPORT:
-            return await self._export(opaque, request_dict)
+        elif command == Commands.EXPORT_TO_SOAKDB3:
+            return await self._export_to_soakdb3(opaque, request_dict)
+
+        elif command == Commands.EXPORT_TO_CSV:
+            return await self._export_to_csv(opaque, request_dict)
 
         elif command == Commands.UPDATE:
             return await self._update(opaque, request_dict)
@@ -298,21 +305,14 @@ class Aiohttp(Thing, BaseAiohttp):
             opaque, request_dict, Cookies.IMAGE_LIST_UX
         )
 
-        visit = await self.set_or_get_cookie_content(
+        visit_filter = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_LIST_UX,
-            "visit",
-            request_dict.get("visit"),
+            "visit_filter",
+            request_dict.get("visit_filter"),
             None,
         )
 
-        barcode_filter = await self.set_or_get_cookie_content(
-            opaque,
-            Cookies.IMAGE_LIST_UX,
-            "barcode_filter",
-            request_dict.get("barcode_filter"),
-            None,
-        )
         should_show_only_undecided = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_LIST_UX,
@@ -322,12 +322,12 @@ class Aiohttp(Thing, BaseAiohttp):
         )
 
         logger.debug(
-            f"fetching image records, barcode_filter is '{barcode_filter}' and "
+            f"fetching image records, visit_filter is '{visit_filter}' and "
             f" should_show_only_undecided is '{should_show_only_undecided}'"
         )
 
         # Start a filter where we anchor on the given image.
-        filter = CrystalWellFilterModel(barcode=barcode_filter)
+        filter = CrystalWellFilterModel(visit=visit_filter)
 
         should_show_only_undecided = await self.set_or_get_cookie_content(
             opaque,
@@ -348,8 +348,7 @@ class Aiohttp(Thing, BaseAiohttp):
             crystal_well_models
         )
         filters = {
-            "visit": visit,
-            "barcode_filter": barcode_filter,
+            "visit_filter": visit_filter,
             "should_show_only_undecided": should_show_only_undecided,
         }
         response = {
@@ -402,39 +401,97 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _export(self, opaque, request_dict):
+    async def _export_to_soakdb3(self, opaque, request_dict):
 
-        visit = request_dict.get("visit")
+        visit_filter = request_dict.get("visit_filter")
 
-        if visit is None:
+        if visit_filter is None:
             raise RuntimeError("visit not submitted with request (programming error)")
 
-        visit = visit.strip()
-        if visit == "":
+        visit_filter = visit_filter.strip()
+        if visit_filter == "":
             response = {"error": "blank visit was given"}
             return response
 
-        # Get the barcode string submitted from the html form.
-        barcode_filter = request_dict.get("barcode_filter")
-
-        if barcode_filter is None:
-            raise RuntimeError(
-                "barcode_filter not submitted with request (programming error)"
-            )
-
-        barcode_filter = barcode_filter.strip()
-        if barcode_filter == "":
-            response = {"error": "blank barcode was given"}
-            return response
-
-        # Get a filter for wells on the plate with this barcode.
+        # Get a filter for wells we want to export.
         crystal_well_filter = CrystalWellFilterModel(
-            barcode=barcode_filter,
+            visit=visit_filter,
             is_decided=True,
             is_usable=True,
         )
 
-        # Fetch the list of wells for this barcode.
+        # Fetch the list of wells according to the filter.
+        crystal_well_models: List[
+            CrystalWellNeedingDroplocationModel
+        ] = await self.__xchembku.fetch_crystal_wells_needing_droplocation(
+            crystal_well_filter
+        )
+
+        # Export the crystal wells to the appropriate soakdb3 visit.
+        await self.__export_to_soakdb3_visit(visit_filter, crystal_well_models)
+
+        response = {
+            "confirmation": f"exported {len(crystal_well_models)} rows to soakdb3 visit {visit_filter}"
+        }
+
+        return response
+
+    # ----------------------------------------------------------------------------------------
+    async def __export_to_soakdb3_visit(
+        self, visit, crystal_well_models: List[CrystalWellNeedingDroplocationModel]
+    ) -> None:
+
+        # Fetch the plate record for visit.
+        crystal_plate_filter = CrystalPlateFilterModel(visit=visit)
+        crystal_plate_models = await self.__xchembku.fetch_crystal_plates(
+            crystal_plate_filter
+        )
+
+        if len(crystal_plate_models) == 0:
+            raise RuntimeError(
+                f'database integrity error: no crystal plate for visit "{visit}"'
+            )
+        crystal_plate_model = crystal_plate_models[0]
+
+        soakdb3_crystal_well_models = []
+        for m in crystal_well_models:
+            soakdb3_crystal_well_models.append(
+                Soakdb3CrystalWellModel(
+                    LabVisit=visit,
+                    CrystalPlate=crystal_plate_model.rockminer_collected_stem,
+                    CrystalWell=m.position,
+                    EchoX=m.confirmed_microns_x,
+                    EchoY=m.confirmed_microns_y,
+                )
+            )
+
+        visit_directory = Path(get_xchem_directory(self.__export_directory, visit))
+
+        logger.debug(
+            f"exporting {len(soakdb3_crystal_well_models)} to {str(visit_directory)}"
+        )
+        # Append well records to soakdb3 database.
+        # Soakdb3 wants the "/processing" to be on the end of the visitid.
+        await self.__xchembku.inject_soakdb3_crystal_wells(
+            str(visit_directory / "processing"), soakdb3_crystal_well_models
+        )
+
+    # ----------------------------------------------------------------------------------------
+    async def _export_to_csv(self, opaque, request_dict):
+
+        visit_filter = request_dict.get("visit_filter")
+
+        if visit_filter is not None:
+            visit_filter = visit_filter.strip()
+
+        # Get a filter for wells on the plate with this barcode.
+        crystal_well_filter = CrystalWellFilterModel(
+            visit=visit_filter,
+            is_decided=True,
+            is_usable=True,
+        )
+
+        # Fetch the list of wells according to the filter.
         crystal_well_models = (
             await self.__xchembku.fetch_crystal_wells_needing_droplocation(
                 crystal_well_filter
@@ -457,8 +514,10 @@ class Aiohttp(Thing, BaseAiohttp):
         # Use the stem from the rockmaker Luigi pipeline to form the csv filename.
         logger.debug(describe("self.__export_directory", self.__export_directory))
         logger.debug(describe("self.__export_subdirectory", self.__export_subdirectory))
-        logger.debug(describe("visit", visit))
-        visit_directory = Path(get_xchem_directory(self.__export_directory, visit))
+        logger.debug(describe("visit", visit_filter))
+        visit_directory = Path(
+            get_xchem_directory(self.__export_directory, visit_filter)
+        )
         logger.debug(describe("xchem_directory", visit_directory))
         targets_directory = visit_directory / self.__export_subdirectory
         logger.debug(describe("targets_directory", targets_directory))
@@ -492,7 +551,7 @@ class Aiohttp(Thing, BaseAiohttp):
         for m in crystal_well_models:
             soakdb3_crystal_well_models.append(
                 Soakdb3CrystalWellModel(
-                    LabVisit=visit,
+                    LabVisit=visit_filter,
                     CrystalPlate=crystal_plate_model.rockminer_collected_stem,
                     CrystalWell=m.position,
                     EchoX=m.confirmed_microns_x,

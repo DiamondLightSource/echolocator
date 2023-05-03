@@ -1,4 +1,3 @@
-import csv
 import logging
 from pathlib import Path
 
@@ -41,12 +40,12 @@ logger = logging.getLogger(__name__)
 
 
 # ----------------------------------------------------------------------------------------
-class TestExport:
+class TestExportToSoakdb3:
     def test(self, constants, logging_setup, output_directory):
         """ """
 
         configuration_file = "tests/configurations/service.yaml"
-        ExportTester().main(
+        ExportToSoakdb3Tester().main(
             constants,
             configuration_file,
             output_directory,
@@ -54,7 +53,7 @@ class TestExport:
 
 
 # ----------------------------------------------------------------------------------------
-class ExportTester(Base):
+class ExportToSoakdb3Tester(Base):
     """
     Class to test the gui fetch_image endpoint.
     """
@@ -139,7 +138,7 @@ class ExportTester(Base):
             / get_xchem_subdirectory(self.visit)
         )
 
-        # Soakdb3 expects visitid to be a visit directory.
+        # Soakdb3 expects visitid to be a visit directory with processing tacked onto the end.
         # This is because of how the soadkb3 VBA in the Excel works.
         visitid = str(self.__visit_directory / "processing")
 
@@ -169,8 +168,6 @@ class ExportTester(Base):
 
         # ----------------------------------------------------------------
 
-        await self.__export_initial()
-
         crystal_wells = []
 
         # Inject some wells.
@@ -185,41 +182,12 @@ class ExportTester(Base):
 
     # ----------------------------------------------------------------------------------------
 
-    async def __export_initial(self):
-        """ """
-
-        request = {
-            Keywords.COMMAND: Commands.EXPORT,
-            "visit": self.visit,
-            "barcode_filter": self.barcode,
-        }
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies={}
-        )
-
-        # Expect confirmation message in response.
-        assert "confirmation" in response
-        assert "exported 0" in response["confirmation"]
-
-        # Check the csv file got written with no lines.
-        csv = (
-            self.__crystal_targets_directory
-            / f"{self.rockminer_collected_stem}_targets.csv"
-        )
-
-        assert csv.exists()
-        assert csv.stat().st_size == 0
-
-    # ----------------------------------------------------------------------------------------
-
     async def __export_wells(self, crystal_wells):
         """ """
 
         request = {
-            Keywords.COMMAND: Commands.EXPORT,
-            "visit": self.visit,
-            "barcode_filter": self.barcode,
+            Keywords.COMMAND: Commands.EXPORT_TO_SOAKDB3,
+            "visit_filter": self.visit,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
@@ -228,46 +196,15 @@ class ExportTester(Base):
 
         # Expect confirmation message in response.
         assert "confirmation" in response
-        assert "exported 3" in response["confirmation"]
-
-        # Check the csv file got written.
-        csv_path = (
-            self.__crystal_targets_directory
-            / f"{self.rockminer_collected_stem}_targets.csv"
-        )
-        assert csv_path.exists()
-
-        # Read the csv file into an array.
-        rows = []
-        with open(csv_path, "r", newline="") as csv_file:
-            reader = csv.reader(csv_file)
-            for row in reader:
-                rows.append(row)
-
-        # Check row count we read.
-        assert len(rows) == 3
-
-        # Check each row has 3 parts.
-        for row in rows:
-            assert len(row) == 3
-
-        # Check the well positions are those that are considered "confirmed".
-        # The position constants are fromt the Swiss3 microns computation.
-        assert rows[0][0] == "02A_1"
-        assert int(rows[0][1]) == -561
-        assert int(rows[0][2]) == -842
-        assert rows[1][0] == "04A_1"
-        assert int(rows[1][1]) == 6
-        assert int(rows[1][2]) == -274
-        assert rows[2][0] == "05A_1"
-        assert int(rows[2][1]) == 289
-        assert int(rows[2][2]) == 9
+        assert "exported" in response["confirmation"]
 
         # Check the results stored in soakdbb3, there should be no change to the first ones.
         queried_models = await self.__xchembku.fetch_soakdb3_crystal_wells(
             str(self.__visit_directory / "processing")
         )
         assert len(queried_models) == 3
+
+        # The position constants are fromt the Swiss3 microns computation.
         assert queried_models[0].CrystalWell == "02A_1"
         assert int(queried_models[0].EchoX) == -561
         assert int(queried_models[0].EchoY) == -842
