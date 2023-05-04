@@ -124,16 +124,16 @@ class ExportTester(Base):
         crystal_wells.append(await self.inject(self.__xchembku, True, True))
         crystal_wells.append(await self.inject(self.__xchembku, True, False))
 
-        # # Inject second plate.
-        # await self.inject_plate(self.__xchembku)
+        # Inject second plate.
+        await self.inject_plate(self.__xchembku)
 
         # Inject some more wells on the second plate.
-        # crystal_wells.append(await self.inject(self.__xchembku, False, False))
-        # crystal_wells.append(await self.inject(self.__xchembku, True, True))
-        # crystal_wells.append(await self.inject(self.__xchembku, True, False))
-        # crystal_wells.append(await self.inject(self.__xchembku, True, True))
-        # crystal_wells.append(await self.inject(self.__xchembku, True, True))
-        # crystal_wells.append(await self.inject(self.__xchembku, True, False))
+        crystal_wells.append(await self.inject(self.__xchembku, False, False))
+        crystal_wells.append(await self.inject(self.__xchembku, True, True))
+        crystal_wells.append(await self.inject(self.__xchembku, True, False))
+        crystal_wells.append(await self.inject(self.__xchembku, True, True))
+        crystal_wells.append(await self.inject(self.__xchembku, True, True))
+        crystal_wells.append(await self.inject(self.__xchembku, True, False))
 
         await self.__export_wells(crystal_wells)
 
@@ -151,11 +151,25 @@ class ExportTester(Base):
             request, cookies={}
         )
 
+        from dls_utilpack.describe import describe
+
+        logger.debug(describe("response", response))
+
         # Expect confirmation message in response.
         assert "confirmation" in response
+        # There will be two of "exported 3" since there are two plates.
         assert "exported 3" in response["confirmation"]
+        # The confirmation should say what files got written.
+        assert (
+            self.crystal_plate_models[0].rockminer_collected_stem
+            in response["confirmation"]
+        )
+        assert (
+            self.crystal_plate_models[1].rockminer_collected_stem
+            in response["confirmation"]
+        )
 
-        # Check the csv file got written.
+        # Check the first csv file got written.
         csv_path = (
             self.__crystal_targets_directory
             / f"{self.crystal_plate_models[0].rockminer_collected_stem}_targets.csv"
@@ -187,3 +201,25 @@ class ExportTester(Base):
         assert rows[2][0] == "05A_1"
         assert int(rows[2][1]) == 289
         assert int(rows[2][2]) == 9
+
+        # ----------------------------------------------------------------------
+        # Check the second csv file got written.
+        csv_path = (
+            self.__crystal_targets_directory
+            / f"{self.crystal_plate_models[1].rockminer_collected_stem}_targets.csv"
+        )
+        assert csv_path.exists()
+
+        # Read the csv file into an array.
+        rows = []
+        with open(csv_path, "r", newline="") as csv_file:
+            reader = csv.reader(csv_file)
+            for row in reader:
+                rows.append(row)
+
+        # Check row count we read.
+        assert len(rows) == 3
+
+        # Check each row has 3 parts.
+        for row in rows:
+            assert len(row) == 3

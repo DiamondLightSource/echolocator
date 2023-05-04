@@ -507,23 +507,26 @@ class Aiohttp(Thing, BaseAiohttp):
             crystal_well_filter
         )
 
-        barcodes_crystal_well_models = {}
+        # Group the wells by the plate they belong to.
+        plates_crystal_well_models = {}
         for crystal_well_model in crystal_well_models:
-            if crystal_well_models.barcode not in barcodes_crystal_well_models:
-                barcodes_crystal_well_models[crystal_well_models.barcode] = []
-            barcodes_crystal_well_models[crystal_well_models.barcode].append(
-                crystal_well_model
-            )
+            crystal_plate_uuid = crystal_well_model.crystal_plate_uuid
+            if crystal_plate_uuid not in plates_crystal_well_models:
+                plates_crystal_well_models[crystal_plate_uuid] = []
+            plates_crystal_well_models[crystal_plate_uuid].append(crystal_well_model)
 
         confirmations = []
-        for barcode_crystal_well_models in barcodes_crystal_well_models:
+        for (
+            crystal_plate_uuid,
+            plate_crystal_well_models,
+        ) in plates_crystal_well_models.items():
             # Export the crystal wells to the appropriate csv file.
-            filename = await self.__export_to_csv_visit(
-                visit_filter, barcode_crystal_well_models
+            filename = await self.__export_to_csv_plate(
+                visit_filter, crystal_plate_uuid, plate_crystal_well_models
             )
 
             confirmations.append(
-                f"exported {len(crystal_well_models)} rows to {filename}"
+                f"exported {len(plate_crystal_well_models)} rows to {filename}"
             )
 
         response = {"confirmation": "\n  " + "\n  ".join(confirmations)}
@@ -531,21 +534,22 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def __export_to_csv_visit(
+    async def __export_to_csv_plate(
         self,
         visit,
+        crystal_plate_uuid,
         crystal_well_models: List[CrystalWellNeedingDroplocationModel],
     ):
 
         # Fetch the plate record for visit.
-        crystal_plate_filter = CrystalPlateFilterModel(visit=visit)
+        crystal_plate_filter = CrystalPlateFilterModel(uuid=crystal_plate_uuid)
         crystal_plate_models = await self.__xchembku.fetch_crystal_plates(
             crystal_plate_filter
         )
 
         if len(crystal_plate_models) == 0:
             raise RuntimeError(
-                f'database integrity error: no crystal plate for visit "{visit}"'
+                f'database integrity error: no crystal plate for uuid "{crystal_plate_uuid}"'
             )
         crystal_plate_model = crystal_plate_models[0]
 
