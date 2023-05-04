@@ -97,8 +97,6 @@ class ExportTester(Base):
 
         self.__output_directory = output_directory
 
-        await self.inject_plate(self.__xchembku)
-
         self.__visit_directory = (
             Path(self.__output_directory)
             / "labxchem"
@@ -115,13 +113,27 @@ class ExportTester(Base):
 
         crystal_wells = []
 
-        # Inject some wells.
+        # Inject first plate.
+        await self.inject_plate(self.__xchembku)
+
+        # Inject some wells on the first plate.
         crystal_wells.append(await self.inject(self.__xchembku, False, False))
         crystal_wells.append(await self.inject(self.__xchembku, True, True))
         crystal_wells.append(await self.inject(self.__xchembku, True, False))
         crystal_wells.append(await self.inject(self.__xchembku, True, True))
         crystal_wells.append(await self.inject(self.__xchembku, True, True))
         crystal_wells.append(await self.inject(self.__xchembku, True, False))
+
+        # # Inject second plate.
+        # await self.inject_plate(self.__xchembku)
+
+        # Inject some more wells on the second plate.
+        # crystal_wells.append(await self.inject(self.__xchembku, False, False))
+        # crystal_wells.append(await self.inject(self.__xchembku, True, True))
+        # crystal_wells.append(await self.inject(self.__xchembku, True, False))
+        # crystal_wells.append(await self.inject(self.__xchembku, True, True))
+        # crystal_wells.append(await self.inject(self.__xchembku, True, True))
+        # crystal_wells.append(await self.inject(self.__xchembku, True, False))
 
         await self.__export_wells(crystal_wells)
 
@@ -146,7 +158,7 @@ class ExportTester(Base):
         # Check the csv file got written.
         csv_path = (
             self.__crystal_targets_directory
-            / f"{self.rockminer_collected_stem}_targets.csv"
+            / f"{self.crystal_plate_models[0].rockminer_collected_stem}_targets.csv"
         )
         assert csv_path.exists()
 
