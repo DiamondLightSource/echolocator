@@ -568,8 +568,6 @@ class Aiohttp(Thing, BaseAiohttp):
         if not filename.parent.is_dir():
             raise RuntimeError(f"the directory does not exist: {str(filename.parent)}")
 
-        # directory.mkdir(parents=True, exist_ok=True)
-
         with open(filename, "w", newline="") as f:
             writer = csv.writer(f)
 
