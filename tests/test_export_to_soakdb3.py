@@ -142,11 +142,7 @@ class ExportToSoakdb3Tester(Base):
         # This is because of how the soadkb3 VBA in the Excel works.
         visitid = str(self.__visit_directory / "processing")
 
-        self.__crystal_targets_directory = (
-            self.__visit_directory / "processing/lab36/crystal-targets"
-        )
-
-        self.__crystal_targets_directory.mkdir(parents=True)
+        (Path(visitid)).mkdir(parents=True)
 
         # ----------------------------------------------------------------
         # Seed the necessary fields in the head table.

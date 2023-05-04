@@ -193,31 +193,31 @@ class Aiohttp(Thing, BaseAiohttp):
             )
 
         if command == Commands.LOAD_TABS:
-            return await self._load_tabs(opaque, request_dict)
+            return await self.__load_tabs(opaque, request_dict)
 
         if command == Commands.SELECT_TAB:
-            return await self._select_tab(opaque, request_dict)
+            return await self.__select_tab(opaque, request_dict)
 
         if command == Commands.FETCH_IMAGE:
-            return await self._fetch_image(opaque, request_dict)
+            return await self.__fetch_image(opaque, request_dict)
 
         elif command == Commands.FETCH_IMAGE_LIST:
-            return await self._fetch_image_list(opaque, request_dict)
+            return await self.__fetch_image_list(opaque, request_dict)
 
         elif command == Commands.EXPORT_TO_SOAKDB3:
-            return await self._export_to_soakdb3(opaque, request_dict)
+            return await self.__export_to_soakdb3(opaque, request_dict)
 
         elif command == Commands.EXPORT_TO_CSV:
-            return await self._export_to_csv(opaque, request_dict)
+            return await self.__export_to_csv(opaque, request_dict)
 
         elif command == Commands.UPDATE:
-            return await self._update(opaque, request_dict)
+            return await self.__update(opaque, request_dict)
 
         else:
             raise RuntimeError("invalid command %s" % (command))
 
     # ----------------------------------------------------------------------------------------
-    async def _load_tabs(self, opaque, request_dict):
+    async def __load_tabs(self, opaque, request_dict):
 
         tab_id = await self.get_cookie_content(
             opaque, Cookies.TABS_MANAGER, Keywords.TAB_ID
@@ -230,7 +230,7 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _select_tab(self, opaque, request_dict):
+    async def __select_tab(self, opaque, request_dict):
         tab_id = require("request json", request_dict, Keywords.TAB_ID)
 
         logger.debug(f"[GUITABS] tab_id in request is {tab_id}")
@@ -243,7 +243,7 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _fetch_image(self, opaque, request_dict):
+    async def __fetch_image(self, opaque, request_dict):
 
         # Get uuid from the cookie if it's not being posted here.
         crystal_well_uuid = await self.set_or_get_cookie_content(
@@ -298,7 +298,7 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _fetch_image_list(self, opaque, request_dict):
+    async def __fetch_image_list(self, opaque, request_dict):
 
         # Remember last posted value for auto_update_enabled.
         auto_update_enabled = await self._handle_auto_update(
@@ -360,7 +360,7 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _update(self, opaque, request_dict):
+    async def __update(self, opaque, request_dict):
 
         t = require("ajax request", request_dict, "crystal_well_droplocation_model")
 
@@ -385,7 +385,7 @@ class Aiohttp(Thing, BaseAiohttp):
                 "crystal_well_uuid": crystal_well_droplocation_model.crystal_well_uuid,
                 "direction": 1,
             }
-            response = await self._fetch_image(opaque, next_request_dict)
+            response = await self.__fetch_image(opaque, next_request_dict)
 
             if response.get("record") is not None:
                 response[
@@ -401,13 +401,14 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _export_to_soakdb3(self, opaque, request_dict):
+    async def __export_to_soakdb3(self, opaque, request_dict):
 
+        # Caller must provide a visit.
         visit_filter = request_dict.get("visit_filter")
-
         if visit_filter is None:
             raise RuntimeError("visit not submitted with request (programming error)")
 
+        # Visit must not be blank.
         visit_filter = visit_filter.strip()
         if visit_filter == "":
             response = {"error": "blank visit was given"}
@@ -438,7 +439,9 @@ class Aiohttp(Thing, BaseAiohttp):
 
     # ----------------------------------------------------------------------------------------
     async def __export_to_soakdb3_visit(
-        self, visit, crystal_well_models: List[CrystalWellNeedingDroplocationModel]
+        self,
+        visit,
+        crystal_well_models: List[CrystalWellNeedingDroplocationModel],
     ) -> None:
 
         # Fetch the plate record for visit.
@@ -477,14 +480,20 @@ class Aiohttp(Thing, BaseAiohttp):
         )
 
     # ----------------------------------------------------------------------------------------
-    async def _export_to_csv(self, opaque, request_dict):
+    async def __export_to_csv(self, opaque, request_dict):
 
+        # Caller must provide a visit.
         visit_filter = request_dict.get("visit_filter")
+        if visit_filter is None:
+            raise RuntimeError("visit not submitted with request (programming error)")
 
-        if visit_filter is not None:
-            visit_filter = visit_filter.strip()
+        # Visit must not be blank.
+        visit_filter = visit_filter.strip()
+        if visit_filter == "":
+            response = {"error": "blank visit was given"}
+            return response
 
-        # Get a filter for wells on the plate with this barcode.
+        # Get a filter for wells we want to export.
         crystal_well_filter = CrystalWellFilterModel(
             visit=visit_filter,
             is_decided=True,
@@ -492,41 +501,48 @@ class Aiohttp(Thing, BaseAiohttp):
         )
 
         # Fetch the list of wells according to the filter.
-        crystal_well_models = (
-            await self.__xchembku.fetch_crystal_wells_needing_droplocation(
-                crystal_well_filter
-            )
+        crystal_well_models: List[
+            CrystalWellNeedingDroplocationModel
+        ] = await self.__xchembku.fetch_crystal_wells_needing_droplocation(
+            crystal_well_filter
         )
 
-        # Fetch the plate record for barcode.
-        crystal_plate_filter = CrystalPlateFilterModel(barcode=barcode_filter)
+        # Export the crystal wells to the appropriate soakdb3 visit.
+        filename = await self.__export_to_csv_visit(visit_filter, crystal_well_models)
+
+        response = {
+            "confirmation": f"exported {len(crystal_well_models)} rows to {filename}"
+        }
+
+        return response
+
+    # ----------------------------------------------------------------------------------------
+    async def __export_to_csv_visit(
+        self,
+        visit,
+        crystal_well_models: List[CrystalWellNeedingDroplocationModel],
+    ):
+
+        # Fetch the plate record for visit.
+        crystal_plate_filter = CrystalPlateFilterModel(visit=visit)
         crystal_plate_models = await self.__xchembku.fetch_crystal_plates(
             crystal_plate_filter
         )
 
         if len(crystal_plate_models) == 0:
             raise RuntimeError(
-                f"no plate for barcode {barcode_filter} (database integrity error)"
+                f'database integrity error: no crystal plate for visit "{visit}"'
             )
-
         crystal_plate_model = crystal_plate_models[0]
 
         # Use the stem from the rockmaker Luigi pipeline to form the csv filename.
-        logger.debug(describe("self.__export_directory", self.__export_directory))
-        logger.debug(describe("self.__export_subdirectory", self.__export_subdirectory))
-        logger.debug(describe("visit", visit_filter))
-        visit_directory = Path(
-            get_xchem_directory(self.__export_directory, visit_filter)
-        )
-        logger.debug(describe("xchem_directory", visit_directory))
+        visit_directory = Path(get_xchem_directory(self.__export_directory, visit))
         targets_directory = visit_directory / self.__export_subdirectory
-        logger.debug(describe("targets_directory", targets_directory))
 
         filename = (
             targets_directory
             / f"{crystal_plate_model.rockminer_collected_stem}_targets.csv"
         )
-        logger.debug(describe("filename", filename))
 
         if not filename.parent.is_dir():
             raise RuntimeError(f"the directory does not exist: {str(filename.parent)}")
@@ -543,29 +559,7 @@ class Aiohttp(Thing, BaseAiohttp):
                 row.append(m.confirmed_microns_y or "")
                 writer.writerow(row)
 
-        response = {
-            "confirmation": f"exported {len(crystal_well_models)} rows to {filename}"
-        }
-
-        soakdb3_crystal_well_models = []
-        for m in crystal_well_models:
-            soakdb3_crystal_well_models.append(
-                Soakdb3CrystalWellModel(
-                    LabVisit=visit_filter,
-                    CrystalPlate=crystal_plate_model.rockminer_collected_stem,
-                    CrystalWell=m.position,
-                    EchoX=m.confirmed_microns_x,
-                    EchoY=m.confirmed_microns_y,
-                )
-            )
-
-            # Append well records to soakdb3 database.
-            # Soakdb3 wants the "/processing" to be on the end of the visitid.
-            await self.__xchembku.inject_soakdb3_crystal_wells(
-                str(visit_directory / "processing"), soakdb3_crystal_well_models
-            )
-
-        return response
+        return filename
 
     # ----------------------------------------------------------------------------------------
     async def _handle_auto_update(self, opaque, request_dict, cookie_name):
