@@ -507,12 +507,26 @@ class Aiohttp(Thing, BaseAiohttp):
             crystal_well_filter
         )
 
-        # Export the crystal wells to the appropriate soakdb3 visit.
-        filename = await self.__export_to_csv_visit(visit_filter, crystal_well_models)
+        barcodes_crystal_well_models = {}
+        for crystal_well_model in crystal_well_models:
+            if crystal_well_models.barcode not in barcodes_crystal_well_models:
+                barcodes_crystal_well_models[crystal_well_models.barcode] = []
+            barcodes_crystal_well_models[crystal_well_models.barcode].append(
+                crystal_well_model
+            )
 
-        response = {
-            "confirmation": f"exported {len(crystal_well_models)} rows to {filename}"
-        }
+        confirmations = []
+        for barcode_crystal_well_models in barcodes_crystal_well_models:
+            # Export the crystal wells to the appropriate csv file.
+            filename = await self.__export_to_csv_visit(
+                visit_filter, barcode_crystal_well_models
+            )
+
+            confirmations.append(
+                f"exported {len(crystal_well_models)} rows to {filename}"
+            )
+
+        response = {"confirmation": "\n  " + "\n  ".join(confirmations)}
 
         return response
 
