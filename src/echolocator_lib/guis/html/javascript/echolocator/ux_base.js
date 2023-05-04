@@ -44,7 +44,7 @@ class echolocator__UxBase extends common__Base {
         var $cm = $("." + cm_class, this.$interaction_parent);
 
         if ($cm_container.length == 0) {
-            this.$interaction_parent.prepend("<div class='" + cm_class + "_container'><div class='" + cm_class + "'></div></div>");
+            this.$interaction_parent.prepend("<div class='" + cm_class + "_container'><xmp class='" + cm_class + "'></xmp></div>");
             $cm_container = $("." + cm_class + "_container", this.$interaction_parent);
             $cm = $("." + cm_class, this.$interaction_parent);
         }

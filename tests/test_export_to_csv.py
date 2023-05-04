@@ -151,10 +151,6 @@ class ExportTester(Base):
             request, cookies={}
         )
 
-        from dls_utilpack.describe import describe
-
-        logger.debug(describe("response", response))
-
         # Expect confirmation message in response.
         assert "confirmation" in response
         # There will be two of "exported 3" since there are two plates.

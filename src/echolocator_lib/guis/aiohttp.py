@@ -515,12 +515,15 @@ class Aiohttp(Thing, BaseAiohttp):
                 plates_crystal_well_models[crystal_plate_uuid] = []
             plates_crystal_well_models[crystal_plate_uuid].append(crystal_well_model)
 
+        # Keep a list of the confirmations we will get from exporting the plates.
         confirmations = []
+
+        # Go through each plate separately.
         for (
             crystal_plate_uuid,
             plate_crystal_well_models,
         ) in plates_crystal_well_models.items():
-            # Export the crystal wells to the appropriate csv file.
+            # Export the crystal wells for this plate to the appropriate csv file named for the plate.
             filename = await self.__export_to_csv_plate(
                 visit_filter, crystal_plate_uuid, plate_crystal_well_models
             )
@@ -529,7 +532,7 @@ class Aiohttp(Thing, BaseAiohttp):
                 f"exported {len(plate_crystal_well_models)} rows to {filename}"
             )
 
-        response = {"confirmation": "\n  " + "\n  ".join(confirmations)}
+        response = {"confirmation": "\n".join(confirmations)}
 
         return response
 
