@@ -31,7 +31,7 @@ class echolocator__CentroidUx extends echolocator__UxBase {
 
         var that = this;
 
-        this.#shape = new webviz__sprite__Shape(this, this.plugin_link_name);
+        this.#shape = new webviz__sprite__Ring(this, this.plugin_link_name);
 
         this.#shape.activate(this.#raphael, this.#color);
 

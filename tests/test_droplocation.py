@@ -107,16 +107,17 @@ class DroplocationTester(Base):
         crystal_wells.append(await self.inject(xchembku, True, False))
         crystal_wells.append(await self.inject(xchembku, True, False))
 
-        await self.__set_confirmed_target(xchembku, crystal_wells, 0, 1)
-        await self.__set_confirmed_target(xchembku, crystal_wells, 1, 2)
-        await self.__set_confirmed_target(xchembku, crystal_wells, 2, None)
+        # The crystal count increases with each one added, so they are sorted in reverse order of adding.
+        await self.__set_confirmed_target_and_advance(xchembku, crystal_wells, 2, 1)
+        await self.__set_confirmed_target_and_advance(xchembku, crystal_wells, 1, 0)
+        await self.__set_confirmed_target_and_advance(xchembku, crystal_wells, 0, None)
 
-        await self.__set_is_usable(xchembku, crystal_wells, 0, False)
-        await self.__set_is_usable(xchembku, crystal_wells, 0, True)
+        await self.__set_is_usable_and_dont_advance(xchembku, crystal_wells, 0, False)
+        await self.__set_is_usable_and_dont_advance(xchembku, crystal_wells, 0, True)
 
     # ----------------------------------------------------------------------------------------
 
-    async def __set_confirmed_target(
+    async def __set_confirmed_target_and_advance(
         self, xchembku, crystal_well_models, index1, index2
     ):
         """ """
@@ -130,6 +131,7 @@ class DroplocationTester(Base):
             ],
             Keywords.COMMAND: Commands.UPDATE,
             Keywords.SHOULD_ADVANCE: True,
+            "visit": self.visit,
             "crystal_well_droplocation_model": {
                 "crystal_well_uuid": crystal_well_models[index1].uuid,
                 "confirmed_target_x": x,
@@ -144,32 +146,33 @@ class DroplocationTester(Base):
 
         self.__cookies = response["__cookies"]
 
-        logger.debug(describe("first set_target response", response))
+        note = f"advance from {index1} to {index2}"
+        logger.debug(describe(f"set_target response, {note}", response))
 
-        assert "record" in response
+        assert "record" in response, note
         record = response["record"]
-        assert "confirmation" in response
-        assert "has been updated" in response["confirmation"]
+        assert "confirmation" in response, note
+        assert "has been updated" in response["confirmation"], note
         if index2 is not None:
-            assert record is not None, f"index {index1}"
-            assert record["uuid"] == crystal_well_models[index2].uuid, f"index {index1}"
-            assert "advanced" in response["confirmation"]
+            assert record is not None, note
+            assert record["uuid"] == crystal_well_models[index2].uuid, note
+            assert "advanced" in response["confirmation"], note
         else:
-            assert record is None
-            assert "no more images" in response["confirmation"]
+            assert record is None, note
+            assert "no more images" in response["confirmation"], note
 
         # Fetch the record which should have been updated.
         fetched_models = await xchembku.fetch_crystal_wells_needing_droplocation(
             CrystalWellFilterModel(anchor=crystal_well_models[index1].uuid)
         )
 
-        assert fetched_models[0].confirmed_target_x == x, f"index {index1}"
-        assert fetched_models[0].confirmed_target_y == y, f"index {index1}"
-        assert fetched_models[0].is_usable is True, f"index {index1}"
+        assert fetched_models[0].confirmed_target_x == x, note
+        assert fetched_models[0].confirmed_target_y == y, note
+        assert fetched_models[0].is_usable is True, note
 
     # ----------------------------------------------------------------------------------------
 
-    async def __set_is_usable(
+    async def __set_is_usable_and_dont_advance(
         self,
         xchembku,
         crystal_well_models,

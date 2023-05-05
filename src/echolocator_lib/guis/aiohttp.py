@@ -3,6 +3,7 @@ import logging
 import multiprocessing
 import threading
 from pathlib import Path
+from typing import List
 
 from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 
@@ -26,7 +27,13 @@ from xchembku_api.models.crystal_plate_filter_model import CrystalPlateFilterMod
 from xchembku_api.models.crystal_well_droplocation_model import (
     CrystalWellDroplocationModel,
 )
-from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
+from xchembku_api.models.crystal_well_filter_model import (
+    CrystalWellFilterModel,
+    CrystalWellFilterSortbyEnum,
+)
+from xchembku_api.models.crystal_well_needing_droplocation_model import (
+    CrystalWellNeedingDroplocationModel,
+)
 
 # Base class for an aiohttp server.
 from echolocator_lib.base_aiohttp import BaseAiohttp
@@ -189,28 +196,31 @@ class Aiohttp(Thing, BaseAiohttp):
             )
 
         if command == Commands.LOAD_TABS:
-            return await self._load_tabs(opaque, request_dict)
+            return await self.__load_tabs(opaque, request_dict)
 
         if command == Commands.SELECT_TAB:
-            return await self._select_tab(opaque, request_dict)
+            return await self.__select_tab(opaque, request_dict)
 
         if command == Commands.FETCH_IMAGE:
-            return await self._fetch_image(opaque, request_dict)
+            return await self.__fetch_image(opaque, request_dict)
 
         elif command == Commands.FETCH_IMAGE_LIST:
-            return await self._fetch_image_list(opaque, request_dict)
+            return await self.__fetch_image_list(opaque, request_dict)
 
-        elif command == Commands.EXPORT:
-            return await self._export(opaque, request_dict)
+        elif command == Commands.EXPORT_TO_SOAKDB3:
+            return await self.__export_to_soakdb3(opaque, request_dict)
+
+        elif command == Commands.EXPORT_TO_CSV:
+            return await self.__export_to_csv(opaque, request_dict)
 
         elif command == Commands.UPDATE:
-            return await self._update(opaque, request_dict)
+            return await self.__update(opaque, request_dict)
 
         else:
             raise RuntimeError("invalid command %s" % (command))
 
     # ----------------------------------------------------------------------------------------
-    async def _load_tabs(self, opaque, request_dict):
+    async def __load_tabs(self, opaque, request_dict):
 
         tab_id = await self.get_cookie_content(
             opaque, Cookies.TABS_MANAGER, Keywords.TAB_ID
@@ -223,7 +233,7 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _select_tab(self, opaque, request_dict):
+    async def __select_tab(self, opaque, request_dict):
         tab_id = require("request json", request_dict, Keywords.TAB_ID)
 
         logger.debug(f"[GUITABS] tab_id in request is {tab_id}")
@@ -236,7 +246,7 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _fetch_image(self, opaque, request_dict):
+    async def __fetch_image(self, opaque, request_dict):
 
         # Get uuid from the cookie if it's not being posted here.
         crystal_well_uuid = await self.set_or_get_cookie_content(
@@ -247,7 +257,10 @@ class Aiohttp(Thing, BaseAiohttp):
             "",
         )
 
-        logger.info(f"fetching image for crystal_well_uuid {crystal_well_uuid}")
+        logger.info(
+            f"fetching image from crystal_well_uuid {crystal_well_uuid}"
+            f" direction {request_dict.get('direction')}"
+        )
 
         # Not able to get an image from posted value or cookie?
         # Usually first time visiting Image Details tab when no image picked from list.
@@ -256,7 +269,16 @@ class Aiohttp(Thing, BaseAiohttp):
             return response
 
         # Start a filter where we anchor on the given well.
-        filter = CrystalWellFilterModel(anchor=crystal_well_uuid, limit=1)
+        filter = CrystalWellFilterModel(
+            anchor=crystal_well_uuid,
+            limit=1,
+            sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
+        )
+
+        # Caller is providing visit?
+        visit = request_dict.get("visit")
+        if visit is not None:
+            filter.visit = visit
 
         # Image previous or next?
         direction = request_dict.get("direction", 0)
@@ -291,28 +313,21 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _fetch_image_list(self, opaque, request_dict):
+    async def __fetch_image_list(self, opaque, request_dict):
 
         # Remember last posted value for auto_update_enabled.
         auto_update_enabled = await self._handle_auto_update(
             opaque, request_dict, Cookies.IMAGE_LIST_UX
         )
 
-        visit = await self.set_or_get_cookie_content(
+        visit_filter = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_LIST_UX,
-            "visit",
-            request_dict.get("visit"),
+            "visit_filter",
+            request_dict.get("visit_filter"),
             None,
         )
 
-        barcode_filter = await self.set_or_get_cookie_content(
-            opaque,
-            Cookies.IMAGE_LIST_UX,
-            "barcode_filter",
-            request_dict.get("barcode_filter"),
-            None,
-        )
         should_show_only_undecided = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_LIST_UX,
@@ -321,37 +336,49 @@ class Aiohttp(Thing, BaseAiohttp):
             False,
         )
 
-        logger.debug(
-            f"fetching image records, barcode_filter is '{barcode_filter}' and "
-            f" should_show_only_undecided is '{should_show_only_undecided}'"
-        )
+        if visit_filter is None:
+            visit_filter = ""
+        visit_filter = visit_filter.strip()
 
-        # Start a filter where we anchor on the given image.
-        filter = CrystalWellFilterModel(barcode=barcode_filter)
-
-        should_show_only_undecided = await self.set_or_get_cookie_content(
-            opaque,
-            Cookies.IMAGE_LIST_UX,
-            "should_show_only_undecided",
-            request_dict.get("should_show_only_undecided"),
-            False,
-        )
-        if should_show_only_undecided:
-            filter.is_decided = False
-
-        # Fetch the list from the xchembku.
-        crystal_well_models = (
-            await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
-        )
-
-        html = echolocator_composers_get_default().compose_image_list(
-            crystal_well_models
-        )
         filters = {
-            "visit": visit,
-            "barcode_filter": barcode_filter,
+            "visit_filter": visit_filter,
             "should_show_only_undecided": should_show_only_undecided,
         }
+
+        if visit_filter == "":
+            html = "please enter a visit"
+
+        else:
+            logger.debug(
+                f"fetching image records, visit_filter is '{visit_filter}' and "
+                f" should_show_only_undecided is '{should_show_only_undecided}'"
+            )
+
+            # Start a filter where we anchor on the given image.
+            filter = CrystalWellFilterModel(
+                visit=visit_filter,
+                sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
+            )
+
+            should_show_only_undecided = await self.set_or_get_cookie_content(
+                opaque,
+                Cookies.IMAGE_LIST_UX,
+                "should_show_only_undecided",
+                request_dict.get("should_show_only_undecided"),
+                False,
+            )
+            if should_show_only_undecided:
+                filter.is_decided = False
+
+            # Fetch the list from the xchembku.
+            crystal_well_models = (
+                await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
+            )
+
+            html = echolocator_composers_get_default().compose_image_list(
+                crystal_well_models
+            )
+
         response = {
             "html": html,
             "filters": filters,
@@ -361,7 +388,7 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _update(self, opaque, request_dict):
+    async def __update(self, opaque, request_dict):
 
         t = require("ajax request", request_dict, "crystal_well_droplocation_model")
 
@@ -376,6 +403,14 @@ class Aiohttp(Thing, BaseAiohttp):
 
         # Caller wants to select the next image automatically?
         if request_dict.get(Keywords.SHOULD_ADVANCE, False):
+
+            # Caller must provide a visit in order to automatically advance.
+            visit = request_dict.get("visit")
+            if visit is None:
+                raise RuntimeError(
+                    "programming error: visit not submitted with request to advance after update"
+                )
+
             # Advance by fetching the next image record after the update.
             next_request_dict = {
                 ProtocoljKeywords.ENABLE_COOKIES: [
@@ -385,8 +420,9 @@ class Aiohttp(Thing, BaseAiohttp):
                 Keywords.COMMAND: Commands.FETCH_IMAGE,
                 "crystal_well_uuid": crystal_well_droplocation_model.crystal_well_uuid,
                 "direction": 1,
+                "visit": visit,
             }
-            response = await self._fetch_image(opaque, next_request_dict)
+            response = await self.__fetch_image(opaque, next_request_dict)
 
             if response.get("record") is not None:
                 response[
@@ -402,91 +438,61 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def _export(self, opaque, request_dict):
+    async def __export_to_soakdb3(self, opaque, request_dict):
 
-        visit = request_dict.get("visit")
+        # Caller must provide a visit.
+        visit_filter = request_dict.get("visit_filter")
+        if visit_filter is None:
+            raise RuntimeError("programming error: visit not submitted with request")
 
-        if visit is None:
-            raise RuntimeError("visit not submitted with request (programming error)")
-
-        visit = visit.strip()
-        if visit == "":
+        # Visit must not be blank.
+        visit_filter = visit_filter.strip()
+        if visit_filter == "":
             response = {"error": "blank visit was given"}
             return response
 
-        # Get the barcode string submitted from the html form.
-        barcode_filter = request_dict.get("barcode_filter")
-
-        if barcode_filter is None:
-            raise RuntimeError(
-                "barcode_filter not submitted with request (programming error)"
-            )
-
-        barcode_filter = barcode_filter.strip()
-        if barcode_filter == "":
-            response = {"error": "blank barcode was given"}
-            return response
-
-        # Get a filter for wells on the plate with this barcode.
+        # Get a filter for wells we want to export.
         crystal_well_filter = CrystalWellFilterModel(
-            barcode=barcode_filter,
+            visit=visit_filter,
             is_decided=True,
             is_usable=True,
+            sortby=CrystalWellFilterSortbyEnum.POSITION,
         )
 
-        # Fetch the list of wells for this barcode.
-        crystal_well_models = (
-            await self.__xchembku.fetch_crystal_wells_needing_droplocation(
-                crystal_well_filter
-            )
+        # Fetch the list of wells according to the filter.
+        crystal_well_models: List[
+            CrystalWellNeedingDroplocationModel
+        ] = await self.__xchembku.fetch_crystal_wells_needing_droplocation(
+            crystal_well_filter
         )
 
-        # Fetch the plate record for barcode.
-        crystal_plate_filter = CrystalPlateFilterModel(barcode=barcode_filter)
+        # Export the crystal wells to the appropriate soakdb3 visit.
+        await self.__export_to_soakdb3_visit(visit_filter, crystal_well_models)
+
+        response = {
+            "confirmation": f"exported {len(crystal_well_models)} rows to soakdb3 visit {visit_filter}"
+        }
+
+        return response
+
+    # ----------------------------------------------------------------------------------------
+    async def __export_to_soakdb3_visit(
+        self,
+        visit,
+        crystal_well_models: List[CrystalWellNeedingDroplocationModel],
+    ) -> None:
+
+        # Fetch the plate record for visit.
+        crystal_plate_filter = CrystalPlateFilterModel(visit=visit)
         crystal_plate_models = await self.__xchembku.fetch_crystal_plates(
             crystal_plate_filter
         )
 
         if len(crystal_plate_models) == 0:
             raise RuntimeError(
-                f"no plate for barcode {barcode_filter} (database integrity error)"
+                f'database integrity error: no crystal plate for visit "{visit}"'
             )
-
         crystal_plate_model = crystal_plate_models[0]
-
-        # Use the stem from the rockmaker Luigi pipeline to form the csv filename.
-        logger.debug(describe("self.__export_directory", self.__export_directory))
-        logger.debug(describe("self.__export_subdirectory", self.__export_subdirectory))
-        logger.debug(describe("visit", visit))
-        visit_directory = Path(get_xchem_directory(self.__export_directory, visit))
-        logger.debug(describe("xchem_directory", visit_directory))
-        targets_directory = visit_directory / self.__export_subdirectory
-        logger.debug(describe("targets_directory", targets_directory))
-
-        filename = (
-            targets_directory
-            / f"{crystal_plate_model.rockminer_collected_stem}_targets.csv"
-        )
-        logger.debug(describe("filename", filename))
-
-        if not filename.parent.is_dir():
-            raise RuntimeError(f"the directory does not exist: {str(filename.parent)}")
-
-        # directory.mkdir(parents=True, exist_ok=True)
-
-        with open(filename, "w", newline="") as f:
-            writer = csv.writer(f)
-
-            for m in crystal_well_models:
-                row = []
-                row.append(m.position)
-                row.append(m.confirmed_microns_x or "")
-                row.append(m.confirmed_microns_y or "")
-                writer.writerow(row)
-
-        response = {
-            "confirmation": f"exported {len(crystal_well_models)} rows to {filename}"
-        }
 
         soakdb3_crystal_well_models = []
         for m in crystal_well_models:
@@ -500,13 +506,118 @@ class Aiohttp(Thing, BaseAiohttp):
                 )
             )
 
-            # Append well records to soakdb3 database.
-            # Soakdb3 wants the "/processing" to be on the end of the visitid.
-            await self.__xchembku.inject_soakdb3_crystal_wells(
-                str(visit_directory / "processing"), soakdb3_crystal_well_models
+        visit_directory = Path(get_xchem_directory(self.__export_directory, visit))
+
+        logger.debug(
+            f"exporting {len(soakdb3_crystal_well_models)} to {str(visit_directory)}"
+        )
+        # Append well records to soakdb3 database.
+        # Soakdb3 wants the "/processing" to be on the end of the visitid.
+        await self.__xchembku.inject_soakdb3_crystal_wells(
+            str(visit_directory / "processing"), soakdb3_crystal_well_models
+        )
+
+    # ----------------------------------------------------------------------------------------
+    async def __export_to_csv(self, opaque, request_dict):
+
+        # Caller must provide a visit.
+        visit_filter = request_dict.get("visit_filter")
+        if visit_filter is None:
+            raise RuntimeError("visit not submitted with request (programming error)")
+
+        # Visit must not be blank.
+        visit_filter = visit_filter.strip()
+        if visit_filter == "":
+            response = {"error": "blank visit was given"}
+            return response
+
+        # Get a filter for wells we want to export.
+        crystal_well_filter = CrystalWellFilterModel(
+            visit=visit_filter,
+            is_decided=True,
+            is_usable=True,
+            sortby=CrystalWellFilterSortbyEnum.POSITION,
+        )
+
+        # Fetch the list of wells according to the filter.
+        crystal_well_models: List[
+            CrystalWellNeedingDroplocationModel
+        ] = await self.__xchembku.fetch_crystal_wells_needing_droplocation(
+            crystal_well_filter
+        )
+
+        # Group the wells by the plate they belong to.
+        plates_crystal_well_models = {}
+        for crystal_well_model in crystal_well_models:
+            crystal_plate_uuid = crystal_well_model.crystal_plate_uuid
+            if crystal_plate_uuid not in plates_crystal_well_models:
+                plates_crystal_well_models[crystal_plate_uuid] = []
+            plates_crystal_well_models[crystal_plate_uuid].append(crystal_well_model)
+
+        # Keep a list of the confirmations we will get from exporting the plates.
+        confirmations = []
+
+        # Go through each plate separately.
+        for (
+            crystal_plate_uuid,
+            plate_crystal_well_models,
+        ) in plates_crystal_well_models.items():
+            # Export the crystal wells for this plate to the appropriate csv file named for the plate.
+            filename = await self.__export_to_csv_plate(
+                visit_filter, crystal_plate_uuid, plate_crystal_well_models
             )
 
+            confirmations.append(
+                f"exported {len(plate_crystal_well_models)} rows to {filename}"
+            )
+
+        response = {"confirmation": "\n".join(confirmations)}
+
         return response
+
+    # ----------------------------------------------------------------------------------------
+    async def __export_to_csv_plate(
+        self,
+        visit,
+        crystal_plate_uuid,
+        crystal_well_models: List[CrystalWellNeedingDroplocationModel],
+    ):
+
+        # Fetch the plate record for visit.
+        crystal_plate_filter = CrystalPlateFilterModel(uuid=crystal_plate_uuid)
+        crystal_plate_models = await self.__xchembku.fetch_crystal_plates(
+            crystal_plate_filter
+        )
+
+        if len(crystal_plate_models) == 0:
+            raise RuntimeError(
+                f'database integrity error: no crystal plate for uuid "{crystal_plate_uuid}"'
+            )
+        crystal_plate_model = crystal_plate_models[0]
+
+        # Use the stem from the rockmaker Luigi pipeline to form the csv filename.
+        visit_directory = Path(get_xchem_directory(self.__export_directory, visit))
+        targets_directory = visit_directory / self.__export_subdirectory
+
+        filename = (
+            targets_directory
+            / f"{crystal_plate_model.rockminer_collected_stem}_targets.csv"
+        )
+
+        if not filename.parent.is_dir():
+            raise RuntimeError(f"the directory does not exist: {str(filename.parent)}")
+
+        with open(filename, "w", newline="") as f:
+            writer = csv.writer(f)
+
+            for m in crystal_well_models:
+                row = []
+                row.append(m.position)
+                row.append(m.confirmed_microns_x or "")
+                row.append(m.confirmed_microns_y or "")
+                writer.writerow(row)
+
+        return filename
 
     # ----------------------------------------------------------------------------------------
     async def _handle_auto_update(self, opaque, request_dict, cookie_name):

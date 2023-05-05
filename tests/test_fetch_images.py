@@ -171,13 +171,15 @@ class FetchImagesTester(Base):
         assert len(rows) == 1 + 5
 
         # Check the first row's filename.
+        # Remember fiels are injected with increasing crystal counts,
+        # so default sorting is in reverse order.
         row = rows[1]
         columns = row.find_all(class_="T_filename")
         assert len(columns) == 1
-        assert columns[0].get_text() == Path(crystal_wells[1].filename).stem
+        assert columns[0].get_text() == Path(crystal_wells[5].filename).stem
 
         # Check the last row's filename.
         row = rows[5]
         columns = row.find_all(class_="T_filename")
         assert len(columns) == 1
-        assert columns[0].get_text() == Path(crystal_wells[5].filename).stem
+        assert columns[0].get_text() == Path(crystal_wells[1].filename).stem

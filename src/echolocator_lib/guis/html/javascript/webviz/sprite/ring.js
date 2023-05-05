@@ -1,6 +1,6 @@
 
 
-class webviz__sprite__Shape extends common__Base {
+class webviz__sprite__Ring extends common__Base {
 
     constructor(page, name, classname, precisionLine = false) {
         super(page.runtime);
@@ -14,48 +14,53 @@ class webviz__sprite__Shape extends common__Base {
     // -------------------------------------------------------------
 
     activate(raphael, color) {
-        var F = "webviz__sprite__Shape[" + this.name + "]::activate";
+        var F = "webviz__sprite__Ring[" + this.name + "]::activate";
 
         this._raphael = raphael
 
         raphael.setStart();
 
-        // this._perimeter = this._raphael.path("M0,0:L10,0:L0,10:L0,0").attr({ 
+        // this._group = this._raphael.path("M0,0:L10,0:L0,10:L0,0").attr({ 
         //     fill: "#FF0000", 
         //     stroke: "#000000", 
         //     "stroke-width": 1 
         // }); 
 
-        this._center = this._raphael.circle(0, 0, 5).attr({
-            fill: color,
-            stroke: "black",
-            "stroke-width": 1
+        // Dot at the center.
+        // this._center = this._raphael.circle(0, 0, 5).attr({
+        //     fill: color,
+        //     stroke: "black",
+        //     "stroke-width": 1
+        // });
+
+        this._raphael.circle(0, 0, 1).attr({
+            fill: "transparent",
+            stroke: "white",
+            "stroke-width": 5,
+            "stroke-dasharray": "--",
         });
 
-        this._perimeter = this._raphael.circle(0, 0, 1).attr({
+        this._raphael.circle(0, 0, 1).attr({
             fill: "transparent",
-            stroke: color,
-            "stroke-width": 4
+            stroke: "black",
+            "stroke-width": 2,
+            "stroke-dasharray": "--",
         });
 
         // matrix = Raphael.matrix(1, 0, 0, 1, 0, 0, 0, 0, 0);
         // matrix.translate(0, 0)
         // console.log(F + " raphael matrix is \"" + matrix.toTransformString() + "\"")
-        // this._perimeter.translate(1, 1);
-        // console.log(F + " ball matrix is \"" + this._perimeter.matrix.toTransformString() + "\"")
+        // this._group.translate(1, 1);
+        // console.log(F + " ball matrix is \"" + this._group.matrix.toTransformString() + "\"")
 
         this._group = this._raphael.setFinish()
-        this._group._parent_object = this;
-
-        this._perimeter._group = this._group;
-        this._perimeter._parent_object = this;
 
         console.log(F + ": activated")
     } // end method
 
     // -------------------------------------------------------------
     set(settings) {
-        var F = "webviz__sprite__Shape[" + this.name + "]::set";
+        var F = "webviz__sprite__Ring[" + this.name + "]::set";
 
         for (var k in settings) {
             var setting = settings[k];
@@ -77,7 +82,7 @@ class webviz__sprite__Shape extends common__Base {
 
                 // Something wrong with settings?
                 if (!isNaN(setting)) {
-                    this._perimeter.scale(setting);
+                    this._group.scale(setting);
                 }
                 else {
                     console.log(F + ": [CENTPO] something is wrong with the scale setting")
@@ -98,13 +103,13 @@ class webviz__sprite__Shape extends common__Base {
     // Returns the currents settings in a JSON-serializable structure.
 
     get() {
-        var F = "webviz__sprite__Shape[" + this.name + "]::get";
+        var F = "webviz__sprite__Ring[" + this.name + "]::get";
 
         var settings = {};
 
         // Position to where the group's anchor point has been moved.
-        var x = this._perimeter.matrix.x(0, 0);
-        var y = this._perimeter.matrix.y(0, 0);
+        var x = this._group.matrix.x(0, 0);
+        var y = this._group.matrix.y(0, 0);
 
         settings.position = { x: x, y: y };
 

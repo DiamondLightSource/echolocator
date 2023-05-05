@@ -3,11 +3,11 @@
 class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     COOKIE_NAME = "IMAGE_LIST_UX";
     FETCH_IMAGE_LIST = "echolocator_guis::commands::fetch_image_list";
-    EXPORT = "echolocator_guis::commands::export";
+    EXPORT_TO_SOAKDB3 = "echolocator_guis::commands::export_to_soakdb3";
+    EXPORT_TO_CSV = "echolocator_guis::commands::export_to_csv";
 
     #jquery_objects = {};
-    #visit = "undefined";
-    #barcode_filter = "undefined";
+    #visit_filter = "undefined";
     #should_show_only_undecided = "undefined";
 
     constructor(runtime, plugin_link_name, $interaction_parent) {
@@ -25,18 +25,13 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         super.activate()
 
         this.#jquery_objects.$div = $(".T_composed", this.$interaction_parent);
-        this.#jquery_objects.$visit = $(".T_visit", this.$interaction_parent);
-        this.#jquery_objects.$barcode_filter = $(".T_barcode_filter", this.$interaction_parent);
+        this.#jquery_objects.$visit_filter = $(".T_visit_filter", this.$interaction_parent);
         this.#jquery_objects.$should_show_only_undecided = $(".T_should_show_only_undecided", this.$interaction_parent);
-        this.#jquery_objects.$export_button = $(".T_export_button", this.$interaction_parent);
+        this.#jquery_objects.$export_to_soakdb3_button = $(".T_export_to_soakdb3_button", this.$interaction_parent);
+        this.#jquery_objects.$export_to_csv_button = $(".T_export_to_csv_button", this.$interaction_parent);
 
         var that = this;
-        this.#jquery_objects.$visit.change(
-            function (jquery_event_object) {
-                that._handle_filter_change(jquery_event_object);
-            });
-
-        this.#jquery_objects.$barcode_filter.change(
+        this.#jquery_objects.$visit_filter.change(
             function (jquery_event_object) {
                 that._handle_filter_change(jquery_event_object);
             });
@@ -46,9 +41,14 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
                 that._handle_filter_change(jquery_event_object);
             });
 
-        this.#jquery_objects.$export_button.click(
+        this.#jquery_objects.$export_to_soakdb3_button.click(
             function (jquery_event_object) {
-                that._handle_export_clicked(jquery_event_object);
+                that._handle_export_to_soakdb3_clicked(jquery_event_object);
+            });
+
+        this.#jquery_objects.$export_to_csv_button.click(
+            function (jquery_event_object) {
+                that._handle_export_to_csv_clicked(jquery_event_object);
             });
 
     } // end method
@@ -62,8 +62,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         json_object[this.COMMAND] = this.FETCH_IMAGE_LIST;
         json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME];
 
-        json_object["visit"] = this.#visit;
-        json_object["barcode_filter"] = this.#barcode_filter;
+        json_object["visit_filter"] = this.#visit_filter;
         json_object["should_show_only_undecided"] = this.#should_show_only_undecided;
 
         this.send(json_object);
@@ -82,14 +81,12 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         var filters = response.filters;
         if (filters !== undefined) {
             var t;
-            t = filters["visit"];
+
+            t = filters["visit_filter"];
             if (t === undefined)
                 t = "";
-            this.#jquery_objects.$visit.val(t);
-            t = filters["barcode_filter"];
-            if (t === undefined)
-                t = "";
-            this.#jquery_objects.$barcode_filter.val(t);
+            this.#jquery_objects.$visit_filter.val(t);
+
             t = filters["should_show_only_undecided"];
             if (t === undefined)
                 t = false;
@@ -110,8 +107,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     _handle_filter_change(jquery_event_object) {
         var F = "echolocator__ImageListUx::_handle_filter_change"
 
-        this.#visit = this.#jquery_objects.$visit.val()
-        this.#barcode_filter = this.#jquery_objects.$barcode_filter.val()
+        this.#visit_filter = this.#jquery_objects.$visit_filter.val()
         this.#should_show_only_undecided = this.#jquery_objects.$should_show_only_undecided.prop("checked")
         this.request_update()
 
@@ -119,18 +115,33 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
 
     // -------------------------------------------------------------
 
-    _handle_export_clicked(jquery_event_object) {
-        var F = "echolocator__ImageListUx::_handle_export_clicked"
+    _handle_export_to_soakdb3_clicked(jquery_event_object) {
+        var F = "echolocator__ImageListUx::_handle_export_to_soakdb3_clicked"
 
-        this.#visit = this.#jquery_objects.$visit.val()
-        this.#barcode_filter = this.#jquery_objects.$barcode_filter.val()
+        this.#visit_filter = this.#jquery_objects.$visit_filter.val()
 
         // Enable no cookie for this request.
         var json_object = {}
-        json_object[this.COMMAND] = this.EXPORT;
+        json_object[this.COMMAND] = this.EXPORT_TO_SOAKDB3;
 
-        json_object["visit"] = this.#visit;
-        json_object["barcode_filter"] = this.#barcode_filter;
+        json_object["visit_filter"] = this.#visit_filter;
+
+        this.send(json_object);
+
+    } // end method
+
+    // -------------------------------------------------------------
+
+    _handle_export_to_csv_clicked(jquery_event_object) {
+        var F = "echolocator__ImageListUx::_handle_export_to_csv_clicked"
+
+        this.#visit_filter = this.#jquery_objects.$visit_filter.val()
+
+        // Enable no cookie for this request.
+        var json_object = {}
+        json_object[this.COMMAND] = this.EXPORT_TO_CSV;
+
+        json_object["visit_filter"] = this.#visit_filter;
 
         this.send(json_object);
 

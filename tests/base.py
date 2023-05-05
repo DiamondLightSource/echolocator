@@ -37,9 +37,13 @@ class Base:
 
         self.injected_count = 0
         self.visit = "cm00001-1"
-        self.barcode = "98ab"
+        self.__barcode_template = "98a%d"
         self.crystal_plate_uuid = None
-        self.rockminer_collected_stem = "98ab_2021-09-14_RI1000-0276-3drop"
+        self.__rockminer_collected_stem_template = "98a%d_2021-09-14_RI1000-0276-3drop"
+
+        self.crystal_plate_models = []
+
+        self.__formulatrix_plate_id = 0
 
     def main(self, constants, configuration_file, output_directory):
         """
@@ -99,17 +103,25 @@ class Base:
     async def inject_plate(self, xchembku):
         """ """
 
+        self.__formulatrix_plate_id += 1
+        self.barcode = self.__barcode_template % (self.__formulatrix_plate_id)
+        rockminer_collected_stem = self.__rockminer_collected_stem_template % (
+            self.__formulatrix_plate_id
+        )
+
         # Make the plate on which the wells reside.
         crystal_plate_model = CrystalPlateModel(
-            formulatrix__plate__id=10,
+            formulatrix__plate__id=self.__formulatrix_plate_id,
             barcode=self.barcode,
-            rockminer_collected_stem=self.rockminer_collected_stem,
+            rockminer_collected_stem=rockminer_collected_stem,
             visit=self.visit,
             thing_type=CrystalPlateObjectThingTypes.SWISS3,
         )
 
         await xchembku.upsert_crystal_plates([crystal_plate_model])
         self.crystal_plate_uuid = crystal_plate_model.uuid
+
+        self.crystal_plate_models.append(crystal_plate_model)
 
     # ----------------------------------------------------------------------------------------
 
