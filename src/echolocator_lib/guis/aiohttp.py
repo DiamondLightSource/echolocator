@@ -336,39 +336,49 @@ class Aiohttp(Thing, BaseAiohttp):
             False,
         )
 
-        logger.debug(
-            f"fetching image records, visit_filter is '{visit_filter}' and "
-            f" should_show_only_undecided is '{should_show_only_undecided}'"
-        )
+        if visit_filter is None:
+            visit_filter = ""
+        visit_filter = visit_filter.strip()
 
-        # Start a filter where we anchor on the given image.
-        filter = CrystalWellFilterModel(
-            visit=visit_filter,
-            sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
-        )
-
-        should_show_only_undecided = await self.set_or_get_cookie_content(
-            opaque,
-            Cookies.IMAGE_LIST_UX,
-            "should_show_only_undecided",
-            request_dict.get("should_show_only_undecided"),
-            False,
-        )
-        if should_show_only_undecided:
-            filter.is_decided = False
-
-        # Fetch the list from the xchembku.
-        crystal_well_models = (
-            await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
-        )
-
-        html = echolocator_composers_get_default().compose_image_list(
-            crystal_well_models
-        )
         filters = {
             "visit_filter": visit_filter,
             "should_show_only_undecided": should_show_only_undecided,
         }
+
+        if visit_filter == "":
+            html = "please enter a visit"
+
+        else:
+            logger.debug(
+                f"fetching image records, visit_filter is '{visit_filter}' and "
+                f" should_show_only_undecided is '{should_show_only_undecided}'"
+            )
+
+            # Start a filter where we anchor on the given image.
+            filter = CrystalWellFilterModel(
+                visit=visit_filter,
+                sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
+            )
+
+            should_show_only_undecided = await self.set_or_get_cookie_content(
+                opaque,
+                Cookies.IMAGE_LIST_UX,
+                "should_show_only_undecided",
+                request_dict.get("should_show_only_undecided"),
+                False,
+            )
+            if should_show_only_undecided:
+                filter.is_decided = False
+
+            # Fetch the list from the xchembku.
+            crystal_well_models = (
+                await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
+            )
+
+            html = echolocator_composers_get_default().compose_image_list(
+                crystal_well_models
+            )
+
         response = {
             "html": html,
             "filters": filters,
