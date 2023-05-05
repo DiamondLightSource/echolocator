@@ -9,7 +9,6 @@ from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 
 # Utilities.
 from dls_utilpack.callsign import callsign
-from dls_utilpack.describe import describe
 from dls_utilpack.require import require
 
 # Basic things.
