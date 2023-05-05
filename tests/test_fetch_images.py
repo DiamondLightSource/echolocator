@@ -122,6 +122,7 @@ class FetchImagesTester(Base):
                 Cookies.IMAGE_LIST_UX,
             ],
             Keywords.COMMAND: Commands.FETCH_IMAGE_LIST,
+            "visit_filter": self.visit,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
@@ -151,6 +152,7 @@ class FetchImagesTester(Base):
                 Cookies.IMAGE_LIST_UX,
             ],
             Keywords.COMMAND: Commands.FETCH_IMAGE_LIST,
+            "visit_filter": self.visit,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
