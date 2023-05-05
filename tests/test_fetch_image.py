@@ -179,6 +179,7 @@ class FetchImageTester(Base):
             Keywords.COMMAND: Commands.FETCH_IMAGE,
             "crystal_well_uuid": crystal_wells[2].uuid,
             "direction": 1,
+            "visit": self.visit,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
@@ -188,7 +189,8 @@ class FetchImageTester(Base):
         logger.debug(describe("fetch_image response", response))
 
         record = response["record"]
-        assert record["uuid"] == crystal_wells[3].uuid
+        assert record["position"] == crystal_wells[1].position
+        assert record["uuid"] == crystal_wells[1].uuid
         assert record["confirmed_target_x"] is not None
 
         # -------------------------------------------------------------------------------------
@@ -202,7 +204,8 @@ class FetchImageTester(Base):
         logger.debug(describe("fetch_image response", response))
 
         record = response["record"]
-        assert record["uuid"] == crystal_wells[3].uuid
+        assert record["position"] == crystal_wells[1].position
+        assert record["uuid"] == crystal_wells[1].uuid
         assert record["confirmed_target_x"] is not None
 
     # ----------------------------------------------------------------------------------------
@@ -217,8 +220,9 @@ class FetchImageTester(Base):
                 Cookies.IMAGE_LIST_UX,
             ],
             Keywords.COMMAND: Commands.FETCH_IMAGE,
-            "crystal_well_uuid": crystal_wells[2].uuid,
+            "crystal_well_uuid": crystal_wells[5].uuid,
             "direction": 1,
+            "visit": self.visit,
             "should_show_only_undecided": True,
         }
 
@@ -229,7 +233,7 @@ class FetchImageTester(Base):
         logger.debug(describe("__request_forward_undecided response 1", response))
 
         record = response["record"]
-        assert record["uuid"] == crystal_wells[5].uuid
+        assert record["uuid"] == crystal_wells[2].uuid
         assert record["confirmed_target_x"] is None
 
         # -------------------------------------------------------------------------------------
@@ -244,5 +248,5 @@ class FetchImageTester(Base):
         logger.debug(describe("__request_forward_undecided response 2", response))
 
         record = response["record"]
-        assert record["uuid"] == crystal_wells[5].uuid
+        assert record["uuid"] == crystal_wells[2].uuid
         assert record["confirmed_target_x"] is None

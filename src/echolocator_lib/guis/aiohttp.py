@@ -27,7 +27,10 @@ from xchembku_api.models.crystal_plate_filter_model import CrystalPlateFilterMod
 from xchembku_api.models.crystal_well_droplocation_model import (
     CrystalWellDroplocationModel,
 )
-from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
+from xchembku_api.models.crystal_well_filter_model import (
+    CrystalWellFilterModel,
+    CrystalWellFilterSortbyEnum,
+)
 from xchembku_api.models.crystal_well_needing_droplocation_model import (
     CrystalWellNeedingDroplocationModel,
 )
@@ -254,7 +257,10 @@ class Aiohttp(Thing, BaseAiohttp):
             "",
         )
 
-        logger.info(f"fetching image for crystal_well_uuid {crystal_well_uuid}")
+        logger.info(
+            f"fetching image from crystal_well_uuid {crystal_well_uuid}"
+            f" direction {request_dict.get('direction')}"
+        )
 
         # Not able to get an image from posted value or cookie?
         # Usually first time visiting Image Details tab when no image picked from list.
@@ -263,7 +269,16 @@ class Aiohttp(Thing, BaseAiohttp):
             return response
 
         # Start a filter where we anchor on the given well.
-        filter = CrystalWellFilterModel(anchor=crystal_well_uuid, limit=1)
+        filter = CrystalWellFilterModel(
+            anchor=crystal_well_uuid,
+            limit=1,
+            sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
+        )
+
+        # Caller is providing visit?
+        visit = request_dict.get("visit")
+        if visit is not None:
+            filter.visit = visit
 
         # Image previous or next?
         direction = request_dict.get("direction", 0)
@@ -327,7 +342,10 @@ class Aiohttp(Thing, BaseAiohttp):
         )
 
         # Start a filter where we anchor on the given image.
-        filter = CrystalWellFilterModel(visit=visit_filter)
+        filter = CrystalWellFilterModel(
+            visit=visit_filter,
+            sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
+        )
 
         should_show_only_undecided = await self.set_or_get_cookie_content(
             opaque,
@@ -375,6 +393,14 @@ class Aiohttp(Thing, BaseAiohttp):
 
         # Caller wants to select the next image automatically?
         if request_dict.get(Keywords.SHOULD_ADVANCE, False):
+
+            # Caller must provide a visit in order to automatically advance.
+            visit = request_dict.get("visit")
+            if visit is None:
+                raise RuntimeError(
+                    "programming error: visit not submitted with request to advance after update"
+                )
+
             # Advance by fetching the next image record after the update.
             next_request_dict = {
                 ProtocoljKeywords.ENABLE_COOKIES: [
@@ -384,6 +410,7 @@ class Aiohttp(Thing, BaseAiohttp):
                 Keywords.COMMAND: Commands.FETCH_IMAGE,
                 "crystal_well_uuid": crystal_well_droplocation_model.crystal_well_uuid,
                 "direction": 1,
+                "visit": visit,
             }
             response = await self.__fetch_image(opaque, next_request_dict)
 
@@ -406,7 +433,7 @@ class Aiohttp(Thing, BaseAiohttp):
         # Caller must provide a visit.
         visit_filter = request_dict.get("visit_filter")
         if visit_filter is None:
-            raise RuntimeError("visit not submitted with request (programming error)")
+            raise RuntimeError("programming error: visit not submitted with request")
 
         # Visit must not be blank.
         visit_filter = visit_filter.strip()
@@ -419,6 +446,7 @@ class Aiohttp(Thing, BaseAiohttp):
             visit=visit_filter,
             is_decided=True,
             is_usable=True,
+            sortby=CrystalWellFilterSortbyEnum.POSITION,
         )
 
         # Fetch the list of wells according to the filter.
@@ -498,6 +526,7 @@ class Aiohttp(Thing, BaseAiohttp):
             visit=visit_filter,
             is_decided=True,
             is_usable=True,
+            sortby=CrystalWellFilterSortbyEnum.POSITION,
         )
 
         # Fetch the list of wells according to the filter.
