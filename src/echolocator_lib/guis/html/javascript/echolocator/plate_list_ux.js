@@ -49,8 +49,10 @@ class echolocator__PlateListUx extends echolocator__UxAutoUpdate {
         var html = response.html;
 
         if (html !== undefined) {
+
+            console.log(F + ": displaying on this.#jquery_objects.$div len " + this.#jquery_objects.$div.length)
             this.#jquery_objects.$div.html(html);
-            // Attach events to all the individual job links in the "recent jobs" grid.
+            // Attach events to all the individual job links in the plates grid.
             this._attach_links();
         }
     }

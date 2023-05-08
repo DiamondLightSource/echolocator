@@ -2,6 +2,7 @@
 
 class Index extends echolocator__Page {
     #tabs_manager = null;
+    #plate_list_ux = null;
     #image_list_ux = null;
     #image_edit_ux = null;
 
@@ -57,6 +58,11 @@ class Index extends echolocator__Page {
             "tabs_manager",
             $("#tabs_manager_interaction_parent"));
 
+        this.#plate_list_ux = new echolocator__PlateListUx(
+            self.runtime,
+            "plate_list",
+            $("#plate_list_ux_interaction_parent"));
+
         this.#image_list_ux = new echolocator__ImageListUx(
             self.runtime,
             "image_list",
@@ -76,6 +82,11 @@ class Index extends echolocator__Page {
             echolocator__Events_TABS_CREATED_EVENT,
             function (event) { that.handle_tabs_created(event); });
 
+        // User picks an pl;ate from the ate list.
+        this.#plate_list_ux.addEventListener(
+            echolocator__Events_PLATE_PICKED_EVENT,
+            function (event) { that.handle_plate_picked(event); });
+
         // User picks an image from the image list.
         this.#image_list_ux.addEventListener(
             echolocator__Events_IMAGE_PICKED_EVENT,
@@ -89,6 +100,7 @@ class Index extends echolocator__Page {
         // -------------------------------------------------------------------
 
         this.#tabs_manager.activate()
+        this.#plate_list_ux.activate();
         this.#image_list_ux.activate();
         this.#image_edit_ux.activate();
 
@@ -139,12 +151,32 @@ class Index extends echolocator__Page {
 
         // console.log(F + ": $interaction_parent_id is \"" + interaction_parent_id + "\"");
 
-        if (interaction_parent_id == "image_list_ux_interaction_parent") {
+        if (interaction_parent_id == "plate_list_ux_interaction_parent") {
+            this.#plate_list_ux.request_update()
+        }
+        else if (interaction_parent_id == "image_list_ux_interaction_parent") {
             this.#image_list_ux.request_update()
         }
         else if (interaction_parent_id == "image_edit_ux_interaction_parent") {
             this.#image_edit_ux.request_update()
         }
+
+    } // end method
+
+    // -----------------------------------------------------------------------
+    // Propagate event where user clicks a filename, such as in plate_list_ux.
+    handle_plate_picked(event) {
+        var F = "Index::handle_plate_picked";
+
+        var crystal_plate_uuid = event.detail.crystal_plate_uuid;
+
+        // Tell the image list to show the images from the new plate.
+        this.#image_list_ux.set_crystal_plate_uuid(crystal_plate_uuid);
+
+        this.#tabs_manager.switch_to_tab("tab-image-list")
+
+        // Resize the displayed plate according to the current screen size.
+        // this.resize_plate()
 
     } // end method
 
