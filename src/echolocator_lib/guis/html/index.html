@@ -33,6 +33,7 @@
     <script src="javascript/echolocator/ux_base.js"></script>
     <script src="javascript/echolocator/ux_auto_update.js"></script>
     <script src="javascript/echolocator/tabs_manager.js"></script>
+    <script src="javascript/echolocator/plate_list_ux.js"></script>
     <script src="javascript/echolocator/image_list_ux.js"></script>
     <script src="javascript/echolocator/image_edit_ux.js"></script>
     <script src="javascript/echolocator/centroid_ux.js"></script>
@@ -43,6 +44,7 @@
 
     <!-- Styles for this page. -->
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/plate_list_ux.css">
     <link rel="stylesheet" href="css/image_list_ux.css">
     <link rel="stylesheet" href="css/image_edit_ux.css">
     <link rel="stylesheet" href="css/pixel_ux.css">
@@ -54,9 +56,24 @@
         <div class="T_tabs" id="tabs">
 
             <ul>
+                <li><a href="#tab-plate-list">Plate List</a></li>
                 <li><a href="#tab-image-list">Image List</a></li>
                 <li><a href="#tab-image-edit">Image Details</a></li>
             </ul>
+
+
+            <div id="tab-plate-list">
+                <div id="plate_list_ux_interaction_parent">
+                    <div class="T_auto_update">
+                        <div class="T_toggle">AUTO</div>
+                        <div class="T_status">-</div>
+                    </div>
+                    <div class="T_section">
+                        <div class="T_title" title="plate list">Plate List</div>
+                        <div class="T_composed T_plate_list" style="overflow:scroll; height: 100%;">-</div>
+                    </div>
+                </div>
+            </div><!-- tab-plate-list -->
 
 
             <div id="tab-image-list">
@@ -86,7 +103,7 @@
                     </div>
                     <div class="T_section">
                         <div class="T_title" title="image list">Image List</div>
-                        <div class="T_composed T_image_list" style="overflow:scroll;height: 100%;">-</div>
+                        <div class="T_composed T_image_list" style="overflow:scroll; height: 100%;">-</div>
                     </div>
                 </div>
             </div><!-- tab-image-list -->

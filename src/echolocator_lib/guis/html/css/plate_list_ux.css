@@ -1,0 +1,19 @@
+#plate_list_ux_interaction_parent {}
+
+#plate_list_ux_interaction_parent .T_plate_list TR {
+    cursor: pointer
+}
+
+#plate_list_ux_interaction_parent .T_uuid {
+    display: none;
+}
+
+#plate_list_ux_interaction_parent TH,
+#plate_list_ux_interaction_parent TD {
+    vertical-align: bottom;
+}
+
+/* Fields with integer counts. */
+#plate_list_ux_interaction_parent .T_count {
+    text-align: right;
+}

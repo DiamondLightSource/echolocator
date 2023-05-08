@@ -9,6 +9,7 @@ import numpy as np
 from dls_utilpack.thing import Thing
 
 # Models which we can compose.
+from xchembku_api.models.crystal_plate_report_model import CrystalPlateReportModel
 from xchembku_api.models.crystal_well_needing_droplocation_model import (
     CrystalWellNeedingDroplocationModel,
 )
@@ -164,6 +165,100 @@ class Html(Thing):
             html_lines.append("<td class='T_error'>" + html.escape(error) + "</td>")
 
             html_lines.append("</td>")
+
+            html_lines.append("</tr>")
+
+        html_lines.append("</tbody>")
+
+        html_lines.append("</table>")
+
+        return "\n".join(html_lines)
+
+    # ----------------------------------------------------------------------------------------
+    def compose_crystal_plate_report(self, models: List[CrystalPlateReportModel]):
+        """
+        Compose the crystal plates as an html table.
+        """
+
+        field_names = [
+            {"text": "uuid", "class": "T_uuid"},
+            {"text": "formulatrix plate id", "class": "T_formulatrix__plate__id"},
+            {
+                "text": "formulatrix experiment name",
+                "class": "T_formulatrix__experiment__name",
+            },
+            {"text": "rockminer collected stem", "class": "T_rockminer_collected_stem"},
+            {"text": "barcode", "class": "T_barcode"},
+            {"text": "visit", "class": "T_visit"},
+            {"text": "collected from Luigi", "class": "T_collected_count T_count"},
+            {"text": "chimp processed", "class": "T_chimped_count T_count"},
+            {"text": "undecided", "class": "T_undecided_count T_count"},
+            {
+                "text": "undecided with crystals",
+                "class": "T_undecided_crystals_count T_count",
+            },
+            {"text": "decided", "class": "T_decided_count T_count"},
+            {"text": "usable", "class": "T_decided_usable_count T_count"},
+            {
+                "text": "unusable",
+                "class": "T_decided_unusable_count T_count",
+            },
+        ]
+
+        html_lines = []
+
+        html_lines.append("<table>")
+        html_lines.append("<thead>")
+        html_lines.append("<tr>")
+        for field_name in field_names:
+            if isinstance(field_name, dict):
+                html_lines.append(
+                    f"<th class='{field_name['class']}'>{field_name['text']}</th>"
+                )
+            else:
+                html_lines.append(f"<th>{field_name}</th>")
+        html_lines.append("</tr>")
+        html_lines.append("</thead>")
+
+        html_lines.append("<tbody>")
+
+        # Traverse all the given records.
+        for model in models:
+            uuid = model.uuid
+            html_lines.append(f"<tr crystal_plate_uuid='{uuid}'>")
+            html_lines.append(f"<td class='T_uuid'>{uuid}</td>")
+            html_lines.append(
+                f"<td class='T_formulatrix__plate__id'>{model.formulatrix__plate__id}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_formulatrix__experiment__name'>{model.formulatrix__experiment__name}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_rockminer_collected_stem'>{model.rockminer_collected_stem}</td>"
+            )
+            html_lines.append(f"<td class='T_barcode'>{model.barcode}</td>")
+            html_lines.append(f"<td class='T_visit'>{model.visit}</td>")
+            html_lines.append(
+                f"<td class='T_collected_count T_count'>{model.collected_count}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_chimped_count T_count'>{model.chimped_count}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_undecided_count T_count'>{model.undecided_count}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_undecided_crystals_count T_count'>{model.undecided_crystals_count}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_decided_count T_count'>{model.decided_count}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_decided_usable_count T_count'>{model.decided_usable_count}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_decided_unusable_count T_count'>{model.decided_unusable_count}</td>"
+            )
 
             html_lines.append("</tr>")
 

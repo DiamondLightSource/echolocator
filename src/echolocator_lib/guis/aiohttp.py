@@ -165,21 +165,16 @@ class Aiohttp(Thing, BaseAiohttp):
     # ----------------------------------------------------------------------------------------
     async def direct_shutdown(self):
         """"""
-        logger.debug(f"[ECHDON] {callsign(self)} in direct_shutdown")
 
         # Forget we have an xchembku client reference.
         self.__xchembku = None
 
         if self.__xchembku_client_context is not None:
-            logger.debug(f"[ECHDON] {callsign(self)} exiting __xchembku_client_context")
             await self.__xchembku_client_context.aexit()
-            logger.debug(f"[ECHDON] {callsign(self)} exited __xchembku_client_context")
             self.__xchembku_client_context = None
 
         # Let the base class stop the server event looping.
         await self.base_direct_shutdown()
-
-        logger.debug(f"[ECHDON] {callsign(self)} called base_direct_shutdown")
 
     # ----------------------------------------------------------------------------------------
     async def dispatch(self, request_dict, opaque):
@@ -200,11 +195,14 @@ class Aiohttp(Thing, BaseAiohttp):
         if command == Commands.SELECT_TAB:
             return await self.__select_tab(opaque, request_dict)
 
-        if command == Commands.FETCH_IMAGE:
-            return await self.__fetch_image(opaque, request_dict)
+        elif command == Commands.REPORT_PLATES:
+            return await self.__report_plates(opaque, request_dict)
 
         elif command == Commands.FETCH_IMAGE_LIST:
             return await self.__fetch_image_list(opaque, request_dict)
+
+        if command == Commands.FETCH_IMAGE:
+            return await self.__fetch_image(opaque, request_dict)
 
         elif command == Commands.EXPORT_TO_SOAKDB3:
             return await self.__export_to_soakdb3(opaque, request_dict)
@@ -245,69 +243,29 @@ class Aiohttp(Thing, BaseAiohttp):
         return response
 
     # ----------------------------------------------------------------------------------------
-    async def __fetch_image(self, opaque, request_dict):
+    async def __report_plates(self, opaque, request_dict):
 
-        # Get uuid from the cookie if it's not being posted here.
-        crystal_well_uuid = await self.set_or_get_cookie_content(
-            opaque,
-            Cookies.IMAGE_EDIT_UX,
-            "crystal_well_uuid",
-            request_dict.get("crystal_well_uuid"),
-            "",
+        # Remember last posted value for auto_update_enabled.
+        auto_update_enabled = await self._handle_auto_update(
+            opaque, request_dict, Cookies.PLATE_LIST_UX
         )
 
-        logger.info(
-            f"fetching image from crystal_well_uuid {crystal_well_uuid}"
-            f" direction {request_dict.get('direction')}"
+        # Start a filter where we anchor on the given image.
+        filter = CrystalPlateFilterModel()
+
+        # Fetch the list from the xchembku.
+        crystal_plate_report_models = await self.__xchembku.report_crystal_plates(
+            filter
         )
 
-        # Not able to get an image from posted value or cookie?
-        # Usually first time visiting Image Details tab when no image picked from list.
-        if crystal_well_uuid == "":
-            response = {"record": None}
-            return response
-
-        # Start a filter where we anchor on the given well.
-        filter = CrystalWellFilterModel(
-            anchor=crystal_well_uuid,
-            limit=1,
-            sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
+        html = echolocator_composers_get_default().compose_crystal_plate_report(
+            crystal_plate_report_models
         )
 
-        # Caller is providing visit?
-        visit = request_dict.get("visit")
-        if visit is not None:
-            filter.visit = visit
-
-        # Image previous or next?
-        direction = request_dict.get("direction", 0)
-        if direction != 0:
-            filter.direction = direction
-
-        should_show_only_undecided = await self.set_or_get_cookie_content(
-            opaque,
-            Cookies.IMAGE_LIST_UX,
-            "should_show_only_undecided",
-            request_dict.get("should_show_only_undecided"),
-            False,
-        )
-        if should_show_only_undecided:
-            filter.is_decided = False
-
-        crystal_well_models = (
-            await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
-        )
-
-        if len(crystal_well_models) == 0:
-            response = {"record": None}
-            if direction != 0:
-                response["confirmation"] = "there are no more images in this direction"
-            return response
-
-        # Presumably there is only one image of interest.
-        record = crystal_well_models[0].dict()
-        record["filename"] = "filestore" + record["filename"]
-        response = {"record": record}
+        response = {
+            "html": html,
+            "auto_update_enabled": auto_update_enabled,
+        }
 
         return response
 
@@ -383,6 +341,73 @@ class Aiohttp(Thing, BaseAiohttp):
             "filters": filters,
             "auto_update_enabled": auto_update_enabled,
         }
+
+        return response
+
+    # ----------------------------------------------------------------------------------------
+    async def __fetch_image(self, opaque, request_dict):
+
+        # Get uuid from the cookie if it's not being posted here.
+        crystal_well_uuid = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.IMAGE_EDIT_UX,
+            "crystal_well_uuid",
+            request_dict.get("crystal_well_uuid"),
+            "",
+        )
+
+        logger.info(
+            f"fetching image from crystal_well_uuid {crystal_well_uuid}"
+            f" direction {request_dict.get('direction')}"
+        )
+
+        # Not able to get an image from posted value or cookie?
+        # Usually first time visiting Image Details tab when no image picked from list.
+        if crystal_well_uuid == "":
+            response = {"record": None}
+            return response
+
+        # Start a filter where we anchor on the given well.
+        filter = CrystalWellFilterModel(
+            anchor=crystal_well_uuid,
+            limit=1,
+            sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
+        )
+
+        # Caller is providing visit?
+        visit = request_dict.get("visit")
+        if visit is not None:
+            filter.visit = visit
+
+        # Image previous or next?
+        direction = request_dict.get("direction", 0)
+        if direction != 0:
+            filter.direction = direction
+
+        should_show_only_undecided = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.IMAGE_LIST_UX,
+            "should_show_only_undecided",
+            request_dict.get("should_show_only_undecided"),
+            False,
+        )
+        if should_show_only_undecided:
+            filter.is_decided = False
+
+        crystal_well_models = (
+            await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
+        )
+
+        if len(crystal_well_models) == 0:
+            response = {"record": None}
+            if direction != 0:
+                response["confirmation"] = "there are no more images in this direction"
+            return response
+
+        # Presumably there is only one image of interest.
+        record = crystal_well_models[0].dict()
+        record["filename"] = "filestore" + record["filename"]
+        response = {"record": record}
 
         return response
 
