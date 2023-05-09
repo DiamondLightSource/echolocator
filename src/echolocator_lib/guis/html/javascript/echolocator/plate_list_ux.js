@@ -122,8 +122,8 @@ class echolocator__PlateListUx extends echolocator__UxAutoUpdate {
             {
                 detail: {
                     crystal_plate_uuid: crystal_plate_uuid,
-                    barcode: barcode,
-                    visit: visit
+                    visit: visit,
+                    barcode: barcode
                 }
             });
 

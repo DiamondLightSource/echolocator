@@ -59,9 +59,21 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     } // end method
 
     // -------------------------------------------------------------
+
+    show_first_image(visit_filter, barcode_filter, should_show_only_undecided) {
+        var F = "echolocator__ImageListUx::show_first_image"
+
+        this.#visit_filter = visit_filter;
+        this.#barcode_filter = barcode_filter;
+        this.#should_show_only_undecided = should_show_only_undecided;
+        this.request_update(true);
+
+    } // end method
+
+    // -------------------------------------------------------------
     // Request update from database.
 
-    request_update() {
+    request_update(show_first_image) {
 
         var json_object = {}
         json_object[this.COMMAND] = this.FETCH_IMAGE_LIST;
@@ -74,7 +86,8 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
             json_object["barcode_filter"] = this.#barcode_filter;
         if (this.#should_show_only_undecided !== undefined)
             json_object["should_show_only_undecided"] = this.#should_show_only_undecided;
-
+        if (show_first_image !== undefined)
+            json_object["show_first_image"] = show_first_image;
 
         this.send(json_object);
 
@@ -115,6 +128,17 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
             this.#jquery_objects.$div.html(html);
             // Attach events to all the individual job links in the "recent jobs" grid.
             this._attach_links();
+        }
+
+        // Response includes "first image"?
+        var crystal_well_uuid = response.crystal_well_uuid;
+
+        // Post this up to the page to switch tabs, similar to clicking on a row.
+        if (crystal_well_uuid !== null && crystal_well_uuid !== undefined) {
+
+            this._load_image(crystal_well_uuid);
+
+            this.set_and_render_auto_update(false);
         }
     }
 

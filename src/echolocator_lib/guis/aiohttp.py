@@ -333,6 +333,8 @@ class Aiohttp(Thing, BaseAiohttp):
             False,
         )
 
+        show_first_image = request_dict.get("show_first_image", False)
+
         if visit_filter is None:
             visit_filter = ""
         visit_filter = visit_filter.strip()
@@ -349,12 +351,14 @@ class Aiohttp(Thing, BaseAiohttp):
 
         if visit_filter == "":
             html = "please enter a visit"
+            crystal_well_uuid = None
 
         else:
             logger.debug(
                 f"fetching image records, visit_filter is '{visit_filter}' and "
                 f" barcode_filter is '{barcode_filter}' and "
-                f" should_show_only_undecided is '{should_show_only_undecided}'"
+                f" should_show_only_undecided is '{should_show_only_undecided}' and"
+                f" show_first_image is '{show_first_image}'"
             )
 
             # Start a filter where we anchor on the given image.
@@ -374,17 +378,31 @@ class Aiohttp(Thing, BaseAiohttp):
             if should_show_only_undecided:
                 filter.is_decided = False
 
-            # Fetch the list from the xchembku.
+            if show_first_image:
+                filter.limit = 1
+
+            # Fetch the first image or list from the xchembku.
             crystal_well_models = (
                 await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
             )
 
-            html = echolocator_composers_get_default().compose_image_list(
-                crystal_well_models
-            )
+            # Asking for first image only, and there are any?
+            if show_first_image and len(crystal_well_models) > 0:
+                # Give the first image uuid in the response.
+                crystal_well_uuid = crystal_well_models[0].uuid
+                # Don't give html in the response.
+                html = None
+            # Asking for image list?
+            else:
+                # Give the html.
+                html = echolocator_composers_get_default().compose_image_list(
+                    crystal_well_models
+                )
+                crystal_well_uuid = None
 
         response = {
             "html": html,
+            "crystal_well_uuid": crystal_well_uuid,
             "filters": filters,
             "auto_update_enabled": auto_update_enabled,
         }
@@ -425,6 +443,11 @@ class Aiohttp(Thing, BaseAiohttp):
         visit = request_dict.get("visit")
         if visit is not None:
             filter.visit = visit
+
+        # Caller is providing barcode?
+        barcode = request_dict.get("barcode")
+        if barcode is not None:
+            filter.barcode = barcode
 
         # Image previous or next?
         direction = request_dict.get("direction", 0)

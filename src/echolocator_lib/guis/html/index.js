@@ -172,12 +172,12 @@ class Index extends echolocator__Page {
         var visit_filter = event.detail.visit;
         var barcode_filter = event.detail.barcode;
 
-        console.log(F + ": visit is \"" + visit + "\", barcode is \"" + barcode + "\"")
+        console.log(F + ": visit is \"" + visit_filter + "\", barcode is \"" + barcode_filter + "\"")
 
         // Tell the image list to show the images from the new plate.
-        this.#image_list_ux.show_list(visit_filter, barcode_filter, true);
+        this.#image_list_ux.show_first_image(visit_filter, barcode_filter, true);
 
-        this.#tabs_manager.switch_to_tab("tab-image-list")
+        this.#tabs_manager.switch_to_tab("tab-image-edit")
 
     } // end method
 
