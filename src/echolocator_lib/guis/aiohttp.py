@@ -285,6 +285,14 @@ class Aiohttp(Thing, BaseAiohttp):
             None,
         )
 
+        barcode_filter = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.IMAGE_LIST_UX,
+            "barcode_filter",
+            request_dict.get("barcode_filter"),
+            None,
+        )
+
         should_show_only_undecided = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_LIST_UX,
@@ -297,8 +305,13 @@ class Aiohttp(Thing, BaseAiohttp):
             visit_filter = ""
         visit_filter = visit_filter.strip()
 
+        if barcode_filter is None:
+            barcode_filter = ""
+        barcode_filter = barcode_filter.strip()
+
         filters = {
             "visit_filter": visit_filter,
+            "barcode_filter": barcode_filter,
             "should_show_only_undecided": should_show_only_undecided,
         }
 
@@ -308,12 +321,14 @@ class Aiohttp(Thing, BaseAiohttp):
         else:
             logger.debug(
                 f"fetching image records, visit_filter is '{visit_filter}' and "
+                f" barcode_filter is '{barcode_filter}' and "
                 f" should_show_only_undecided is '{should_show_only_undecided}'"
             )
 
             # Start a filter where we anchor on the given image.
             filter = CrystalWellFilterModel(
                 visit=visit_filter,
+                barcode=barcode_filter,
                 sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
             )
 

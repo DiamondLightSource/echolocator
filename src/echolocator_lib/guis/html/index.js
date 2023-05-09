@@ -82,7 +82,7 @@ class Index extends echolocator__Page {
             echolocator__Events_TABS_CREATED_EVENT,
             function (event) { that.handle_tabs_created(event); });
 
-        // User picks an pl;ate from the ate list.
+        // User picks an plate from the plate list.
         this.#plate_list_ux.addEventListener(
             echolocator__Events_PLATE_PICKED_EVENT,
             function (event) { that.handle_plate_picked(event); });
@@ -168,15 +168,16 @@ class Index extends echolocator__Page {
     handle_plate_picked(event) {
         var F = "Index::handle_plate_picked";
 
-        var crystal_plate_uuid = event.detail.crystal_plate_uuid;
+        // Get the visit and barcode provided by the plate row that was clicked.
+        var visit_filter = event.detail.visit;
+        var barcode_filter = event.detail.barcode;
+
+        console.log(F + ": visit is \"" + visit + "\", barcode is \"" + barcode + "\"")
 
         // Tell the image list to show the images from the new plate.
-        this.#image_list_ux.set_crystal_plate_uuid(crystal_plate_uuid);
+        this.#image_list_ux.show_list(visit_filter, barcode_filter, true);
 
         this.#tabs_manager.switch_to_tab("tab-image-list")
-
-        // Resize the displayed plate according to the current screen size.
-        // this.resize_plate()
 
     } // end method
 

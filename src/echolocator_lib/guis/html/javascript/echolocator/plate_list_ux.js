@@ -11,7 +11,6 @@ class echolocator__PlateListUx extends echolocator__UxAutoUpdate {
 
         this.plugin_link_name = plugin_link_name;
         this.$interaction_parent = $interaction_parent;
-        this.plate_rows = undefined;
     }
 
     // -------------------------------------------------------------
@@ -59,37 +58,24 @@ class echolocator__PlateListUx extends echolocator__UxAutoUpdate {
 
     // -------------------------------------------------------------
 
-    _handle_plate_clicked(jquery_event_object) {
+    _handle_undecided_crystals_clicked(jquery_event_object) {
 
-        var $plate_row = $(jquery_event_object.target);
-
-        // User clicked on a cell within the row?
-        if ($plate_row.get(0).tagName == "TD")
-            $plate_row = $plate_row.parent();
+        var $plate_row = $(jquery_event_object.target).closest("TR");
 
         // The row has the attribute holding the crystal plate of this row.
         var crystal_plate_uuid = $plate_row.attr("crystal_plate_uuid");
 
-        this._load_plate(crystal_plate_uuid);
-
-        this.set_and_render_auto_update(false);
-
-    } // end method
-
-    // -------------------------------------------------------------
-
-    _load_plate(crystal_plate_uuid) {
-        var F = "echolocator__PlateListUx::_load_plate";
-
-        console.log(F + ": loading plate for crystal_plate_uuid " + crystal_plate_uuid)
-
-        //     this.$plate_rows.removeClass("T_picked");
-        //     plate_info.$plate_row.addClass("T_picked");
+        var visit = $("#visit", $plate_row).text();
+        var barcode = $("#barcode", $plate_row).text();
 
         // Trigger an event that the index.js will use to coordinate cross-widget changes.
         var custom_event = new CustomEvent(echolocator__Events_PLATE_PICKED_EVENT,
             {
-                detail: { crystal_plate_uuid: crystal_plate_uuid }
+                detail: {
+                    crystal_plate_uuid: crystal_plate_uuid,
+                    barcode: barcode,
+                    visit: visit
+                }
             });
 
         this.dispatchEvent(custom_event);
@@ -104,8 +90,11 @@ class echolocator__PlateListUx extends echolocator__UxAutoUpdate {
 
         var that = this;
 
-        this.$plate_rows = $(".T_plate_list TR", this.$interaction_parent);
-        this.$plate_rows.click(function (jquery_event_object) { that._handle_plate_clicked(jquery_event_object); })
+        var $undecided_crystals = $("TD.T_undecided_crystals_count", this.$interaction_parent);
+        $undecided_crystals.click(function (jquery_event_object) { that._handle_undecided_crystals_clicked(jquery_event_object); })
+
+        var $usable_unexported = $("TD.T_usable_unexported_count", this.$interaction_parent);
+        $usable_unexported.click(function (jquery_event_object) { that._handle_usable_unexported_clicked(jquery_event_object); })
 
     }
 

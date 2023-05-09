@@ -182,19 +182,19 @@ class Html(Thing):
 
         field_names = [
             {"text": "uuid", "class": "T_uuid"},
-            {"text": "formulatrix plate id", "class": "T_formulatrix__plate__id"},
-            {
-                "text": "formulatrix experiment name",
-                "class": "T_formulatrix__experiment__name",
-            },
+            {"text": "plate id", "class": "T_formulatrix__plate__id"},
             {"text": "rockminer collected stem", "class": "T_rockminer_collected_stem"},
             {"text": "barcode", "class": "T_barcode"},
+            {
+                "text": "plate name",
+                "class": "T_formulatrix__experiment__name",
+            },
             {"text": "visit", "class": "T_visit"},
-            {"text": "collected from Luigi", "class": "T_collected_count T_count"},
-            {"text": "chimp processed", "class": "T_chimped_count T_count"},
+            {"text": "luigi", "class": "T_collected_count T_count"},
+            {"text": "chimp", "class": "T_chimped_count T_count"},
             {"text": "undecided", "class": "T_undecided_count T_count"},
             {
-                "text": "undecided with crystals",
+                "text": "ready to verify",
                 "class": "T_undecided_crystals_count T_count",
             },
             {"text": "decided", "class": "T_decided_count T_count"},
@@ -236,13 +236,15 @@ class Html(Thing):
                 f"<td class='T_formulatrix__plate__id'>{model.formulatrix__plate__id}</td>"
             )
             html_lines.append(
-                f"<td class='T_formulatrix__experiment__name'>{model.formulatrix__experiment__name}</td>"
-            )
-            html_lines.append(
                 f"<td class='T_rockminer_collected_stem'>{model.rockminer_collected_stem}</td>"
             )
-            html_lines.append(f"<td class='T_barcode'>{model.barcode}</td>")
-            html_lines.append(f"<td class='T_visit'>{model.visit}</td>")
+            html_lines.append(
+                f"<td id='barcode' class='T_barcode'>{model.barcode}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_formulatrix__experiment__name'>{model.formulatrix__experiment__name}</td>"
+            )
+            html_lines.append(f"<td id='visit' class='T_visit'>{model.visit}</td>")
             html_lines.append(
                 f"<td class='T_collected_count T_count'>{model.collected_count}</td>"
             )
