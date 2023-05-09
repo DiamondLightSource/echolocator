@@ -67,9 +67,14 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         json_object[this.COMMAND] = this.FETCH_IMAGE_LIST;
         json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME];
 
-        json_object["visit_filter"] = this.#visit_filter;
-        json_object["barcode_filter"] = this.#barcode_filter;
-        json_object["should_show_only_undecided"] = this.#should_show_only_undecided;
+        // Don't post any value if none defined yet, this will allow them to come from cookie, if any.
+        if (this.#visit_filter !== undefined)
+            json_object["visit_filter"] = this.#visit_filter;
+        if (this.#barcode_filter !== undefined)
+            json_object["barcode_filter"] = this.#barcode_filter;
+        if (this.#should_show_only_undecided !== undefined)
+            json_object["should_show_only_undecided"] = this.#should_show_only_undecided;
+
 
         this.send(json_object);
 

@@ -250,8 +250,39 @@ class Aiohttp(Thing, BaseAiohttp):
             opaque, request_dict, Cookies.PLATE_LIST_UX
         )
 
-        # Start a filter where we anchor on the given image.
-        filter = CrystalPlateFilterModel()
+        visit_filter = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.PLATE_LIST_UX,
+            "visit_filter",
+            request_dict.get("visit_filter"),
+            None,
+        )
+
+        should_show_only_needing_intervention = await self.set_or_get_cookie_content(
+            opaque,
+            Cookies.PLATE_LIST_UX,
+            "should_show_only_needing_intervention",
+            request_dict.get("should_show_only_needing_intervention"),
+            False,
+        )
+
+        filters = {
+            "visit_filter": visit_filter,
+            "should_show_only_needing_intervention": should_show_only_needing_intervention,
+        }
+
+        # Start a filter where default is sorted on reverse.
+        filter = CrystalPlateFilterModel(direction=-1)
+
+        logger.debug(
+            f"fetching image records, visit_filter is '{visit_filter}' and "
+            f" should_show_only_needing_intervention is '{should_show_only_needing_intervention}'"
+        )
+
+        if visit_filter is not None and visit_filter.strip() != "":
+            filter.visit = visit_filter
+        if should_show_only_needing_intervention:
+            filter.needing_intervention = True
 
         # Fetch the list from the xchembku.
         crystal_plate_report_models = await self.__xchembku.report_crystal_plates(
@@ -264,6 +295,7 @@ class Aiohttp(Thing, BaseAiohttp):
 
         response = {
             "html": html,
+            "filters": filters,
             "auto_update_enabled": auto_update_enabled,
         }
 

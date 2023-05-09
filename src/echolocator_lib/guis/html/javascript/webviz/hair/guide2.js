@@ -76,7 +76,7 @@ class webviz__hair__Guide2 extends common__Base {
             var setting = settings[k];
 
             if (k == "position") {
-                console.log(F + ": setting position [" + setting.x + ", " + setting.y + "]")
+                // console.log(F + ": setting position [" + setting.x + ", " + setting.y + "]")
 
                 // Something wrong with settings?
                 if (!isNaN(setting.x) && !isNaN(setting.y)) {

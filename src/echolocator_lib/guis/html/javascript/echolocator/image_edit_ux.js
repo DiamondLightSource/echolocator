@@ -463,7 +463,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         var w = $("#image1_viewport").width()
         var h = $("#image1_viewport").height()
 
-        console.log(F + " image1_viewport size is [" + w + ", " + h + "]");
+        // console.log(F + " image1_viewport size is [" + w + ", " + h + "]");
 
         // Resize the annotation overlay.
         $("#raphael1_viewport").width(w)
@@ -497,7 +497,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         var w = record.width;
         var h = record.height;
 
-        console.log(F + " image data size is [" + w + ", " + h + "]");
+        // console.log(F + " image data size is [" + w + ", " + h + "]");
 
         // To transform coordinates.
         this.#transformer.set_data({ x1: 0, y1: 0, x2: w, y2: h })
@@ -505,7 +505,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // Transform data to view.
         var view_position = this.#transformer.data_to_view({ x: w, y: h })
 
-        console.log(F + " data to view is [" + view_position.x + ", " + view_position.y + "]");
+        // console.log(F + " data to view is [" + view_position.x + ", " + view_position.y + "]");
 
         // TODO: Move detector1_image resize into image_edit_ux.
         var $img = $("#detector1_image")

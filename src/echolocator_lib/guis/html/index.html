@@ -68,6 +68,18 @@
                         <div class="T_toggle">AUTO</div>
                         <div class="T_status">-</div>
                     </div>
+                    <div class="T_inputs" style="margin-top: 8px; margin-bottom: 8px;">
+                        <div class="T_row">
+                            <div class="T_field">
+                                <div class="T_prompt">visit</div>
+                                <div class="T_input"><input type="text" id="visit_filter" class="T_visit_filter"></div>
+                                <div class="T_separator"></div>
+                                <div class="T_prompt">show only needing intervention</div>
+                                <div class="T_input"><input id="should_show_only_needing_intervention" type="checkbox"
+                                        class="T_should_show_only_needing_intervention"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="T_section">
                         <div class="T_title" title="plate list">Plate List</div>
                         <div class="T_composed T_plate_list" style="overflow:scroll; height: 100%;">-</div>
@@ -91,11 +103,6 @@
                             <div class="T_prompt">barcode</div>
                             <div class="T_input"><input type="text" id="barcode_filter" class="T_barcode_filter"></div>
                             <div class="T_separator"></div>
-
-                            <button class="T_export_to_soakdb3_button" title="export to soakdb3 database">Export to
-                                Soakdb3</button>
-                            <div class="T_separator"></div>
-                            <button class="T_export_to_csv_button" title="export to csv file">Export to CSV</button>
                         </div>
                     </div>
                     <div class="T_inputs" style="margin-top: 8px; margin-bottom: 8px;">
