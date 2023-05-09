@@ -493,6 +493,27 @@ class Aiohttp(Thing, BaseAiohttp):
         # Export the crystal wells to the appropriate soakdb3 visit.
         await self.__export_to_soakdb3_visit(visit_filter, crystal_well_models)
 
+        # Make the list of droplocations to update with the exported flag.
+        crystal_well_droplocation_models: List[CrystalWellDroplocationModel] = list()
+        for crystal_well_model in crystal_well_models:
+            # We only need the crystal_well_uuid for upserting.
+            # This will have to be revisited if we ever want multiple droplocations on a single well.
+            crystal_well_droplocation_model = CrystalWellDroplocationModel(
+                crystal_plate_uuid=crystal_well_model.uuid,
+                is_exported_to_soakdb3=True,
+            )
+            crystal_well_droplocation_models.append(crystal_well_droplocation_model)
+
+        # Update the database for those that just got exported.
+        # TODO: Use a bulk update when setting is_exported_to_soakdb3 field after export.
+        result_counts = await self.__xchembku.upsert_crystal_well_droplocations(
+            crystal_well_droplocation_models,
+            only_fields=["is_exported_to_soakdb3"],
+            why="setting is_exported_to_soakdb3 field after export",
+        )
+
+        logger.debug(f"result_counts {result_counts}")
+
         response = {
             "confirmation": f"exported {len(crystal_well_models)} rows to soakdb3 visit {visit_filter}"
         }

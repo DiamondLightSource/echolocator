@@ -16,10 +16,11 @@ from soakdb3_api.datafaces.datafaces import (
 
 # The service process startup/teardown context.
 from soakdb3_lib.datafaces.context import Context as Soakdb3DatafaceServerContext
-
-# Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
 from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
+
+# Things xchembku provides.
+from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
 
 # Client context creator.
 from echolocator_api.guis.context import Context as GuiClientContext
@@ -115,11 +116,11 @@ class ExportToSoakdb3Tester(Base):
                         async with gui_client_context:
                             # And the gui server context which starts the coro.
                             async with gui_server_context:
-                                await self.__run_part1(constants, output_directory)
+                                await self.__run_the_test(constants, output_directory)
 
     # ----------------------------------------------------------------------------------------
 
-    async def __run_part1(self, constants, output_directory):
+    async def __run_the_test(self, constants, output_directory):
         """ """
 
         # Reference the soakdb3 dataface object which the context has set up as the default.
@@ -210,3 +211,11 @@ class ExportToSoakdb3Tester(Base):
         assert queried_models[2].CrystalWell == "05A_1"
         assert int(queried_models[2].EchoX) == 289
         assert int(queried_models[2].EchoY) == 9
+
+        # Check the results stored in xchembku, the exported flag should be set.
+        crystal_well_models = (
+            await self.__xchembku.fetch_crystal_wells_needing_droplocation(
+                CrystalWellFilterModel(is_exported_to_soakdb3=True)
+            )
+        )
+        assert len(crystal_well_models) == 3
