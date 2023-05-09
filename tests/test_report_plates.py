@@ -174,8 +174,10 @@ class ReportPlatesTester(Base):
 
         # Check the first row's contents.
         row = rows[1]
-        columns = row.find_all(class_="T_collected_count")[0].get_text() == "6"
-        columns = row.find_all(class_="T_chimped_count")[0].get_text() == "5"
-        columns = row.find_all(class_="T_undecided_count")[0].get_text() == "2"
-        columns = row.find_all(class_="T_undecided_crystals_count")[0].get_text() == "2"
-        columns = row.find_all(class_="T_decided_count")[0].get_text() == "3"
+        row.find_all(class_="T_collected_count")[0].get_text() == "6"
+        row.find_all(class_="T_chimped_count")[0].get_text() == "5"
+        row.find_all(class_="T_undecided_count")[0].get_text() == "2"
+        row.find_all(class_="T_undecided_crystals_count")[0].get_text() == "2"
+        row.find_all(class_="T_decided_count")[0].get_text() == "3"
+        row.find_all(class_="T_exported_count")[0].get_text() == "0"
+        row.find_all(class_="T_usable_unexported_count")[0].get_text() == "3"

@@ -203,6 +203,11 @@ class Html(Thing):
                 "text": "unusable",
                 "class": "T_decided_unusable_count T_count",
             },
+            {"text": "exported", "class": "T_exported_count T_count"},
+            {
+                "text": "ready to export",
+                "class": "T_usable_unexported_count T_count",
+            },
         ]
 
         html_lines = []
@@ -258,6 +263,12 @@ class Html(Thing):
             )
             html_lines.append(
                 f"<td class='T_decided_unusable_count T_count'>{model.decided_unusable_count}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_exported_count T_count'>{model.exported_count}</td>"
+            )
+            html_lines.append(
+                f"<td class='T_usable_unexported_count T_count'>{model.usable_unexported_count}</td>"
             )
 
             html_lines.append("</tr>")
