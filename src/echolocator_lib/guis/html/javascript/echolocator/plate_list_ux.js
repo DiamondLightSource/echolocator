@@ -3,6 +3,8 @@
 class echolocator__PlateListUx extends echolocator__UxAutoUpdate {
     COOKIE_NAME = "PLATE_LIST_UX";
     REPORT_PLATES = "echolocator_guis::commands::report_plates";
+    EXPORT_TO_SOAKDB3 = "echolocator_guis::commands::export_to_soakdb3";
+    EXPORT_TO_CSV = "echolocator_guis::commands::export_to_csv";
 
     #jquery_objects = {};
 
@@ -79,6 +81,27 @@ class echolocator__PlateListUx extends echolocator__UxAutoUpdate {
             });
 
         this.dispatchEvent(custom_event);
+
+    } // end method
+
+    // -------------------------------------------------------------
+
+    _handle_usable_unexported_clicked(jquery_event_object) {
+
+        var $plate_row = $(jquery_event_object.target).closest("TR");
+
+        // Get the visit and barcode from the other cells in the row.
+        var visit = $("#visit", $plate_row).text();
+        var barcode = $("#barcode", $plate_row).text();
+
+        // Enable no cookie for this request.
+        var json_object = {}
+        json_object[this.COMMAND] = this.EXPORT_TO_SOAKDB3;
+
+        json_object["visit_filter"] = visit;
+        json_object["barcode_filter"] = barcode;
+
+        this.send(json_object);
 
     } // end method
 

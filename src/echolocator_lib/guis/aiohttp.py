@@ -490,9 +490,16 @@ class Aiohttp(Thing, BaseAiohttp):
             response = {"error": "blank visit was given"}
             return response
 
+        # Caller may provide a barcode.
+        barcode_filter = request_dict.get("barcode_filter", "")
+        barcode_filter = barcode_filter.strip()
+        if barcode_filter == "":
+            barcode_filter = None
+
         # Get a filter for wells we want to export.
         crystal_well_filter = CrystalWellFilterModel(
             visit=visit_filter,
+            barcode=barcode_filter,
             is_decided=True,
             is_usable=True,
             sortby=CrystalWellFilterSortbyEnum.POSITION,
@@ -502,8 +509,10 @@ class Aiohttp(Thing, BaseAiohttp):
         crystal_well_models: List[
             CrystalWellNeedingDroplocationModel
         ] = await self.__xchembku.fetch_crystal_wells_needing_droplocation(
-            crystal_well_filter
+            crystal_well_filter, why="[EXPFIL] get list to be epxorted"
         )
+
+        logger.debug(f"[EXPFIL] found {len(crystal_well_models)} to be exported")
 
         # Export the crystal wells to the appropriate soakdb3 visit.
         await self.__export_to_soakdb3_visit(visit_filter, crystal_well_models)
@@ -514,7 +523,7 @@ class Aiohttp(Thing, BaseAiohttp):
             # We only need the crystal_well_uuid for upserting.
             # This will have to be revisited if we ever want multiple droplocations on a single well.
             crystal_well_droplocation_model = CrystalWellDroplocationModel(
-                crystal_plate_uuid=crystal_well_model.uuid,
+                crystal_well_uuid=crystal_well_model.uuid,
                 is_exported_to_soakdb3=True,
             )
             crystal_well_droplocation_models.append(crystal_well_droplocation_model)
@@ -527,10 +536,24 @@ class Aiohttp(Thing, BaseAiohttp):
             why="setting is_exported_to_soakdb3 field after export",
         )
 
-        logger.debug(f"result_counts {result_counts}")
+        logger.debug(f"[EXPFIL] result_counts {result_counts}")
+
+        # ----------------------------------------------------------------------
+        # Start a filter where we anchor on the given image.
+        filter = CrystalPlateFilterModel()
+
+        # Fetch the list from the xchembku.
+        crystal_plate_report_models = await self.__xchembku.report_crystal_plates(
+            filter
+        )
+
+        html = echolocator_composers_get_default().compose_crystal_plate_report(
+            crystal_plate_report_models
+        )
 
         response = {
-            "confirmation": f"exported {len(crystal_well_models)} rows to soakdb3 visit {visit_filter}"
+            "confirmation": f"exported {len(crystal_well_models)} rows to soakdb3 visit {visit_filter}",
+            "html": html,
         }
 
         return response
