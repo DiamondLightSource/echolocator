@@ -114,10 +114,22 @@ class echolocator__PlateListUx extends echolocator__UxAutoUpdate {
         var that = this;
 
         var $undecided_crystals = $("TD.T_undecided_crystals_count", this.$interaction_parent);
-        $undecided_crystals.click(function (jquery_event_object) { that._handle_undecided_crystals_clicked(jquery_event_object); })
+        $undecided_crystals.each(function () {
+            var j = $(this);
+            if (j.text() !== "0") {
+                j.addClass("T_clickable");
+                j.click(function (jquery_event_object) { that._handle_undecided_crystals_clicked(jquery_event_object); })
+            }
+        })
 
         var $usable_unexported = $("TD.T_usable_unexported_count", this.$interaction_parent);
-        $usable_unexported.click(function (jquery_event_object) { that._handle_usable_unexported_clicked(jquery_event_object); })
+        $usable_unexported.each(function () {
+            var j = $(this);
+            if (j.text() !== "0") {
+                j.addClass("T_clickable");
+                j.click(function (jquery_event_object) { that._handle_usable_unexported_clicked(jquery_event_object); })
+            }
+        })
 
     }
 

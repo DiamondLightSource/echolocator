@@ -26,14 +26,8 @@
     text-align: right;
 }
 
-TD.T_undecided_crystals_count {
+TD.T_clickable {
     color: blue;
     font-weight: bold;
-    cursor: pointer
-}
-
-TD.T_usable_unexported_count {
-    color: blue;
-    font-weight: bold;
-    cursor: pointer
+    cursor: pointer;
 }
