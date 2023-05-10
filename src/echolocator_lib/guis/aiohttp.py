@@ -508,8 +508,7 @@ class Aiohttp(Thing, BaseAiohttp):
         # Caller wants to select the next image automatically?
         if request_dict.get(Keywords.SHOULD_ADVANCE, False):
             # There is a next image in the sequence?
-            crystal_well_index = request_dict.get(Keywords.CRYSTAL_WELL_INDEX)
-            crystal_well_count = request_dict.get(Keywords.CRYSTAL_WELL_COUNT)
+            crystal_well_index = request_dict.get(Keywords.CRYSTAL_WELL_INDEX_NEXT)
 
             if crystal_well_index is not None:
                 # Advance by fetching the next image record after the update.
@@ -521,7 +520,6 @@ class Aiohttp(Thing, BaseAiohttp):
                     ],
                     Keywords.COMMAND: Commands.FETCH_IMAGE,
                     Keywords.CRYSTAL_WELL_INDEX: crystal_well_index,
-                    Keywords.CRYSTAL_WELL_COUNT: crystal_well_count,
                 }
                 response = await self.__fetch_image(opaque, next_request_dict)
                 response[
@@ -601,7 +599,7 @@ class Aiohttp(Thing, BaseAiohttp):
 
         # ----------------------------------------------------------------------
         # Start a filter where we anchor on the given image.
-        filter = CrystalPlateFilterModel()
+        filter = CrystalPlateFilterModel(direction=-1)
 
         # Fetch the list from the xchembku.
         crystal_plate_report_models = await self.__xchembku.report_crystal_plates(

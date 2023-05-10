@@ -39,7 +39,8 @@ INPUT {
 }
 
 INPUT[type=checkbox] {
-  width: 22px;
+  width: auto;
+  margin-left: 0px;
 }
 
 

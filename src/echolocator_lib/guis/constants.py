@@ -4,6 +4,7 @@ class Keywords:
     TAB_ID = "echolocator_guis::keywords::tab_id"
     SHOULD_ADVANCE = "echolocator_guis::keywords::should_advance"
     CRYSTAL_WELL_INDEX = "echolocator_guis::keywords::crystal_well_index"
+    CRYSTAL_WELL_INDEX_NEXT = "echolocator_guis::keywords::crystal_well_index_next"
     CRYSTAL_WELL_COUNT = "echolocator_guis::keywords::crystal_well_count"
 
 

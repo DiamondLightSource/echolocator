@@ -6,9 +6,9 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     CRYSTAL_WELL_INDEX = "echolocator_guis::keywords::crystal_well_index";
 
     #jquery_objects = {};
-    #visit_filter = "undefined";
-    #barcode_filter = "undefined";
-    #should_show_only_undecided = "undefined";
+    #visit_filter = null;
+    #barcode_filter = null;
+    #should_show_only_undecided = null;
 
     constructor(runtime, plugin_link_name, $interaction_parent) {
         super(runtime);
@@ -81,11 +81,11 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME];
 
         // Don't post any value if none defined yet, this will allow them to come from cookie, if any.
-        if (this.#visit_filter !== undefined)
+        if (this.#visit_filter !== undefined && this.#visit_filter !== null)
             json_object["visit_filter"] = this.#visit_filter;
-        if (this.#barcode_filter !== undefined)
+        if (this.#barcode_filter !== undefined && this.#barcode_filter !== null)
             json_object["barcode_filter"] = this.#barcode_filter;
-        if (this.#should_show_only_undecided !== undefined)
+        if (this.#should_show_only_undecided !== undefined && this.#should_show_only_undecided !== null)
             json_object["should_show_only_undecided"] = this.#should_show_only_undecided;
         if (show_first_image !== undefined)
             json_object["show_first_image"] = show_first_image;

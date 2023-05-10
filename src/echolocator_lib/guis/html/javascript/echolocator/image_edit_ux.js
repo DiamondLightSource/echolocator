@@ -5,6 +5,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     FETCH_IMAGE = "echolocator_guis::commands::fetch_image";
     UPDATE = "echolocator_guis::commands::update";
     CRYSTAL_WELL_INDEX = "echolocator_guis::keywords::crystal_well_index";
+    CRYSTAL_WELL_INDEX_NEXT = "echolocator_guis::keywords::crystal_well_index_next";
     CRYSTAL_WELL_COUNT = "echolocator_guis::keywords::crystal_well_count";
     SHOULD_ADVANCE = "echolocator_guis::keywords::should_advance";
 
@@ -131,16 +132,19 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         this.#jquery_objects.reject_button.click(
             function (jquery_event_object) {
+                console.log(F + ": clicked reject");
                 that._send_update(false);
             });
 
         this.#jquery_objects.reset_button.click(
             function (jquery_event_object) {
+                console.log(F + ": clicked undecided");
                 that._send_update(null);
             });
 
         this.#jquery_objects.next_button.click(
             function (jquery_event_object) {
+                console.log(F + ": clicked next");
                 that._handle_previous_or_next(1);
             });
 
@@ -217,7 +221,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     _send_update(is_usable, confirmed_target) {
         var F = "echolocator__ImageEditUx::_handle_is_usable_change";
 
-        if (this.#crystal_well_index) {
+        if (this.#crystal_well_index !== null && this.#crystal_well_index !== undefined) {
             // Build json request.
             var json_object = {}
             // TODO: Remove hardcoded "IMAGE_LIST_UX" in image edit's cookie list.
@@ -227,7 +231,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             // We pass the fields of the database we want updated.
             var model =
             {
-                "set_crystal_well_index": this.#crystal_well_index,
+                "crystal_well_uuid": this.#record.uuid,
                 "is_usable": is_usable
             }
 
@@ -250,11 +254,13 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             // Tell server to add response["html"] for next image in series.
             json_object[this.SHOULD_ADVANCE] = true;
 
+            if (this.#crystal_well_index < this.#crystal_well_count - 1) {
+                json_object[this.CRYSTAL_WELL_INDEX_NEXT] = this.#crystal_well_index + 1;
+                json_object[this.CRYSTAL_WELL_COUNT] = this.#crystal_well_count;
+            }
+
             // Send request to update database immediately.
             this.send(json_object);
-
-            // Move to next image.
-            this.request_update(1);
         }
 
     } // end method
@@ -417,7 +423,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // Render the set_crystal_well_index stuff.
         this.#jquery_objects.$filename.text(record.filename);
         if (record.is_usable === null)
-            record.is_usable = "-";
+            record.is_usable = "undecided";
         if (record.is_usable === true)
             record.is_usable = "yes";
         if (record.is_usable === false)
