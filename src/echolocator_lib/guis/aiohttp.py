@@ -386,12 +386,9 @@ class Aiohttp(Thing, BaseAiohttp):
                 await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
             )
 
-            # Remember the crystal well uuids in the list.
-            lines = []
-            for i, m in enumerate(crystal_well_models):
-                lines.append(f"{i}. {m.position} {m.number_of_crystals} {m.uuid}")
-            logger.debug("\n" + "\n".join(lines))
+            crystal_well_count = len(crystal_well_models)
 
+            # Remember the crystal well uuids in the list in the cookie.
             crystal_well_uuids = [m.uuid for m in crystal_well_models]
             self.set_cookie_content(
                 opaque,
@@ -401,7 +398,7 @@ class Aiohttp(Thing, BaseAiohttp):
             )
 
             # Asking for first image only, and there are any?
-            if show_first_image and len(crystal_well_models) > 0:
+            if show_first_image and crystal_well_count > 0:
                 # Give the first image index in the response.
                 crystal_well_index = 0
                 # Don't give html in the response.
@@ -417,6 +414,7 @@ class Aiohttp(Thing, BaseAiohttp):
         response = {
             "html": html,
             Keywords.CRYSTAL_WELL_INDEX: crystal_well_index,
+            Keywords.CRYSTAL_WELL_COUNT: crystal_well_count,
             "filters": filters,
             "auto_update_enabled": auto_update_enabled,
         }
@@ -457,9 +455,10 @@ class Aiohttp(Thing, BaseAiohttp):
                 f"cookie {Cookies.IMAGE_LIST_UX} has no value for crystal_well_uuids"
             )
 
-        if crystal_well_index >= len(crystal_well_uuids):
+        crystal_well_count = len(crystal_well_uuids)
+        if crystal_well_index >= crystal_well_count:
             raise EndOfList(
-                f"crystal_well_index {crystal_well_index} exceeds crystal_well_uuids length {len(crystal_well_uuids)}"
+                f"crystal_well_index {crystal_well_index} exceeds crystal_well_uuids length {crystal_well_count}"
             )
 
         # The uuid at the posted index.
@@ -486,7 +485,7 @@ class Aiohttp(Thing, BaseAiohttp):
             "record": record,
             # Give back current one and length of the list to help with the prev/next button composing.
             Keywords.CRYSTAL_WELL_INDEX: crystal_well_index,
-            "list_length": len(crystal_well_uuids),
+            Keywords.CRYSTAL_WELL_COUNT: crystal_well_count,
         }
 
         return response
@@ -508,9 +507,10 @@ class Aiohttp(Thing, BaseAiohttp):
         # Caller wants to select the next image automatically?
         if request_dict.get(Keywords.SHOULD_ADVANCE, False):
             # There is a next image in the sequence?
-            next_index = request_dict.get(Keywords.CRYSTAL_WELL_INDEX)
+            crystal_well_index = request_dict.get(Keywords.CRYSTAL_WELL_INDEX)
+            crystal_well_count = request_dict.get(Keywords.CRYSTAL_WELL_COUNT)
 
-            if next_index is not None:
+            if crystal_well_index is not None:
                 # Advance by fetching the next image record after the update.
                 # Filters are provided in the IMAGE_LIST_UX cookie.
                 next_request_dict = {
@@ -519,7 +519,8 @@ class Aiohttp(Thing, BaseAiohttp):
                         Cookies.IMAGE_LIST_UX,
                     ],
                     Keywords.COMMAND: Commands.FETCH_IMAGE,
-                    Keywords.CRYSTAL_WELL_INDEX: next_index,
+                    Keywords.CRYSTAL_WELL_INDEX: crystal_well_index,
+                    Keywords.CRYSTAL_WELL_COUNT: crystal_well_count,
                 }
                 response = await self.__fetch_image(opaque, next_request_dict)
                 response[
