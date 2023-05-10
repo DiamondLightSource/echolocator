@@ -14,6 +14,7 @@ logging_settings:
         verbose: True
         filters:
             markers:
+                - "[DISSHU]"
                 - "[RELCOOK]"
                 - "[COOKSEL]"
                 - "[COOKOFF]"

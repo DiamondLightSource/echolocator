@@ -243,9 +243,6 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             // Tell server to add response["html"] for next image in series.
             json_object[this.SHOULD_ADVANCE] = true;
 
-            // Server needs to know the visit as its limiting window in the advancement logic.
-            json_object["visit"] = this.#record.visit;
-
             // Send request to update database immediately.
             this.send(json_object);
 
@@ -328,7 +325,6 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         if (direction !== 0) {
             json_object["direction"] = direction;
-            json_object["visit"] = this.#record.visit;
         }
 
         this.send(json_object);

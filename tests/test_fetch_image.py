@@ -86,14 +86,11 @@ class FetchImageTester(Base):
                 async with gui_client_context:
                     # And the gui server context which starts the coro.
                     async with gui_server_context:
-                        await self.__run_part1(constants, output_directory)
-                        logger.debug(
-                            "[ECHDON] finished running __run_part1, so gui_server_context going out of scope"
-                        )
+                        await self.__run_the_test(constants, output_directory)
 
     # ----------------------------------------------------------------------------------------
 
-    async def __run_part1(self, constants, output_directory):
+    async def __run_the_test(self, constants, output_directory):
         """ """
         # Reference the xchembku object which the context has set up as the default.
         xchembku = xchembku_datafaces_get_default()

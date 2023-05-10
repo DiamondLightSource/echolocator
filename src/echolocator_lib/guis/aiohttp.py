@@ -364,9 +364,11 @@ class Aiohttp(Thing, BaseAiohttp):
             # Start a filter where we anchor on the given image.
             filter = CrystalWellFilterModel(
                 visit=visit_filter,
-                barcode=barcode_filter,
                 sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
             )
+
+            if barcode_filter != "":
+                filter.barcode = barcode_filter
 
             should_show_only_undecided = await self.set_or_get_cookie_content(
                 opaque,
@@ -439,20 +441,30 @@ class Aiohttp(Thing, BaseAiohttp):
             sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
         )
 
-        # Caller is providing visit?
-        visit = request_dict.get("visit")
-        if visit is not None:
-            filter.visit = visit
-
-        # Caller is providing barcode?
-        barcode = request_dict.get("barcode")
-        if barcode is not None:
-            filter.barcode = barcode
-
         # Image previous or next?
         direction = request_dict.get("direction", 0)
         if direction != 0:
             filter.direction = direction
+
+            filter.visit = await self.set_or_get_cookie_content(
+                opaque,
+                Cookies.IMAGE_LIST_UX,
+                "visit_filter",
+                request_dict.get("visit_filter"),
+                None,
+            )
+            if filter.visit is not None and filter.visit.strip() == "":
+                filter.visit = None
+
+            filter.barcode = await self.set_or_get_cookie_content(
+                opaque,
+                Cookies.IMAGE_LIST_UX,
+                "barcode_filter",
+                request_dict.get("barcode_filter"),
+                None,
+            )
+            if filter.barcode is not None and filter.barcode.strip() == "":
+                filter.barcode = None
 
         should_show_only_undecided = await self.set_or_get_cookie_content(
             opaque,
@@ -497,15 +509,8 @@ class Aiohttp(Thing, BaseAiohttp):
 
         # Caller wants to select the next image automatically?
         if request_dict.get(Keywords.SHOULD_ADVANCE, False):
-
-            # Caller must provide a visit in order to automatically advance.
-            visit = request_dict.get("visit")
-            if visit is None:
-                raise RuntimeError(
-                    "programming error: visit not submitted with request to advance after update"
-                )
-
             # Advance by fetching the next image record after the update.
+            # Filters are provided in the IMAGE_LIST_UX cookie.
             next_request_dict = {
                 ProtocoljKeywords.ENABLE_COOKIES: [
                     Cookies.IMAGE_EDIT_UX,
@@ -514,7 +519,6 @@ class Aiohttp(Thing, BaseAiohttp):
                 Keywords.COMMAND: Commands.FETCH_IMAGE,
                 "crystal_well_uuid": crystal_well_droplocation_model.crystal_well_uuid,
                 "direction": 1,
-                "visit": visit,
             }
             response = await self.__fetch_image(opaque, next_request_dict)
 

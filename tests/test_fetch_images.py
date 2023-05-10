@@ -159,7 +159,7 @@ class FetchImagesTester(Base):
             request, cookies={}
         )
 
-        logger.debug(describe("fetch_image response", response))
+        # logger.debug(describe("fetch_images response", response))
 
         soup = BeautifulSoup(response["html"], "html.parser")
 
@@ -173,8 +173,7 @@ class FetchImagesTester(Base):
         assert len(rows) == 1 + 5
 
         # Check the first row's filename.
-        # Remember fiels are injected with increasing crystal counts,
-        # so default sorting is in reverse order.
+        # Wells are injected with increasing crystal counts, so default sorting is in reverse order.
         row = rows[1]
         columns = row.find_all(class_="T_filename")
         assert len(columns) == 1
