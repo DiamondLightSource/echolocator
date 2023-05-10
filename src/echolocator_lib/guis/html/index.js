@@ -186,10 +186,10 @@ class Index extends echolocator__Page {
     handle_image_picked(event) {
         var F = "Index::handle_image_picked";
 
-        var crystal_well_uuid = event.detail.crystal_well_uuid;
+        var crystal_well_index = event.detail.crystal_well_index;
 
         // Tell the image editor to show the new image.
-        this.#image_edit_ux.set_crystal_well_uuid(crystal_well_uuid);
+        this.#image_edit_ux.set_crystal_well_index(crystal_well_index);
 
         this.#tabs_manager.switch_to_tab("tab-image-edit")
 

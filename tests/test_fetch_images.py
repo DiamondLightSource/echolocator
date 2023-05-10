@@ -159,7 +159,7 @@ class FetchImagesTester(Base):
             request, cookies={}
         )
 
-        # logger.debug(describe("fetch_images response", response))
+        # logger.debug(describe("fetch_images cookies", response["__cookies"]))
 
         soup = BeautifulSoup(response["html"], "html.parser")
 

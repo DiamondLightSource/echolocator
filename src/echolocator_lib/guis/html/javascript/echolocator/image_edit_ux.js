@@ -185,8 +185,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     // When the selected filename changes, we get notified.
     // We will load the image into the display.
 
-    set_crystal_well_uuid(crystal_well_uuid) {
-        var F = "echolocator__ImageEditUx::set_crystal_well_uuid";
+    set_crystal_well_index(crystal_well_uuid) {
+        var F = "echolocator__ImageEditUx::set_crystal_well_index";
 
         // Remember the image info.
         this.#crystal_well_uuid = crystal_well_uuid;

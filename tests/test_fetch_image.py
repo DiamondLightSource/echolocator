@@ -1,11 +1,14 @@
 import logging
 
+import pytest
+
 # API constants.
 from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 from dls_servbase_lib.datafaces.context import Context as DlsServbaseDatafaceContext
 
 # Utilities.
 from dls_utilpack.describe import describe
+from dls_utilpack.exceptions import ProgrammingFault
 
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
@@ -95,6 +98,17 @@ class FetchImageTester(Base):
         # Reference the xchembku object which the context has set up as the default.
         xchembku = xchembku_datafaces_get_default()
 
+        self.__cookies = {}
+
+        # Error when no index given in the request.
+        await self.__request_error_no_index()
+
+        # Make a list which is empty.
+        await self.__fetch_image_list()
+
+        # Error when requesting from empty list.
+        await self.__request_error_empty_list()
+
         crystal_wells = []
 
         # Inject some wells.
@@ -105,23 +119,37 @@ class FetchImageTester(Base):
         crystal_wells.append(await self.inject(xchembku, True, True))
         crystal_wells.append(await self.inject(xchembku, True, False))
 
-        await self.__request_initial(crystal_wells)
+        # Make a list which is no longer empty.
+        await self.__fetch_image_list()
+
         await self.__request_anchor(crystal_wells)
-        await self.__request_forward(crystal_wells)
-        await self.__request_forward_undecided(crystal_wells)
+        # await self.__request_forward(crystal_wells)
+        # await self.__request_forward_undecided(crystal_wells)
 
     # ----------------------------------------------------------------------------------------
 
-    async def __request_initial(self, crystal_wells):
+    async def __fetch_image_list(self):
         """ """
 
-        # --------------------------------------------------------------------
-        # Do what the Image Details tab does when it loads.
+        request = {
+            ProtocoljKeywords.ENABLE_COOKIES: [
+                Cookies.IMAGE_LIST_UX,
+            ],
+            Keywords.COMMAND: Commands.FETCH_IMAGE_LIST,
+            "visit_filter": self.visit,
+        }
 
-        # json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME, "IMAGE_LIST_UX"]
-        # json_object[this.COMMAND] = this.FETCH_IMAGE;
-        # json_object["uuid"] = this.#uuid;
-        # json_object["direction"] = direction;
+        response = await echolocator_guis_get_default().client_protocolj(
+            request, cookies=self.__cookies
+        )
+
+        # Pick up the cookies established by the list query.
+        self.__cookies = response["__cookies"]
+
+    # ----------------------------------------------------------------------------------------
+
+    async def __request_error_no_index(self):
+        """ """
 
         request = {
             ProtocoljKeywords.ENABLE_COOKIES: [
@@ -131,14 +159,33 @@ class FetchImageTester(Base):
             Keywords.COMMAND: Commands.FETCH_IMAGE,
         }
 
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies={}
-        )
+        with pytest.raises(ProgrammingFault) as excinfo:
+            await echolocator_guis_get_default().client_protocolj(
+                request,
+                cookies=self.__cookies,
+            )
 
-        logger.debug(describe("first fetch_image response", response))
+        assert f"no value for {Keywords.CRYSTAL_WELL_INDEX}" in str(excinfo.value)
 
-        record = response["record"]
-        assert record is None
+    # ----------------------------------------------------------------------------------------
+
+    async def __request_error_empty_list(self):
+        """ """
+
+        request = {
+            ProtocoljKeywords.ENABLE_COOKIES: [
+                Cookies.IMAGE_EDIT_UX,
+                Cookies.IMAGE_LIST_UX,
+            ],
+            Keywords.COMMAND: Commands.FETCH_IMAGE,
+            Keywords.CRYSTAL_WELL_INDEX: 1,
+        }
+
+        with pytest.raises(ProgrammingFault):
+            await echolocator_guis_get_default().client_protocolj(
+                request,
+                cookies=self.__cookies,
+            )
 
     # ----------------------------------------------------------------------------------------
 
@@ -151,16 +198,19 @@ class FetchImageTester(Base):
                 Cookies.IMAGE_LIST_UX,
             ],
             Keywords.COMMAND: Commands.FETCH_IMAGE,
-            "crystal_well_uuid": crystal_wells[2].uuid,
+            Keywords.CRYSTAL_WELL_INDEX: 2,
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies={}
+            request,
+            cookies=self.__cookies,
         )
+        self.__cookies = response["__cookies"]
 
         logger.debug(describe("__request_anchor response", response))
 
         record = response["record"]
+        assert record is not None
         assert record["uuid"] == crystal_wells[2].uuid
 
     # ----------------------------------------------------------------------------------------
@@ -174,7 +224,7 @@ class FetchImageTester(Base):
                 Cookies.IMAGE_LIST_UX,
             ],
             Keywords.COMMAND: Commands.FETCH_IMAGE,
-            "crystal_well_uuid": crystal_wells[2].uuid,
+            Keywords.CRYSTAL_WELL_INDEX: crystal_wells[2].uuid,
             "direction": 1,
             "visit": self.visit,
         }
@@ -217,7 +267,7 @@ class FetchImageTester(Base):
                 Cookies.IMAGE_LIST_UX,
             ],
             Keywords.COMMAND: Commands.FETCH_IMAGE,
-            "crystal_well_uuid": crystal_wells[5].uuid,
+            Keywords.CRYSTAL_WELL_INDEX: crystal_wells[5].uuid,
             "direction": 1,
             "visit": self.visit,
             "should_show_only_undecided": True,

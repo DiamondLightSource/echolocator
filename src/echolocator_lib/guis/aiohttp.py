@@ -9,6 +9,7 @@ from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 
 # Utilities.
 from dls_utilpack.callsign import callsign
+from dls_utilpack.exceptions import ProgrammingFault
 from dls_utilpack.require import require
 
 # Basic things.
@@ -351,7 +352,7 @@ class Aiohttp(Thing, BaseAiohttp):
 
         if visit_filter == "":
             html = "please enter a visit"
-            crystal_well_uuid = None
+            crystal_well_index = None
 
         else:
             logger.debug(
@@ -361,7 +362,7 @@ class Aiohttp(Thing, BaseAiohttp):
                 f" show_first_image is '{show_first_image}'"
             )
 
-            # Start a filter where we anchor on the given image.
+            # Start a filter for the list based on visit only.
             filter = CrystalWellFilterModel(
                 visit=visit_filter,
                 sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
@@ -380,18 +381,24 @@ class Aiohttp(Thing, BaseAiohttp):
             if should_show_only_undecided:
                 filter.is_decided = False
 
-            if show_first_image:
-                filter.limit = 1
-
-            # Fetch the first image or list from the xchembku.
+            # Fetch the properly ordered and filtered list from the xchembku.
             crystal_well_models = (
                 await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
             )
 
+            # Remember the crystal well uuids in the list.
+            crystal_well_uuids = [m.uuid for m in crystal_well_models]
+            self.set_cookie_content(
+                opaque,
+                Cookies.IMAGE_LIST_UX,
+                "crystal_well_uuids",
+                crystal_well_uuids,
+            )
+
             # Asking for first image only, and there are any?
             if show_first_image and len(crystal_well_models) > 0:
-                # Give the first image uuid in the response.
-                crystal_well_uuid = crystal_well_models[0].uuid
+                # Give the first image index in the response.
+                crystal_well_index = 0
                 # Don't give html in the response.
                 html = None
             # Asking for image list?
@@ -400,11 +407,11 @@ class Aiohttp(Thing, BaseAiohttp):
                 html = echolocator_composers_get_default().compose_image_list(
                     crystal_well_models
                 )
-                crystal_well_uuid = None
+                crystal_well_index = None
 
         response = {
             "html": html,
-            "crystal_well_uuid": crystal_well_uuid,
+            "crystal_well_index": crystal_well_index,
             "filters": filters,
             "auto_update_enabled": auto_update_enabled,
         }
@@ -415,76 +422,56 @@ class Aiohttp(Thing, BaseAiohttp):
     async def __fetch_image(self, opaque, request_dict):
 
         # Get uuid from the cookie if it's not being posted here.
-        crystal_well_uuid = await self.set_or_get_cookie_content(
+        crystal_well_index = await self.set_or_get_cookie_content(
             opaque,
             Cookies.IMAGE_EDIT_UX,
-            "crystal_well_uuid",
-            request_dict.get("crystal_well_uuid"),
-            "",
+            Keywords.CRYSTAL_WELL_INDEX,
+            request_dict.get(Keywords.CRYSTAL_WELL_INDEX),
+            None,
         )
 
-        logger.info(
-            f"fetching image from crystal_well_uuid {crystal_well_uuid}"
-            f" direction {request_dict.get('direction')}"
-        )
+        logger.info(f"fetching image from crystal_well_index {crystal_well_index}")
 
         # Not able to get an image from posted value or cookie?
         # Usually first time visiting Image Details tab when no image picked from list.
-        if crystal_well_uuid == "":
-            response = {"record": None}
-            return response
-
-        # Start a filter where we anchor on the given well.
-        filter = CrystalWellFilterModel(
-            anchor=crystal_well_uuid,
-            limit=1,
-            sortby=CrystalWellFilterSortbyEnum.NUMBER_OF_CRYSTALS,
-        )
-
-        # Image previous or next?
-        direction = request_dict.get("direction", 0)
-        if direction != 0:
-            filter.direction = direction
-
-            filter.visit = await self.set_or_get_cookie_content(
-                opaque,
-                Cookies.IMAGE_LIST_UX,
-                "visit_filter",
-                request_dict.get("visit_filter"),
-                None,
+        if crystal_well_index is None:
+            raise ProgrammingFault(
+                f"no value for {Keywords.CRYSTAL_WELL_INDEX} in post or cookie {Cookies.IMAGE_EDIT_UX}"
             )
-            if filter.visit is not None and filter.visit.strip() == "":
-                filter.visit = None
 
-            filter.barcode = await self.set_or_get_cookie_content(
-                opaque,
-                Cookies.IMAGE_LIST_UX,
-                "barcode_filter",
-                request_dict.get("barcode_filter"),
-                None,
-            )
-            if filter.barcode is not None and filter.barcode.strip() == "":
-                filter.barcode = None
-
-        should_show_only_undecided = await self.set_or_get_cookie_content(
+        # Get uuids of the current list from the cookie.
+        crystal_well_uuids = await self.get_cookie_content(
             opaque,
             Cookies.IMAGE_LIST_UX,
-            "should_show_only_undecided",
-            request_dict.get("should_show_only_undecided"),
-            False,
+            "crystal_well_uuids",
+            None,
         )
-        if should_show_only_undecided:
-            filter.is_decided = False
 
+        if crystal_well_uuids is None:
+            raise ProgrammingFault(
+                f"cookie {Cookies.IMAGE_EDIT_UX} has no value for crystal_well_uuids"
+            )
+
+        if crystal_well_index >= len(crystal_well_uuids):
+            raise ProgrammingFault(
+                f"crystal_well_index {crystal_well_index} exceeds crystal_well_uuids length {len(crystal_well_uuids)}"
+            )
+
+        # The uuid at the posted index.
+        crystal_well_uuid = crystal_well_uuids[crystal_well_index]
+
+        # Filter to get just the single well.
+        filter = CrystalWellFilterModel(anchor=crystal_well_uuid)
+
+        # Get the single record.
         crystal_well_models = (
             await self.__xchembku.fetch_crystal_wells_needing_droplocation(filter)
         )
 
         if len(crystal_well_models) == 0:
-            response = {"record": None}
-            if direction != 0:
-                response["confirmation"] = "there are no more images in this direction"
-            return response
+            raise ProgrammingFault(
+                f"crystal_well_index {crystal_well_index} for uuid {crystal_well_uuid} doesn't exist in the database"
+            )
 
         # Presumably there is only one image of interest.
         record = crystal_well_models[0].dict()

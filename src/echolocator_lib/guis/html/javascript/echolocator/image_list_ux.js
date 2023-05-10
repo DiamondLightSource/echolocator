@@ -131,12 +131,12 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         }
 
         // Response includes "first image"?
-        var crystal_well_uuid = response.crystal_well_uuid;
+        var crystal_well_index = response.crystal_well_uuid;
 
         // Post this up to the page to switch tabs, similar to clicking on a row.
-        if (crystal_well_uuid !== null && crystal_well_uuid !== undefined) {
+        if (crystal_well_index !== null && crystal_well_index !== undefined) {
 
-            this._load_image(crystal_well_uuid);
+            this._load_image(crystal_well_index);
 
             this.set_and_render_auto_update(false);
         }
@@ -175,10 +175,10 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
 
     // -------------------------------------------------------------
 
-    _load_image(crystal_well_uuid) {
+    _load_image(crystal_well_index) {
         var F = "echolocator__ImageListUx::_load_image";
 
-        console.log(F + ": loading image for crystal_well_uuid " + crystal_well_uuid)
+        console.log(F + ": loading image for crystal_well_index " + crystal_well_index)
 
         //     this.$filename_rows.removeClass("T_picked");
         //     image_info.$filename_row.addClass("T_picked");
@@ -186,7 +186,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
         // Trigger an event that the index.js will use to coordinate cross-widget changes.
         var custom_event = new CustomEvent(echolocator__Events_IMAGE_PICKED_EVENT,
             {
-                detail: { crystal_well_uuid: crystal_well_uuid }
+                detail: { crystal_well_index: crystal_well_index }
             });
 
         this.dispatchEvent(custom_event);
