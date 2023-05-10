@@ -143,7 +143,7 @@ class DroplocationTester(Base):
             ],
             Keywords.COMMAND: Commands.UPDATE,
             Keywords.SHOULD_ADVANCE: True,
-            Keywords.CRYSTAL_WELL_INDEX: advance_to_list_index,
+            Keywords.CRYSTAL_WELL_INDEX_NEXT: advance_to_list_index,
             "visit": self.visit,
             "crystal_well_droplocation_model": {
                 "crystal_well_uuid": crystal_well_models[index1].uuid,
