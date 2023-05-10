@@ -387,6 +387,11 @@ class Aiohttp(Thing, BaseAiohttp):
             )
 
             # Remember the crystal well uuids in the list.
+            lines = []
+            for i, m in enumerate(crystal_well_models)
+                lines.append(f"{i}. {m.positions} {m.number_of_crystals} {m.uuid}")
+            logger.debug("\n" + "\n".join(lines)
+                         
             crystal_well_uuids = [m.uuid for m in crystal_well_models]
             self.set_cookie_content(
                 opaque,
