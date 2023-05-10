@@ -168,9 +168,9 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
             $filename_row = $filename_row.parent();
 
         // The row has the attribute holding the crystal well of this row.
-        var crystal_well_uuid = $filename_row.attr("crystal_well_uuid");
+        var crystal_well_index = $filename_row.attr("crystal_well_index");
 
-        this._load_image(crystal_well_uuid);
+        this._load_image(crystal_well_index);
 
         this.set_and_render_auto_update(false);
 
