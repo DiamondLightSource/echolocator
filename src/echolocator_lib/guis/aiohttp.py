@@ -416,7 +416,7 @@ class Aiohttp(Thing, BaseAiohttp):
 
         response = {
             "html": html,
-            "crystal_well_index": crystal_well_index,
+            Keywords.CRYSTAL_WELL_INDEX: crystal_well_index,
             "filters": filters,
             "auto_update_enabled": auto_update_enabled,
         }
@@ -484,7 +484,8 @@ class Aiohttp(Thing, BaseAiohttp):
         record["filename"] = "filestore" + record["filename"]
         response = {
             "record": record,
-            # Give back length of the list to help with the prev/next button composing.
+            # Give back current one and length of the list to help with the prev/next button composing.
+            Keywords.CRYSTAL_WELL_INDEX: crystal_well_index,
             "list_length": len(crystal_well_uuids),
         }
 

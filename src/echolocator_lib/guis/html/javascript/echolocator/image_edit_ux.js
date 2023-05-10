@@ -4,10 +4,12 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     COOKIE_NAME = "IMAGE_EDIT_UX";
     FETCH_IMAGE = "echolocator_guis::commands::fetch_image";
     UPDATE = "echolocator_guis::commands::update";
+    CRYSTAL_WELL_INDEX = "echolocator_guis::keywords::crystal_well_index";
     SHOULD_ADVANCE = "echolocator_guis::keywords::should_advance";
 
     #jquery_objects = {};
-    #crystal_well_uuid = null;
+    #crystal_well_index = null;
+    #list_length = null;
     #record = null;
     #raphael = null;
     #is_dragging = null;
@@ -49,6 +51,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.#jquery_objects.$image = $("IMG", this.$interaction_parent);
         this.#jquery_objects.$hide_when_no_image = $(".T_hide_when_no_image", this.$interaction_parent);
         this.#jquery_objects.$filename = $(".T_filename", this.$interaction_parent);
+        this.#jquery_objects.$crystal_well_index = $(".T_crystal_well_index", this.$interaction_parent);
+        this.#jquery_objects.$list_length = $(".T_list_length", this.$interaction_parent);
         this.#jquery_objects.$number_of_crystals = $(".T_number_of_crystals", this.$interaction_parent);
         this.#jquery_objects.$is_usable = $(".T_is_usable", this.$interaction_parent);
         this.#jquery_objects.previous_button = $(".T_previous_button", this.$interaction_parent);
@@ -177,7 +181,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.#well_centroid_ux.activate(this.#raphael);
         this.#confirmed_target_ux.activate(this.#raphael);
 
-        this.request_update()
+        // this.request_update()
     } // end method
 
 
@@ -185,13 +189,15 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     // When the selected filename changes, we get notified.
     // We will load the image into the display.
 
-    set_crystal_well_index(crystal_well_uuid) {
+    set_crystal_well_index(crystal_well_index) {
         var F = "echolocator__ImageEditUx::set_crystal_well_index";
 
-        // Remember the image info.
-        this.#crystal_well_uuid = crystal_well_uuid;
+        console.log(F + ": [CWINDX] crystal_well_index is " + crystal_well_index)
 
-        if (this.#crystal_well_uuid === undefined) {
+        // Remember the image info.
+        this.#crystal_well_index = crystal_well_index;
+
+        if (this.#crystal_well_index === undefined) {
             this.display_ajax_error("there are no more images to view");
         }
         else {
@@ -205,12 +211,12 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     } // end method
 
     // -------------------------------------------------------------
-    // Handle accept or reject button click.
+    // Send update to currently loaded image.
 
     _send_update(is_usable, confirmed_target) {
         var F = "echolocator__ImageEditUx::_handle_is_usable_change";
 
-        if (this.#crystal_well_uuid) {
+        if (this.#crystal_well_index) {
             // Build json request.
             var json_object = {}
             // TODO: Remove hardcoded "IMAGE_LIST_UX" in image edit's cookie list.
@@ -220,7 +226,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
             // We pass the fields of the database we want updated.
             var model =
             {
-                "crystal_well_uuid": this.#crystal_well_uuid,
+                "set_crystal_well_index": this.#crystal_well_index,
                 "is_usable": is_usable
             }
 
@@ -294,7 +300,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         var confirmed_target = this.#transformer.view_to_data(view_position);
 
         // Notify pixel_ux of requested change in position.
-        this.#confirmed_target_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
+        this.#confirmed_target_ux.set_uuid(this.#crystal_well_index, confirmed_target);
 
         // Mark image usable and save target location.
         this._send_update(true, confirmed_target)
@@ -316,12 +322,14 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     // Request update from database.
 
     request_update(direction = 0) {
+        var F = "echolocator__ImageEditUx::request_update";
 
+        console.log(F + ": [CWINDX] this.#crystal_well_index is " + this.#crystal_well_index)
         var json_object = {}
         // TODO: Remove hardcoded "IMAGE_LIST_UX" in image edit's cookie list.
         json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME, "IMAGE_LIST_UX"]
         json_object[this.COMMAND] = this.FETCH_IMAGE;
-        json_object["crystal_well_uuid"] = this.#crystal_well_uuid;
+        json_object[this.CRYSTAL_WELL_INDEX] = this.#crystal_well_index;
 
         if (direction !== 0) {
             json_object["direction"] = direction;
@@ -372,14 +380,20 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         this.#jquery_objects.$hide_when_no_image.show();
 
-        // Remember which crystal_well_uuid we are showing.
-        this.#crystal_well_uuid = record.uuid;
+        // Remember which set_crystal_well_index we are showing.
+        this.#crystal_well_index = response[this.CRYSTAL_WELL_INDEX];
+        this.#list_length = response.list_length
+        this.#jquery_objects.$crystal_well_index.text(this.#crystal_well_index);
+        this.#jquery_objects.$list_length.text(this.#list_length);
+
+        this.#jquery_objects.previous_button.attr("disabled", this.#crystal_well_index == 0);
+        this.#jquery_objects.next_button.attr("disabled", this.#crystal_well_index >= this.#list_length);
 
         // Update the display with the new file's contents.
         var src = record.filename;
         this.#jquery_objects.$image.prop("src", src)
 
-        // Render the crystal_well_uuid stuff.
+        // Render the set_crystal_well_index stuff.
         this.#jquery_objects.$filename.text(record.filename);
         if (record.is_usable === null)
             record.is_usable = "-";
@@ -397,7 +411,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // Keep the last record loaded.
         this.#record = record;
 
-        // The the pixel ux about the crystal_well_uuid so it can be included in sending changes.
+        // The the pixel ux about the set_crystal_well_index so it can be included in sending changes.
         var x = record.confirmed_target_x;
         if (x === null)
             x = record.auto_target_x;
@@ -412,9 +426,9 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
         var confirmed_target = { x: x, y: y };
 
-        this.#confirmed_target_ux.set_uuid(this.#crystal_well_uuid, confirmed_target);
+        this.#confirmed_target_ux.set_uuid(this.#crystal_well_index, confirmed_target);
 
-        // The the pixel ux about the crystal_well_uuid so it can be included in sending changes.
+        // The the pixel ux about the set_crystal_well_index so it can be included in sending changes.
         var x = record.well_centroid_x;
         if (x === null)
             x = 100;

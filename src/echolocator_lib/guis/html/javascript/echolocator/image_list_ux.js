@@ -3,6 +3,7 @@
 class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     COOKIE_NAME = "IMAGE_LIST_UX";
     FETCH_IMAGE_LIST = "echolocator_guis::commands::fetch_image_list";
+    CRYSTAL_WELL_INDEX = "echolocator_guis::keywords::crystal_well_index";
 
     #jquery_objects = {};
     #visit_filter = "undefined";
@@ -124,14 +125,16 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
 
         var html = response.html;
 
-        if (html !== undefined) {
+        if (html !== null && html !== undefined) {
             this.#jquery_objects.$div.html(html);
             // Attach events to all the individual job links in the "recent jobs" grid.
             this._attach_links();
         }
 
         // Response includes "first image"?
-        var crystal_well_index = response.crystal_well_uuid;
+        var crystal_well_index = response[this.CRYSTAL_WELL_INDEX];
+
+        console.log(F + ": [CWINDX] response[" + this.CRYSTAL_WELL_INDEX + "] is " + crystal_well_index);
 
         // Post this up to the page to switch tabs, similar to clicking on a row.
         if (crystal_well_index !== null && crystal_well_index !== undefined) {
@@ -178,7 +181,7 @@ class echolocator__ImageListUx extends echolocator__UxAutoUpdate {
     _load_image(crystal_well_index) {
         var F = "echolocator__ImageListUx::_load_image";
 
-        console.log(F + ": loading image for crystal_well_index " + crystal_well_index)
+        console.log(F + ": [CWINDX] loading image for crystal_well_index " + crystal_well_index)
 
         //     this.$filename_rows.removeClass("T_picked");
         //     image_info.$filename_row.addClass("T_picked");

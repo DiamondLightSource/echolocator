@@ -3,7 +3,7 @@ class Keywords:
     PAYLOAD = "echolocator_guis::keywords::payload"
     TAB_ID = "echolocator_guis::keywords::tab_id"
     SHOULD_ADVANCE = "echolocator_guis::keywords::should_advance"
-    CRYSTAL_WELL_INDEX = "echolocator_guis::keywords::crytal_well_index"
+    CRYSTAL_WELL_INDEX = "echolocator_guis::keywords::crystal_well_index"
 
 
 class Commands:

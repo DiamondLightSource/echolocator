@@ -172,12 +172,13 @@ class Index extends echolocator__Page {
         var visit_filter = event.detail.visit;
         var barcode_filter = event.detail.barcode;
 
-        console.log(F + ": visit is \"" + visit_filter + "\", barcode is \"" + barcode_filter + "\"")
+        console.log(F + ": [CWINDX] visit is \"" + visit_filter + "\", barcode is \"" + barcode_filter + "\"")
 
         // Tell the image list to show the images from the new plate.
-        this.#image_list_ux.show_first_image(visit_filter, barcode_filter, true);
+        var should_show_only_undecided = true;
+        this.#image_list_ux.show_first_image(visit_filter, barcode_filter, should_show_only_undecided);
 
-        this.#tabs_manager.switch_to_tab("tab-image-edit")
+        // this.#tabs_manager.switch_to_tab("tab-image-edit")
 
     } // end method
 
@@ -187,6 +188,8 @@ class Index extends echolocator__Page {
         var F = "Index::handle_image_picked";
 
         var crystal_well_index = event.detail.crystal_well_index;
+
+        console.log(F + ": [CWINDX] event.detail crystal_well_index is " + crystal_well_index)
 
         // Tell the image editor to show the new image.
         this.#image_edit_ux.set_crystal_well_index(crystal_well_index);
