@@ -198,16 +198,16 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // Remember the image info.
         this.#crystal_well_index = crystal_well_index;
 
-        if (this.#crystal_well_index === undefined) {
-            this.display_ajax_error("there are no more images to view");
-        }
-        else {
-            this.display_ajax_error(null);
+        // if (this.#crystal_well_index === undefined) {
+        //     this.display_ajax_error("there are no more images to view");
+        // }
+        // else {
+        //     this.display_ajax_error(null);
 
-            // Request image info from the server.
-            this.request_update()
+        //     // Request image info from the server.
+        //     this.request_update()
 
-        }
+        // }
 
     } // end method
 
@@ -322,22 +322,25 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     // -------------------------------------------------------------
     // Request update from database.
 
-    request_update(direction = 0) {
+    request_update(direction) {
         var F = "echolocator__ImageEditUx::request_update";
 
 
         if (direction === null || direction === undefined)
             direction = 0;
 
-        var new_crystal_well_index = this.#crystal_well_index + direction;
+        var new_crystal_well_index = this.#crystal_well_index;
+        if (direction != 0) {
+            new_crystal_well_index += direction;
 
-        if (new_crystal_well_index >= this.#crystal_well_count)
-            new_crystal_well_index = null;
+            if (new_crystal_well_index >= this.#crystal_well_count)
+                new_crystal_well_index = null;
 
-        console.log(F + ": [CWINDX]" +
-            " this.#crystal_well_index is " + this.#crystal_well_index +
-            " moving to " + new_crystal_well_index +
-            " in crystal_well_count " + this.#crystal_well_count);
+            console.log(F + ": [CWINDX]" +
+                " this.#crystal_well_index is " + this.#crystal_well_index +
+                " moving to " + new_crystal_well_index +
+                " in crystal_well_count " + this.#crystal_well_count);
+        }
 
         // if (new_crystal_well_index < 0 || new_crystal_well_index >= this.#crystal_well_count) {
         //     return;
@@ -348,9 +351,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         // TODO: Remove hardcoded "IMAGE_LIST_UX" in image edit's cookie list.
         json_object[this.ENABLE_COOKIES] = [this.COOKIE_NAME, "IMAGE_LIST_UX"]
         json_object[this.COMMAND] = this.FETCH_IMAGE;
-        json_object[this.SHOULD_ADVANCE] = true;
+        //json_object[this.SHOULD_ADVANCE] = true;
         json_object[this.CRYSTAL_WELL_INDEX] = new_crystal_well_index;
-        json_object[this.CRYSTAL_WELL_COUNT] = this.#crystal_well_count;
 
         this.send(json_object);
 
@@ -406,7 +408,7 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.#jquery_objects.$crystal_well_count.text(this.#crystal_well_count);
 
         this.#jquery_objects.previous_button.attr("disabled", this.#crystal_well_index == 0);
-        this.#jquery_objects.next_button.attr("disabled", this.#crystal_well_index >= this.#crystal_well_count);
+        this.#jquery_objects.next_button.attr("disabled", this.#crystal_well_index >= this.#crystal_well_count - 1);
 
         // Update the display with the new file's contents.
         var src = record.filename;

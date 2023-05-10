@@ -353,6 +353,7 @@ class Aiohttp(Thing, BaseAiohttp):
         if visit_filter == "":
             html = "please enter a visit"
             crystal_well_index = None
+            crystal_well_count = None
 
         else:
             logger.debug(

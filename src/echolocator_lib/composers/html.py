@@ -78,12 +78,14 @@ class Html(Thing):
         html_lines.append("<tbody>")
 
         # Traverse all the given records.
-        for model in models:
+        for index, model in enumerate(models):
             uuid = model.uuid
             error = model.error
             if error is None:
                 error = "-"
-            html_lines.append(f"<tr crystal_well_uuid='{uuid}'>")
+            html_lines.append(
+                f"<tr crystal_well_uuid='{uuid}' crystal_well_index='{index}'>"
+            )
             html_lines.append(f"<td class='T_uuid'>{uuid}</td>")
 
             # Extract derived info from filename
@@ -228,11 +230,9 @@ class Html(Thing):
         html_lines.append("<tbody>")
 
         # Traverse all the given records.
-        for index, model in enumerate(models):
+        for model in models:
             uuid = model.uuid
-            html_lines.append(
-                f"<tr crystal_plate_uuid='{uuid}' crystal_well_index='{index}'>"
-            )
+            html_lines.append(f"<tr crystal_plate_uuid='{uuid}'>")
             html_lines.append(f"<td class='T_uuid'>{uuid}</td>")
             html_lines.append(
                 f"<td class='T_formulatrix__plate__id'>{model.formulatrix__plate__id}</td>"
