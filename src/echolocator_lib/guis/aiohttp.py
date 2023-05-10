@@ -9,7 +9,7 @@ from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 
 # Utilities.
 from dls_utilpack.callsign import callsign
-from dls_utilpack.exceptions import ProgrammingFault
+from dls_utilpack.exceptions import EndOfList, ProgrammingFault
 from dls_utilpack.require import require
 
 # Basic things.
@@ -388,10 +388,10 @@ class Aiohttp(Thing, BaseAiohttp):
 
             # Remember the crystal well uuids in the list.
             lines = []
-            for i, m in enumerate(crystal_well_models)
-                lines.append(f"{i}. {m.positions} {m.number_of_crystals} {m.uuid}")
-            logger.debug("\n" + "\n".join(lines)
-                         
+            for i, m in enumerate(crystal_well_models):
+                lines.append(f"{i}. {m.position} {m.number_of_crystals} {m.uuid}")
+            logger.debug("\n" + "\n".join(lines))
+
             crystal_well_uuids = [m.uuid for m in crystal_well_models]
             self.set_cookie_content(
                 opaque,
@@ -454,11 +454,11 @@ class Aiohttp(Thing, BaseAiohttp):
 
         if crystal_well_uuids is None:
             raise ProgrammingFault(
-                f"cookie {Cookies.IMAGE_EDIT_UX} has no value for crystal_well_uuids"
+                f"cookie {Cookies.IMAGE_LIST_UX} has no value for crystal_well_uuids"
             )
 
         if crystal_well_index >= len(crystal_well_uuids):
-            raise ProgrammingFault(
+            raise EndOfList(
                 f"crystal_well_index {crystal_well_index} exceeds crystal_well_uuids length {len(crystal_well_uuids)}"
             )
 
@@ -480,8 +480,13 @@ class Aiohttp(Thing, BaseAiohttp):
 
         # Presumably there is only one image of interest.
         record = crystal_well_models[0].dict()
+        # Filestore's full path to the image file.
         record["filename"] = "filestore" + record["filename"]
-        response = {"record": record}
+        response = {
+            "record": record,
+            # Give back length of the list to help with the prev/next button composing.
+            "list_length": len(crystal_well_uuids),
+        }
 
         return response
 
@@ -501,27 +506,29 @@ class Aiohttp(Thing, BaseAiohttp):
 
         # Caller wants to select the next image automatically?
         if request_dict.get(Keywords.SHOULD_ADVANCE, False):
-            # Advance by fetching the next image record after the update.
-            # Filters are provided in the IMAGE_LIST_UX cookie.
-            next_request_dict = {
-                ProtocoljKeywords.ENABLE_COOKIES: [
-                    Cookies.IMAGE_EDIT_UX,
-                    Cookies.IMAGE_LIST_UX,
-                ],
-                Keywords.COMMAND: Commands.FETCH_IMAGE,
-                "crystal_well_uuid": crystal_well_droplocation_model.crystal_well_uuid,
-                "direction": 1,
-            }
-            response = await self.__fetch_image(opaque, next_request_dict)
+            # There is a next image in the sequence?
+            next_index = request_dict.get(Keywords.CRYSTAL_WELL_INDEX)
 
-            if response.get("record") is not None:
+            if next_index is not None:
+                # Advance by fetching the next image record after the update.
+                # Filters are provided in the IMAGE_LIST_UX cookie.
+                next_request_dict = {
+                    ProtocoljKeywords.ENABLE_COOKIES: [
+                        Cookies.IMAGE_EDIT_UX,
+                        Cookies.IMAGE_LIST_UX,
+                    ],
+                    Keywords.COMMAND: Commands.FETCH_IMAGE,
+                    Keywords.CRYSTAL_WELL_INDEX: next_index,
+                }
+                response = await self.__fetch_image(opaque, next_request_dict)
                 response[
                     "confirmation"
                 ] = "drop location has been updated and view advanced to next image"
             else:
-                response[
-                    "confirmation"
-                ] = "drop location has been updated and there are no more images in the list"
+                response = {
+                    "record": None,
+                    "confirmation": "drop location has been updated and have reached the end of the list",
+                }
         else:
             response = {"confirmation": "drop location has been updated"}
 

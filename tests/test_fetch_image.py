@@ -7,8 +7,7 @@ from dls_servbase_api.constants import Keywords as ProtocoljKeywords
 from dls_servbase_lib.datafaces.context import Context as DlsServbaseDatafaceContext
 
 # Utilities.
-from dls_utilpack.describe import describe
-from dls_utilpack.exceptions import ProgrammingFault
+from dls_utilpack.exceptions import EndOfList, ProgrammingFault
 
 # Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
@@ -103,11 +102,11 @@ class FetchImageTester(Base):
         # Error when no index given in the request.
         await self.__request_error_no_index()
 
-        # Make a list which is empty.
+        # Query for a list, which will be zero length because there are no wells injected yet.
         await self.__fetch_image_list()
 
         # Error when requesting from empty list.
-        await self.__request_error_empty_list()
+        await self.__request_from_empty_list()
 
         crystal_wells = []
 
@@ -123,8 +122,6 @@ class FetchImageTester(Base):
         await self.__fetch_image_list()
 
         await self.__request_anchor(crystal_wells)
-        # await self.__request_forward(crystal_wells)
-        # await self.__request_forward_undecided(crystal_wells)
 
     # ----------------------------------------------------------------------------------------
 
@@ -169,7 +166,7 @@ class FetchImageTester(Base):
 
     # ----------------------------------------------------------------------------------------
 
-    async def __request_error_empty_list(self):
+    async def __request_from_empty_list(self):
         """ """
 
         request = {
@@ -181,7 +178,7 @@ class FetchImageTester(Base):
             Keywords.CRYSTAL_WELL_INDEX: 1,
         }
 
-        with pytest.raises(ProgrammingFault):
+        with pytest.raises(EndOfList):
             await echolocator_guis_get_default().client_protocolj(
                 request,
                 cookies=self.__cookies,
@@ -198,102 +195,29 @@ class FetchImageTester(Base):
                 Cookies.IMAGE_LIST_UX,
             ],
             Keywords.COMMAND: Commands.FETCH_IMAGE,
-            Keywords.CRYSTAL_WELL_INDEX: 2,
+            Keywords.CRYSTAL_WELL_INDEX: 2,  # 04A_1
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
             request,
             cookies=self.__cookies,
         )
-        self.__cookies = response["__cookies"]
 
-        logger.debug(describe("__request_anchor response", response))
+        # Keep now we have both cookies.
+        self.__cookies = response["__cookies"]
 
         record = response["record"]
         assert record is not None
-        assert record["uuid"] == crystal_wells[2].uuid
-
-    # ----------------------------------------------------------------------------------------
-
-    async def __request_forward(self, crystal_wells):
-        """ """
-
-        request = {
-            ProtocoljKeywords.ENABLE_COOKIES: [
-                Cookies.IMAGE_EDIT_UX,
-                Cookies.IMAGE_LIST_UX,
-            ],
-            Keywords.COMMAND: Commands.FETCH_IMAGE,
-            Keywords.CRYSTAL_WELL_INDEX: crystal_wells[2].uuid,
-            "direction": 1,
-            "visit": self.visit,
-        }
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies={}
-        )
-
-        logger.debug(describe("fetch_image response", response))
-
-        record = response["record"]
-        assert record["position"] == crystal_wells[1].position
-        assert record["uuid"] == crystal_wells[1].uuid
-        assert record["confirmed_target_x"] is not None
+        assert record["position"] == "04A_1"
 
         # -------------------------------------------------------------------------------------
-        # Same query again, but rely on cookies for values.
-        request.pop("crystal_well_uuid")
+        # Same query again, but rely on cookie for index.
+        request.pop(Keywords.CRYSTAL_WELL_INDEX)
 
         response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies=response["__cookies"]
+            request,
+            cookies=self.__cookies,
         )
 
-        logger.debug(describe("fetch_image response", response))
-
         record = response["record"]
-        assert record["position"] == crystal_wells[1].position
-        assert record["uuid"] == crystal_wells[1].uuid
-        assert record["confirmed_target_x"] is not None
-
-    # ----------------------------------------------------------------------------------------
-
-    async def __request_forward_undecided(self, crystal_wells):
-        """ """
-
-        # Get next image in forward direction, anchored on 2, ignoring those decided.
-        request = {
-            ProtocoljKeywords.ENABLE_COOKIES: [
-                Cookies.IMAGE_EDIT_UX,
-                Cookies.IMAGE_LIST_UX,
-            ],
-            Keywords.COMMAND: Commands.FETCH_IMAGE,
-            Keywords.CRYSTAL_WELL_INDEX: crystal_wells[5].uuid,
-            "direction": 1,
-            "visit": self.visit,
-            "should_show_only_undecided": True,
-        }
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies={}
-        )
-
-        logger.debug(describe("__request_forward_undecided response 1", response))
-
-        record = response["record"]
-        assert record["uuid"] == crystal_wells[2].uuid
-        assert record["confirmed_target_x"] is None
-
-        # -------------------------------------------------------------------------------------
-        # Same query again, but rely on cookies for values.
-        request.pop("crystal_well_uuid")
-        request.pop("should_show_only_undecided")
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies=response["__cookies"]
-        )
-
-        logger.debug(describe("__request_forward_undecided response 2", response))
-
-        record = response["record"]
-        assert record["uuid"] == crystal_wells[2].uuid
-        assert record["confirmed_target_x"] is None
+        assert record["position"] == "04A_1"
