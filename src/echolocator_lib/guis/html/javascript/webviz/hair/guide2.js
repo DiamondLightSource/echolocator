@@ -15,7 +15,7 @@ class webviz__hair__Guide2 extends common__Base {
 
     // -------------------------------------------------------------
 
-    activate(raphael, color, is_draggable) {
+    activate(raphael, color, is_enabled) {
         var F = "webviz__hair__Guide2[" + this.name + "]::activate";
 
         this._raphael = raphael
@@ -62,7 +62,8 @@ class webviz__hair__Guide2 extends common__Base {
         this._ball._group = this._group;
         this._ball._parent_object = this;
 
-        if (is_draggable)
+        this.is_enabled = is_enabled;
+        if (is_enabled)
             this._group.drag(this._drag_move, this._drag_start, this._drag_stop);
 
         console.log(F + ": activated")
@@ -102,6 +103,10 @@ class webviz__hair__Guide2 extends common__Base {
                 else
                     this._group.hide();
             }
+            // The setting is for visibility?
+            else if (k == "enabled") {
+                this.is_enabled = setting;
+            }
 
         }
     } // end method
@@ -125,6 +130,9 @@ class webviz__hair__Guide2 extends common__Base {
 
     // -------------------------------------------------------------
     _drag_move(dx, dy) {
+        if (!this._parent_object.is_enabled)
+            return;
+
         this._group.translate(dx - this.odx, dy - this.ody);
         this.odx = dx;
         this.ody = dy;
@@ -136,6 +144,9 @@ class webviz__hair__Guide2 extends common__Base {
     // -------------------------------------------------------------
     _drag_start() {
         var F = "webviz__hair__Guide2[" + this._parent_object.name + "]::_drag_start";
+
+        if (!this._parent_object.is_enabled)
+            return;
 
         console.log(F + ": drag start")
 
@@ -154,6 +165,9 @@ class webviz__hair__Guide2 extends common__Base {
     // -------------------------------------------------------------
     _drag_stop() {
         var F = "webviz__hair__Guide2[" + this._parent_object.name + "]::_drag_stop";
+
+        if (!this._parent_object.is_enabled)
+            return;
 
         // Not yet started the timeout?
         if (this.timeout === undefined) {

@@ -57,6 +57,8 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.#jquery_objects.$crystal_well_count = $(".T_crystal_well_count", this.$interaction_parent);
         this.#jquery_objects.$number_of_crystals = $(".T_number_of_crystals", this.$interaction_parent);
         this.#jquery_objects.$is_usable = $(".T_is_usable", this.$interaction_parent);
+        this.#jquery_objects.$is_exported_to_soakdb3 = $(".T_is_exported_to_soakdb3", this.$interaction_parent);
+
         this.#jquery_objects.previous_button = $(".T_previous_button", this.$interaction_parent);
         this.#jquery_objects.accept_button = $(".T_accept_button", this.$interaction_parent);
         this.#jquery_objects.reject_button = $(".T_reject_button", this.$interaction_parent);
@@ -296,6 +298,11 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
     _handle_canvas_left_click(jquery_event_object) {
         var F = "echolocator__ImageEditUx::_handle_canvas_left_click";
 
+        if (this.#record.is_exported_to_soakdb3) {
+            console.log(F + ": ignoring canvas left click because is_exported_to_soakdb3 is " + this.#record.is_exported_to_soakdb3);
+            return;
+        }
+
         console.log(F + ": seeing canvas left click");
 
         var view_position = {
@@ -319,6 +326,9 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
 
     _handle_canvas_right_click(jquery_event_object) {
         var F = "echolocator__ImageEditUx::_handle_canvas_right_click";
+
+        if (this.#record.is_exported_to_soakdb3)
+            return;
 
         // Mark image unusable.
         this._send_update(false)
@@ -416,12 +426,22 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         this.#jquery_objects.previous_button.attr("disabled", this.#crystal_well_index == 0);
         this.#jquery_objects.next_button.attr("disabled", this.#crystal_well_index >= this.#crystal_well_count - 1);
 
+        this.#jquery_objects.accept_button.attr("disabled", record.is_exported_to_soakdb3);
+        this.#jquery_objects.reject_button.attr("disabled", record.is_exported_to_soakdb3);
+        this.#jquery_objects.reset_button.attr("disabled", record.is_exported_to_soakdb3);
+
+        this.#confirmed_target_ux.enabled(!record.is_exported_to_soakdb3)
+
         // Update the display with the new file's contents.
         var src = record.filename;
         this.#jquery_objects.$image.prop("src", src)
 
         // Render the set_crystal_well_index stuff.
         this.#jquery_objects.$filename.text(record.filename);
+
+        if (record.number_of_crystals === null)
+            record.number_of_crystals = "-";
+
         if (record.is_usable === null)
             record.is_usable = "undecided";
         if (record.is_usable === true)
@@ -429,8 +449,12 @@ class echolocator__ImageEditUx extends echolocator__UxAutoUpdate {
         if (record.is_usable === false)
             record.is_usable = "no";
 
-        if (record.number_of_crystals === null)
-            record.number_of_crystals = "-";
+        if (record.is_exported_to_soakdb3 === null)
+            this.#jquery_objects.$is_exported_to_soakdb3.text("no");
+        if (record.is_exported_to_soakdb3 === true)
+            this.#jquery_objects.$is_exported_to_soakdb3.text("yes");
+        if (record.is_exported_to_soakdb3 === false)
+            this.#jquery_objects.$is_exported_to_soakdb3.text("no");
 
         this.#jquery_objects.$number_of_crystals.text(record.number_of_crystals);
         this.#jquery_objects.$is_usable.text(record.is_usable);

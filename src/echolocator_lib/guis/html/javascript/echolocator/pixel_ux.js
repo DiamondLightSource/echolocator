@@ -57,6 +57,19 @@ class echolocator__PixelUx extends echolocator__UxBase {
     // We will move the guide to the image's target location.
     // We will update the x and y as the guid moves.
 
+    enabled(flag) {
+        var F = "echolocator__PixelUx[" + this.plugin_link_name + "]::enabled"
+
+        this.#is_draggable = flag;
+        this.#guide.set_box({ "enabled": flag });
+
+    } // end method
+
+    // -------------------------------------------------------------
+    // When the selected image changes, we get notified.
+    // We will move the guide to the image's target location.
+    // We will update the x and y as the guid moves.
+
     set_uuid(uuid, target) {
         var F = "echolocator__PixelUx[" + this.plugin_link_name + "]::set_uuid"
 

@@ -56,7 +56,8 @@ class Html(Thing):
             {"text": "auto x,y", "class": "T_auto_target_x_y"},
             {"text": "confirmed x,y", "class": "T_confirmed_target_x_y"},
             {"text": "echo coordinate x,y", "class": "T_confirmed_microns_x_y"},
-            {"text": "use", "class": "T_is_usable"},
+            {"text": "usable", "class": "T_is_usable"},
+            {"text": "exported", "class": "T_is_exported_to_soakdb3"},
             {"text": "error", "class": "T_error"},
         ]
 
@@ -157,12 +158,23 @@ class Html(Thing):
 
             t = model.is_usable
             if t is None:
-                t = "-"
+                t = "undecided"
             elif t:
                 t = "yes"
             else:
                 t = "no"
             html_lines.append("<td class='T_is_usable'>" + str(t) + "</td>")
+
+            t = model.is_exported_to_soakdb3
+            if t is None:
+                t = "no"
+            elif t:
+                t = "yes"
+            else:
+                t = "no"
+            html_lines.append(
+                "<td class='T_is_exported_to_soakdb3'>" + str(t) + "</td>"
+            )
 
             html_lines.append("<td class='T_error'>" + html.escape(error) + "</td>")
 
