@@ -624,24 +624,12 @@ class Aiohttp(Thing, BaseAiohttp):
         crystal_well_models: List[CrystalWellNeedingDroplocationModel],
     ) -> None:
 
-        # Fetch the plate record for visit.
-        crystal_plate_filter = CrystalPlateFilterModel(visit=visit)
-        crystal_plate_models = await self.__xchembku.fetch_crystal_plates(
-            crystal_plate_filter
-        )
-
-        if len(crystal_plate_models) == 0:
-            raise RuntimeError(
-                f'database integrity error: no crystal plate for visit "{visit}"'
-            )
-        crystal_plate_model = crystal_plate_models[0]
-
         soakdb3_crystal_well_models = []
         for m in crystal_well_models:
             soakdb3_crystal_well_models.append(
                 Soakdb3CrystalWellModel(
                     LabVisit=visit,
-                    CrystalPlate=crystal_plate_model.rockminer_collected_stem,
+                    CrystalPlate=m.rockminer_collected_stem,
                     CrystalWell=m.position,
                     EchoX=m.confirmed_microns_x,
                     EchoY=m.confirmed_microns_y,
