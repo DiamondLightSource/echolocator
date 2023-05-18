@@ -40,6 +40,7 @@ external_access_bits:
 # The soakdb3 dataface via direct.
 soakdb3_dataface_specification: &SOAKDB3_DATAFACE_SPECIFICATION
     type: "soakdb3_lib.datafaces.aiosqlite"
+    puck_barcodes_filename: tests/configurations/store.csv
     type_specific_tbd:
         visitid_mappings:
             - action: "regex_replace"
