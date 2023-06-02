@@ -8,10 +8,11 @@ from dls_servbase_lib.datafaces.context import Context as DlsServbaseDatafaceCon
 
 # Utilities.
 from dls_utilpack.exceptions import EndOfList, ProgrammingFault
-
-# Things xchembku provides.
 from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
 from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
+
+# Things xchembku provides.
+from xchembku_lib.datafaces.context import Context as XchembkuDatafaceServerContext
 
 # Client context creator.
 from echolocator_api.guis.context import Context as GuiClientContext
@@ -62,6 +63,10 @@ class FetchImageTester(Base):
         ]
 
         # Make the xchembku client context, expected to be direct (no server).
+        xchembku_server_context = XchembkuDatafaceServerContext(
+            xchembku_dataface_specification
+        )
+        # Make the xchembku client context, expected to be direct (no server).
         xchembku_client_context = XchembkuDatafaceClientContext(
             xchembku_dataface_specification
         )
@@ -80,63 +85,50 @@ class FetchImageTester(Base):
         # Make the client context.
         gui_client_context = GuiClientContext(gui_specification)
 
-        self.__cookies = {}
-
-        self.__crystal_wells = []
-
-        # Start the dataface the gui uses for cookies.
-        async with servbase_dataface_context:
-            # Start the gui client context.
-            async with gui_client_context:
-                # And the gui server context which starts the process.
-                async with gui_server_context:
-                    await self.__run_the_test_before_injecting()
-
-                # Start the client context for the direct access to the xchembku.
-                async with xchembku_client_context:
-                    await self.__inject()
-
-                # Restart the server context which starts the process.
-                async with gui_server_context:
-                    await self.__run_the_test_after_injecting()
+        # Start the client context for the direct access to the xchembku.
+        async with xchembku_client_context:
+            # Start the client context for the direct access to the xchembku.
+            async with xchembku_server_context:
+                # Start the dataface the gui uses for cookies.
+                async with servbase_dataface_context:
+                    # Start the gui client context.
+                    async with gui_client_context:
+                        # And the gui server context which starts the coro.
+                        async with gui_server_context:
+                            await self.__run_the_test(constants, output_directory)
 
     # ----------------------------------------------------------------------------------------
 
-    async def __run_the_test_before_injecting(self):
-        """ """
-        # Error when no index given in the request.
-        await self.__request_error_no_index()
-
-        # Query for a list, which will be zero length because there are no wells injected yet.
-        await self.__fetch_image_list()
-
-        # Error when requesting from empty list.
-        await self.__request_from_empty_list()
-
-    # ----------------------------------------------------------------------------------------
-
-    async def __inject(self):
+    async def __run_the_test(self, constants, output_directory):
         """ """
         # Reference the xchembku object which the context has set up as the default.
         xchembku = xchembku_datafaces_get_default()
 
+        self.__cookies = {}
+
+        # Error when no index given in the request.
+        # await self.__request_error_no_index()
+
+        # Query for a list, which will be zero length because there are no wells injected yet.
+        # await self.__fetch_image_list()
+
+        # Error when requesting from empty list.
+        # await self.__request_from_empty_list()
+
+        crystal_wells = []
+
         # Inject some wells.
-        self.__crystal_wells.append(await self.inject(xchembku, False, False))
-        self.__crystal_wells.append(await self.inject(xchembku, True, True))
-        self.__crystal_wells.append(await self.inject(xchembku, True, False))
-        self.__crystal_wells.append(await self.inject(xchembku, True, True))
-        self.__crystal_wells.append(await self.inject(xchembku, True, True))
-        self.__crystal_wells.append(await self.inject(xchembku, True, False))
-
-    # ----------------------------------------------------------------------------------------
-
-    async def __run_the_test_after_injecting(self):
-        """ """
+        crystal_wells.append(await self.inject(xchembku, False, False))
+        crystal_wells.append(await self.inject(xchembku, True, True))
+        crystal_wells.append(await self.inject(xchembku, True, False))
+        crystal_wells.append(await self.inject(xchembku, True, True))
+        crystal_wells.append(await self.inject(xchembku, True, True))
+        crystal_wells.append(await self.inject(xchembku, True, False))
 
         # Make a list which is no longer empty.
         await self.__fetch_image_list()
 
-        await self.__request_anchor(self.__crystal_wells)
+        await self.__request_anchor(crystal_wells)
 
     # ----------------------------------------------------------------------------------------
 

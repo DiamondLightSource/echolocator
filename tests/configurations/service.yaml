@@ -31,6 +31,8 @@ logging_settings:
 
 # The external access bits.
 external_access_bits:
+    xchembku_dataface_server: &XCHEMBKU_DATAFACE_SERVER http://*:27621
+    xchembku_dataface_client: &XCHEMBKU_DATAFACE_CLIENT http://localhost:27621
     dls_servbase_dataface_server: &DLS_SERVBASE_DATAFACE_SERVER http://*:27620
     dls_servbase_dataface_client: &DLS_SERVBASE_DATAFACE_CLIENT http://localhost:27620
     echolocator_gui_server: &ECHOLOCATOR_GUI_SERVER http://*:27622
@@ -56,15 +58,27 @@ soakdb3_dataface_specification: &SOAKDB3_DATAFACE_SPECIFICATION
             log_level: "WARNING"
 
 # -----------------------------------------------------------------------------
-
 # The xchembku_dataface direct access.
-xchembku_dataface_specification: &XCHEMBKU_DATAFACE_SPECIFICATION
+xchembku_dataface_specification_direct: &XCHEMBKU_DATAFACE_SPECIFICATION_DIRECT
     type: "xchembku_lib.xchembku_datafaces.direct"
     soakdb3_dataface_specification: *SOAKDB3_DATAFACE_SPECIFICATION
     database:
         type: "dls_normsql.aiosqlite"
-        filename: "${output_directory}/xchembku.sqlite"
+        filename: "${output_directory}/xchembku_dataface.sqlite"
         log_level: "WARNING"
+
+# The xchembku_dataface client/server composite.
+xchembku_dataface_specification: &XCHEMBKU_DATAFACE_SPECIFICATION
+    type: "xchembku_lib.xchembku_datafaces.aiohttp"
+    type_specific_tbd:
+        # The remote xchembku_dataface server access.
+        aiohttp_specification:
+            server: *XCHEMBKU_DATAFACE_SERVER
+            client: *XCHEMBKU_DATAFACE_CLIENT
+        # The local implementation of the xchembku_dataface.
+        actual_xchembku_dataface_specification: *XCHEMBKU_DATAFACE_SPECIFICATION_DIRECT
+    context:
+        start_as: process
 
 # -----------------------------------------------------------------------------
 # The dls_servbase_dataface client/server composite.
