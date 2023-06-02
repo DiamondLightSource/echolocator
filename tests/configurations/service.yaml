@@ -37,11 +37,13 @@ external_access_bits:
     dls_servbase_dataface_client: &DLS_SERVBASE_DATAFACE_CLIENT http://localhost:27620
     echolocator_gui_server: &ECHOLOCATOR_GUI_SERVER http://*:27622
     echolocator_gui_client: &ECHOLOCATOR_GUI_CLIENT http://127.0.0.1:27622
+    soakdb3_server: &SOADKB3_SERVER http://*:27623
+    soakdb3_client: &SOADKB3_CLIENT http://localhost:27623
 
 # -----------------------------------------------------------------------------
 # The soakdb3 dataface via direct.
-soakdb3_dataface_specification: &SOAKDB3_DATAFACE_SPECIFICATION
-    type: "soakdb3_lib.datafaces.normsql"
+soakdb3_dataface_specification_direct: &SOAKDB3_DATAFACE_SPECIFICATION_DIRECT
+    type: "soakdb3_lib.datafaces.aiosqlite"
     puck_barcodes_filename: tests/configurations/store.csv
     type_specific_tbd:
         visitid_mappings:
@@ -56,6 +58,19 @@ soakdb3_dataface_specification: &SOAKDB3_DATAFACE_SPECIFICATION
             filename: "set by code"
             backup_directory: "set by code"
             log_level: "WARNING"
+
+# The dataface client/server composite.
+soakdb3_dataface_specification: &SOAKDB3_DATAFACE_SPECIFICATION
+    type: "soakdb3_lib.datafaces.aiohttp"
+    type_specific_tbd:
+        # The remote dataface server access.
+        aiohttp_specification:
+            server: *SOADKB3_SERVER
+            client: *SOADKB3_CLIENT
+        # The local implementation of the dataface.
+        actual_dataface_specification: *SOAKDB3_DATAFACE_SPECIFICATION_DIRECT
+    context:
+        start_as: process
 
 # -----------------------------------------------------------------------------
 # The xchembku_dataface direct access.

@@ -8,10 +8,10 @@ from dls_servbase_lib.datafaces.context import Context as DlsServbaseDatafaceCon
 
 # Utilities.
 from dls_utilpack.exceptions import EndOfList, ProgrammingFault
-from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
-from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
 
 # Things xchembku provides.
+from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
+from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
 from xchembku_lib.datafaces.context import Context as XchembkuDatafaceServerContext
 
 # Client context creator.
@@ -62,11 +62,11 @@ class FetchImageTester(Base):
             "xchembku_dataface_specification"
         ]
 
-        # Make the xchembku client context, expected to be direct (no server).
+        # Make the xchembku server context.
         xchembku_server_context = XchembkuDatafaceServerContext(
             xchembku_dataface_specification
         )
-        # Make the xchembku client context, expected to be direct (no server).
+        # Make the xchembku client context.
         xchembku_client_context = XchembkuDatafaceClientContext(
             xchembku_dataface_specification
         )
@@ -85,9 +85,9 @@ class FetchImageTester(Base):
         # Make the client context.
         gui_client_context = GuiClientContext(gui_specification)
 
-        # Start the client context for the direct access to the xchembku.
+        # Start the client context for the remote access to the xchembku.
         async with xchembku_client_context:
-            # Start the client context for the direct access to the xchembku.
+            # Start the server context xchembku which starts the process.
             async with xchembku_server_context:
                 # Start the dataface the gui uses for cookies.
                 async with servbase_dataface_context:

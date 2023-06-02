@@ -16,11 +16,12 @@ from soakdb3_api.datafaces.datafaces import (
 
 # The service process startup/teardown context.
 from soakdb3_lib.datafaces.context import Context as Soakdb3DatafaceServerContext
-from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
-from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
 
 # Things xchembku provides.
+from xchembku_api.datafaces.context import Context as XchembkuDatafaceClientContext
+from xchembku_api.datafaces.datafaces import xchembku_datafaces_get_default
 from xchembku_api.models.crystal_well_filter_model import CrystalWellFilterModel
+from xchembku_lib.datafaces.context import Context as XchembkuDatafaceServerContext
 
 # Client context creator.
 from echolocator_api.guis.context import Context as GuiClientContext
@@ -85,7 +86,11 @@ class ExportToSoakdb3Tester(Base):
             "xchembku_dataface_specification"
         ]
 
-        # Make the xchembku client context, expected to be direct (no server).
+        # Make the xchembku server context.
+        xchembku_server_context = XchembkuDatafaceServerContext(
+            xchembku_dataface_specification
+        )
+        # Make the xchembku client context.
         xchembku_client_context = XchembkuDatafaceClientContext(
             xchembku_dataface_specification
         )
@@ -108,15 +113,19 @@ class ExportToSoakdb3Tester(Base):
         async with soakdb3_server_context:
             # Client for direct access to the soakdb3 database for seeding it.
             async with soakdb3_client_context:
-                # Start the client context for the direct access to the xchembku.
+                # Start the client context for the remote access to the xchembku.
                 async with xchembku_client_context:
-                    # Start the dataface the gui uses for cookies.
-                    async with servbase_dataface_context:
-                        # Start the gui client context.
-                        async with gui_client_context:
-                            # And the gui server context which starts the coro.
-                            async with gui_server_context:
-                                await self.__run_the_test(constants, output_directory)
+                    # Start the server context xchembku which starts the process.
+                    async with xchembku_server_context:
+                        # Start the dataface the gui uses for cookies.
+                        async with servbase_dataface_context:
+                            # Start the gui client context.
+                            async with gui_client_context:
+                                # And the gui server context which starts the coro.
+                                async with gui_server_context:
+                                    await self.__run_the_test(
+                                        constants, output_directory
+                                    )
 
     # ----------------------------------------------------------------------------------------
 
