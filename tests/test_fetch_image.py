@@ -80,25 +80,30 @@ class FetchImageTester(Base):
         # Make the client context.
         gui_client_context = GuiClientContext(gui_specification)
 
-        # Start the client context for the direct access to the xchembku.
-        async with xchembku_client_context:
-            # Start the dataface the gui uses for cookies.
-            async with servbase_dataface_context:
-                # Start the gui client context.
-                async with gui_client_context:
-                    # And the gui server context which starts the coro.
-                    async with gui_server_context:
-                        await self.__run_the_test(constants, output_directory)
+        self.__cookies = {}
+
+        self.__crystal_wells = []
+
+        # Start the dataface the gui uses for cookies.
+        async with servbase_dataface_context:
+            # Start the gui client context.
+            async with gui_client_context:
+                # And the gui server context which starts the process.
+                async with gui_server_context:
+                    await self.__run_the_test_before_injecting()
+
+                # Start the client context for the direct access to the xchembku.
+                async with xchembku_client_context:
+                    await self.__inject()
+
+                # Restart the server context which starts the process.
+                async with gui_server_context:
+                    await self.__run_the_test_after_injecting()
 
     # ----------------------------------------------------------------------------------------
 
-    async def __run_the_test(self, constants, output_directory):
+    async def __run_the_test_before_injecting(self):
         """ """
-        # Reference the xchembku object which the context has set up as the default.
-        xchembku = xchembku_datafaces_get_default()
-
-        self.__cookies = {}
-
         # Error when no index given in the request.
         await self.__request_error_no_index()
 
@@ -108,40 +113,30 @@ class FetchImageTester(Base):
         # Error when requesting from empty list.
         await self.__request_from_empty_list()
 
-        crystal_wells = []
+    # ----------------------------------------------------------------------------------------
+
+    async def __inject(self):
+        """ """
+        # Reference the xchembku object which the context has set up as the default.
+        xchembku = xchembku_datafaces_get_default()
 
         # Inject some wells.
-        crystal_wells.append(await self.inject(xchembku, False, False))
-        crystal_wells.append(await self.inject(xchembku, True, True))
-        crystal_wells.append(await self.inject(xchembku, True, False))
-        crystal_wells.append(await self.inject(xchembku, True, True))
-        crystal_wells.append(await self.inject(xchembku, True, True))
-        crystal_wells.append(await self.inject(xchembku, True, False))
+        self.__crystal_wells.append(await self.inject(xchembku, False, False))
+        self.__crystal_wells.append(await self.inject(xchembku, True, True))
+        self.__crystal_wells.append(await self.inject(xchembku, True, False))
+        self.__crystal_wells.append(await self.inject(xchembku, True, True))
+        self.__crystal_wells.append(await self.inject(xchembku, True, True))
+        self.__crystal_wells.append(await self.inject(xchembku, True, False))
+
+    # ----------------------------------------------------------------------------------------
+
+    async def __run_the_test_after_injecting(self):
+        """ """
 
         # Make a list which is no longer empty.
         await self.__fetch_image_list()
 
-        await self.__request_anchor(crystal_wells)
-
-    # ----------------------------------------------------------------------------------------
-
-    async def __fetch_image_list(self):
-        """ """
-
-        request = {
-            ProtocoljKeywords.ENABLE_COOKIES: [
-                Cookies.IMAGE_LIST_UX,
-            ],
-            Keywords.COMMAND: Commands.FETCH_IMAGE_LIST,
-            "visit_filter": self.visit,
-        }
-
-        response = await echolocator_guis_get_default().client_protocolj(
-            request, cookies=self.__cookies
-        )
-
-        # Pick up the cookies established by the list query.
-        self.__cookies = response["__cookies"]
+        await self.__request_anchor(self.__crystal_wells)
 
     # ----------------------------------------------------------------------------------------
 
@@ -186,9 +181,32 @@ class FetchImageTester(Base):
 
     # ----------------------------------------------------------------------------------------
 
+    async def __fetch_image_list(self):
+        """ """
+
+        logger.debug("[AT] ----------------- requesting image list -----------------")
+
+        request = {
+            ProtocoljKeywords.ENABLE_COOKIES: [
+                Cookies.IMAGE_LIST_UX,
+            ],
+            Keywords.COMMAND: Commands.FETCH_IMAGE_LIST,
+            "visit_filter": self.visit,
+        }
+
+        response = await echolocator_guis_get_default().client_protocolj(
+            request, cookies=self.__cookies
+        )
+
+        # Pick up the cookies established by the list query.
+        self.__cookies = response["__cookies"]
+
+    # ----------------------------------------------------------------------------------------
+
     async def __request_anchor(self, crystal_wells):
         """ """
 
+        logger.debug("[AT] ----------------- requesting anchor -----------------")
         request = {
             ProtocoljKeywords.ENABLE_COOKIES: [
                 Cookies.IMAGE_EDIT_UX,

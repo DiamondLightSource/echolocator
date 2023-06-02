@@ -39,7 +39,7 @@ external_access_bits:
 # -----------------------------------------------------------------------------
 # The soakdb3 dataface via direct.
 soakdb3_dataface_specification: &SOAKDB3_DATAFACE_SPECIFICATION
-    type: "soakdb3_lib.datafaces.aiosqlite"
+    type: "soakdb3_lib.datafaces.normsql"
     puck_barcodes_filename: tests/configurations/store.csv
     type_specific_tbd:
         visitid_mappings:
@@ -50,7 +50,7 @@ soakdb3_dataface_specification: &SOAKDB3_DATAFACE_SPECIFICATION
               pattern: "^[Yy][:]"
               replace: "/dls/labxchem/"
         database:
-            type: "soakdb3_lib.databases.aiosqlite"
+            type: "dls_normsql.aiosqlite"
             filename: "set by code"
             backup_directory: "set by code"
             log_level: "WARNING"
@@ -62,7 +62,7 @@ xchembku_dataface_specification: &XCHEMBKU_DATAFACE_SPECIFICATION
     type: "xchembku_lib.xchembku_datafaces.direct"
     soakdb3_dataface_specification: *SOAKDB3_DATAFACE_SPECIFICATION
     database:
-        type: "xchembku_lib.xchembku_databases.normsql"
+        type: "dls_normsql.aiosqlite"
         filename: "${output_directory}/xchembku.sqlite"
         log_level: "WARNING"
 
@@ -77,9 +77,9 @@ dls_servbase_dataface_specification: &DLS_SERVBASE_DATAFACE_SPECIFICATION
             client: *DLS_SERVBASE_DATAFACE_CLIENT
         # The local implementation of the dataface.
         actual_dataface_specification:
-            type: "dls_servbase_lib.datafaces.aiosqlite"
+            type: "dls_servbase_lib.datafaces.normsql"
             database:
-                type: "dls_servbase_lib.databases.aiosqlite"
+                type: "dls_normsql.aiosqlite"
                 filename: "${output_directory}/dls_servbase_dataface.sqlite"
                 log_level: "WARNING"
     context:
