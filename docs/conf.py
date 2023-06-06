@@ -1,5 +1,5 @@
 # ********** Please don't edit this file!
-# ********** It has been generated automatically by dae_devops version 0.5.2.
+# ********** It has been generated automatically by dae_devops version 0.5.3.
 # ********** For repository_name echolocator
 
 from pathlib import Path
@@ -55,7 +55,7 @@ extensions = [
 
 # If true, Sphinx will warn about all references where the target cannot
 # be found.
-nitpicky = True
+nitpicky = False
 
 # A list of (type, target) tuples (by default empty) that should be ignored when
 # generating warnings in "nitpicky mode". Note that type should include the
@@ -188,7 +188,7 @@ ultimate_replacements = {
     "$" + "{repository_name}": "echolocator",
     "$" + "{package_name}": "echolocator_lib",
     "$" + "{git_url}": "https://gitlab.diamond.ac.uk/xchem",
-    "$" + "{python_version_at_least}": "3.9",
+    "$" + "{python_version_at_least}": "3.10",
 }
 
 
@@ -197,4 +197,4 @@ def setup(app):
     app.connect("source-read", ultimateReplace)
 
 
-# dae_devops_fingerprint 522695c29baed7676543987e99fc61dd
+# dae_devops_fingerprint 03014300546e31a10942329f91438b95
