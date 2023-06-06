@@ -1,5 +1,5 @@
 # ********** Please don't edit this file!
-# ********** It has been generated automatically by dae_devops version 0.5.2.
+# ********** It has been generated automatically by dae_devops version 0.5.3.
 # ********** For repository_name echolocator
 
 import json
@@ -102,4 +102,4 @@ def main(args=None):
 if __name__ == "__main__":
     main()
 
-# dae_devops_fingerprint e707603d7cbd385a51462ce91214bed6
+# dae_devops_fingerprint b1cf83c6a3f4e6e3b0b8179dc6117147
