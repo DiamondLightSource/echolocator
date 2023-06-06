@@ -1,10 +1,10 @@
 import logging
 
-# Base class which maps flask requests to methods.
-from echolocator_lib.contexts.base import Base as ContextBase
+# Base class for an asyncio server context.
+from dls_utilpack.server_context_base import ServerContextBase
 
 # Things created in the context.
-from echolocator_lib.guis.guis import Guis, echolocator_guis_set_default
+from echolocator_lib.guis.guis import Guis
 
 logger = logging.getLogger(__name__)
 
@@ -12,23 +12,20 @@ logger = logging.getLogger(__name__)
 thing_type = "echolocator_lib.echolocator_guis.context"
 
 
-class Context(ContextBase):
+class Context(ServerContextBase):
     """
     Object representing an event echolocator_dataface connection.
     """
 
     # ----------------------------------------------------------------------------------------
     def __init__(self, specification):
-        ContextBase.__init__(self, thing_type, specification)
+        ServerContextBase.__init__(self, thing_type, specification)
 
     # ----------------------------------------------------------------------------------------
     async def aenter(self):
         """ """
 
         self.server = Guis().build_object(self.specification())
-
-        # If there is more than one gui, the last one defined will be the default.
-        echolocator_guis_set_default(self.server)
 
         if self.context_specification.get("start_as") == "coro":
             await self.server.activate_coro()
@@ -41,7 +38,7 @@ class Context(ContextBase):
             await self.server.start_process()
 
     # ----------------------------------------------------------------------------------------
-    async def aexit(self):
+    async def aexit(self, type, value, traceback):
         """ """
         logger.debug(f"[DISSHU] {thing_type} aexit")
 

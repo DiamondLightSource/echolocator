@@ -9,14 +9,14 @@ from dls_servbase_lib.datafaces.context import Context as DlsServbaseDatafaceCon
 # Xchembku client context.
 from xchembku_api.datafaces.context import Context as XchembkuDatafacesContext
 
+# Things created in the context.
+from echolocator_api.guis.guis import echolocator_guis_get_default
+
 # Base class for cli subcommands.
 from echolocator_cli.subcommands.base import ArgKeywords, Base
 
 # Rockingest context creator.
 from echolocator_lib.guis.context import Context as GuiContext
-
-# Things created in the context.
-from echolocator_lib.guis.guis import echolocator_guis_get_default
 
 logger = logging.getLogger()
 

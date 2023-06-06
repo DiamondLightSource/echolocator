@@ -13,27 +13,6 @@ from echolocator_api.guis.constants import Types
 logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------------------------------
-__default_echolocator_gui = None
-
-
-def echolocator_guis_set_default(echolocator_gui):
-    global __default_echolocator_gui
-    __default_echolocator_gui = echolocator_gui
-
-
-def echolocator_guis_get_default():
-    global __default_echolocator_gui
-    if __default_echolocator_gui is None:
-        raise RuntimeError("echolocator_guis_get_default instance is None")
-    return __default_echolocator_gui
-
-
-def echolocator_guis_has_default():
-    global __default_echolocator_gui
-    return __default_echolocator_gui is not None
-
-
-# -----------------------------------------------------------------------------------------
 
 
 class Guis(Things):

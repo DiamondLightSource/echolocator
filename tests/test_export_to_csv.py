@@ -14,14 +14,14 @@ from xchembku_lib.datafaces.context import Context as XchembkuDatafaceServerCont
 # Client context creator.
 from echolocator_api.guis.context import Context as GuiClientContext
 
+# Object managing gui
+from echolocator_api.guis.guis import echolocator_guis_get_default
+
 # GUI constants.
 from echolocator_lib.guis.constants import Commands, Keywords
 
 # Server context creator.
 from echolocator_lib.guis.context import Context as GuiServerContext
-
-# Object managing gui
-from echolocator_lib.guis.guis import echolocator_guis_get_default
 
 # Base class for the tester.
 from tests.base import Base

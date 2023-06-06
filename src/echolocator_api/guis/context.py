@@ -1,7 +1,7 @@
 import logging
 
 # Base class.
-from echolocator_api.context_base import ContextBase
+from dls_utilpack.client_context_base import ClientContextBase
 
 # Things created in the context.
 from echolocator_api.guis.guis import Guis, echolocator_guis_set_default
@@ -9,7 +9,7 @@ from echolocator_api.guis.guis import Guis, echolocator_guis_set_default
 logger = logging.getLogger(__name__)
 
 
-class Context(ContextBase):
+class Context(ClientContextBase):
     """
     Client context for a echolocator_gui object.
     On entering, it creates the object according to the specification (a dict).
@@ -20,14 +20,14 @@ class Context(ContextBase):
 
     # ----------------------------------------------------------------------------------------
     def __init__(self, specification):
-        self.__specification = specification
+        ClientContextBase.__init__(self, specification)
 
     # ----------------------------------------------------------------------------------------
     async def aenter(self):
         """ """
 
         # Build the object according to the specification.
-        self.interface = Guis().build_object(self.__specification)
+        self.interface = Guis().build_object(self.specification)
 
         # If there is more than one gui, the last one defined will be the default.
         echolocator_guis_set_default(self.interface)

@@ -28,6 +28,11 @@ def echolocator_guis_get_default():
     return __default_echolocator_gui
 
 
+def echolocator_guis_has_default():
+    global __default_echolocator_gui
+    return __default_echolocator_gui is not None
+
+
 # -----------------------------------------------------------------------------------------
 
 

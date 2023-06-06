@@ -16,14 +16,14 @@ from xchembku_lib.datafaces.context import Context as XchembkuDatafaceServerCont
 # Client context creator.
 from echolocator_api.guis.context import Context as GuiClientContext
 
+# Object managing gui
+from echolocator_api.guis.guis import echolocator_guis_get_default
+
 # GUI constants.
 from echolocator_lib.guis.constants import Commands, Cookies, Keywords
 
 # Server context creator.
 from echolocator_lib.guis.context import Context as GuiServerContext
-
-# Object managing gui
-from echolocator_lib.guis.guis import echolocator_guis_get_default
 
 # Base class for the tester.
 from tests.base import Base
@@ -91,6 +91,7 @@ class DroplocationTester(Base):
         async with xchembku_client_context:
             # Start the server context xchembku which starts the process.
             async with xchembku_server_context:
+                # Start the servbase (cookies) server.
                 async with servbase_dataface_context:
                     # Start the gui client context.
                     async with gui_client_context:
