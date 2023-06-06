@@ -57,7 +57,7 @@ thing_type = "echolocator_lib.echolocator_guis.aiohttp"
 # ------------------------------------------------------------------------------------------
 class Aiohttp(Thing, BaseAiohttp):
     """
-    Object implementing remote procedure calls for echolocator_gui methods.
+    Object implementing remote procedure calls for the echolocator API.
     """
 
     # ----------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 # ********** Please don't edit this file!
 # ********** It has been generated automatically by dae_devops version 0.5.3.
-# ********** For repository_name echolocator
+# ********** For repository_name rockingester
 
 from pathlib import Path
 from subprocess import check_output
@@ -12,15 +12,15 @@ from subprocess import check_output
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 from sphinx.domains.python import PythonDomain
 
-import echolocator_lib
+import rockingester_lib
 
 # -- General configuration ------------------------------------------------
 
 # General information about the project.
-project = "echolocator"
+project = "rockingester"
 
 # The full version, including alpha/beta/rc tags.
-release = echolocator_lib.__version__
+release = rockingester_lib.__version__
 
 # The short X.Y version.
 if "+" in release:
@@ -150,7 +150,7 @@ html_theme_options = dict(
     logo=dict(
         text=project,
     ),
-    gitlab_url="https://gitlab.diamond.ac.uk/xchem/echolocator",
+    gitlab_url="https://github.com/diamondlightsource/rockingester/rockingester",
     icon_links=[],
     navbar_end=["theme-switcher", "icon-links"],
 )
@@ -185,9 +185,9 @@ def ultimateReplace(app, docname, source):
 # I got this from https://github.com/sphinx-doc/sphinx/issues/4054.
 # It will allow the ${token} replacement in the rst documents.
 ultimate_replacements = {
-    "$" + "{repository_name}": "echolocator",
-    "$" + "{package_name}": "echolocator_lib",
-    "$" + "{git_url}": "https://gitlab.diamond.ac.uk/xchem",
+    "$" + "{repository_name}": "rockingester",
+    "$" + "{package_name}": "rockingester_lib",
+    "$" + "{git_url}": "https://github.com/diamondlightsource/rockingester",
     "$" + "{python_version_at_least}": "3.10",
 }
 
@@ -197,4 +197,4 @@ def setup(app):
     app.connect("source-read", ultimateReplace)
 
 
-# dae_devops_fingerprint 03014300546e31a10942329f91438b95
+# dae_devops_fingerprint e48e66338bf43fe14551a3ae3aeee6a0
