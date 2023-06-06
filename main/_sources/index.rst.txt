@@ -1,8 +1,16 @@
-.. include:: ../README.rst
-    :end-before: when included in index.rst
+echolocator
+=======================================================================
+
+XChem GUI for manually targeting drop points for the Echo dispenser.
+
+Contains both backend server and front end html/javascript.
+
+Uses xchembku for database interaction.
 
 .. toctree::
-    1_tutorials
-    2_how-to
-    3_explanations
-    4_reference
+    :titlesonly:
+
+    tutorials/index
+    how-to/index
+    explanations/index
+    reference/index
