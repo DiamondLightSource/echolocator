@@ -571,10 +571,16 @@ class Aiohttp(Thing, BaseAiohttp):
             crystal_well_filter, why="[EXPFIL] get list to be epxorted"
         )
 
+        # Sort the list based on the (computed) row_first_position field.
+        sorted_models = sorted(
+            crystal_well_models,
+            key=lambda crystal_well_model: crystal_well_model.row_first_position(),
+        )
+
         logger.debug(f"[EXPFIL] found {len(crystal_well_models)} to be exported")
 
         # Export the crystal wells to the appropriate soakdb3 visit.
-        await self.__export_to_soakdb3_visit(visit_filter, crystal_well_models)
+        await self.__export_to_soakdb3_visit(visit_filter, sorted_models)
 
         # Make the list of droplocations to update with the exported flag.
         crystal_well_droplocation_models: List[CrystalWellDroplocationModel] = list()
@@ -692,9 +698,16 @@ class Aiohttp(Thing, BaseAiohttp):
             crystal_plate_uuid,
             plate_crystal_well_models,
         ) in plates_crystal_well_models.items():
+
+            # Sort the list based on the (computed) row_first_position field.
+            sorted_models = sorted(
+                plate_crystal_well_models,
+                key=lambda crystal_well_model: crystal_well_model.row_first_position(),
+            )
+
             # Export the crystal wells for this plate to the appropriate csv file named for the plate.
             filename = await self.__export_to_csv_plate(
-                visit_filter, crystal_plate_uuid, plate_crystal_well_models
+                visit_filter, crystal_plate_uuid, sorted_models
             )
 
             confirmations.append(

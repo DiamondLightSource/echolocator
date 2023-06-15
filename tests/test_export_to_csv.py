@@ -195,13 +195,16 @@ class ExportTester(Base):
 
         # Check the well positions are those that are considered "confirmed".
         # The position constants are fromt the Swiss3 microns computation.
-        assert rows[0][0] == "02A_1"
-        assert int(rows[0][1]) == -561
-        assert int(rows[0][2]) == -842
-        assert rows[1][0] == "04A_1"
-        assert int(rows[1][1]) == 6
-        assert int(rows[1][2]) == -274
-        assert rows[2][0] == "05A_1"
+        # Note the order here: row_first_position gives get all letters in row 01 before any letters in row 02.
+        assert rows[0][0] == "B01a"
+        assert int(rows[0][1]) == 6
+        assert int(rows[0][2]) == -274
+
+        assert rows[1][0] == "A02a"
+        assert int(rows[1][1]) == -561
+        assert int(rows[1][2]) == -842
+
+        assert rows[2][0] == "B02a"
         assert int(rows[2][1]) == 289
         assert int(rows[2][2]) == 9
 

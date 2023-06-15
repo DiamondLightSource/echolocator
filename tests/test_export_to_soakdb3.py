@@ -211,13 +211,16 @@ class ExportToSoakdb3Tester(Base):
         assert len(queried_models) == 3
 
         # The position constants are fromt the Swiss3 microns computation.
-        assert queried_models[0].CrystalWell == "02A_1"
-        assert int(queried_models[0].EchoX) == -561
-        assert int(queried_models[0].EchoY) == -842
-        assert queried_models[1].CrystalWell == "04A_1"
-        assert int(queried_models[1].EchoX) == 6
-        assert int(queried_models[1].EchoY) == -274
-        assert queried_models[2].CrystalWell == "05A_1"
+        # Note the order here: row_first_position gives get all letters in row 01 before any letters in row 02.
+        assert queried_models[0].CrystalWell == "B01a"
+        assert int(queried_models[0].EchoX) == 6
+        assert int(queried_models[0].EchoY) == -274
+
+        assert queried_models[1].CrystalWell == "A02a"
+        assert int(queried_models[1].EchoX) == -561
+        assert int(queried_models[1].EchoY) == -842
+
+        assert queried_models[2].CrystalWell == "B02a"
         assert int(queried_models[2].EchoX) == 289
         assert int(queried_models[2].EchoY) == 9
 

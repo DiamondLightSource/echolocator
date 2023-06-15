@@ -35,7 +35,7 @@ class Base:
         self.tasks_execution_outputs = {}
         self.residuals = ["stdout.txt", "stderr.txt", "main.log"]
 
-        self.injected_count = 0
+        self.__injected_count = 0
         self.visit = "cm00001-1"
         self.__barcode_template = "98a%d"
         self.crystal_plate_uuid = None
@@ -131,13 +131,33 @@ class Base:
         if self.crystal_plate_uuid is None:
             await self.inject_plate(xchembku)
 
-        self.injected_count += 1
+        letter = "A"
+        if self.__injected_count > 3:
+            letter = "B"
 
-        filename = "/tmp/%03d.jpg" % (self.injected_count)
+        self.__injected_count += 1
+        filename = "/tmp/%02d%s_1.jpg" % (self.__injected_count, letter)
+        position = "%s%02da" % (letter, self.__injected_count)
+
+        positions = [
+            "A01a",
+            "A02a",
+            "A03a",
+            "B01a",
+            "B02a",
+            "B02a",
+            "C01a",
+            "C02a",
+            "C03a",
+            "D01a",
+            "D02a",
+            "D03a",
+        ]
+        position = positions[self.__injected_count - 1]
 
         # Write well record.
         m = CrystalWellModel(
-            position="%02dA_1" % (self.injected_count),
+            position=position,
             filename=filename,
             crystal_plate_uuid=self.crystal_plate_uuid,
         )
@@ -148,11 +168,11 @@ class Base:
             # Add a crystal well autolocation.
             t = CrystalWellAutolocationModel(
                 crystal_well_uuid=m.uuid,
-                number_of_crystals=self.injected_count,
+                number_of_crystals=self.__injected_count,
                 well_centroid_x=400,
                 well_centroid_y=500,
-                auto_target_x=self.injected_count * 10 + 0,
-                auto_target_y=self.injected_count * 10 + 1,
+                auto_target_x=self.__injected_count * 10 + 0,
+                auto_target_y=self.__injected_count * 10 + 1,
             )
 
             await xchembku.originate_crystal_well_autolocations([t])
@@ -161,8 +181,8 @@ class Base:
             # Add a crystal well droplocation.
             t = CrystalWellDroplocationModel(
                 crystal_well_uuid=m.uuid,
-                confirmed_target_x=self.injected_count * 100 + 2,
-                confirmed_target_y=self.injected_count * 100 + 3,
+                confirmed_target_x=self.__injected_count * 100 + 2,
+                confirmed_target_y=self.__injected_count * 100 + 3,
                 is_usable=True,
             )
 

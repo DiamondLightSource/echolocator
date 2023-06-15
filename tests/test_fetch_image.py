@@ -205,7 +205,7 @@ class FetchImageTester(Base):
                 Cookies.IMAGE_LIST_UX,
             ],
             Keywords.COMMAND: Commands.FETCH_IMAGE,
-            Keywords.CRYSTAL_WELL_INDEX: 2,  # 04A_1
+            Keywords.CRYSTAL_WELL_INDEX: 2,  # B01a
         }
 
         response = await echolocator_guis_get_default().client_protocolj(
@@ -218,7 +218,7 @@ class FetchImageTester(Base):
 
         record = response["record"]
         assert record is not None
-        assert record["position"] == "04A_1"
+        assert record["position"] == "B01a"
 
         # -------------------------------------------------------------------------------------
         # Same query again, but rely on cookie for index.
@@ -230,4 +230,4 @@ class FetchImageTester(Base):
         )
 
         record = response["record"]
-        assert record["position"] == "04A_1"
+        assert record["position"] == "B01a"
