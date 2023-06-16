@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>echolocator_lib.guis.aiohttp &#8212; echolocator 1.5.1 documentation</title>
+    <title>echolocator_lib.guis.aiohttp &#8212; echolocator 1.5.2.dev1+g5bf9842 documentation</title>
   
   
   
@@ -947,10 +947,16 @@ document.write(`
             <span class="n">crystal_well_filter</span><span class="p">,</span> <span class="n">why</span><span class="o">=</span><span class="s2">&quot;[EXPFIL] get list to be epxorted&quot;</span>
         <span class="p">)</span>
 
+        <span class="c1"># Sort the list based on the (computed) row_first_position field.</span>
+        <span class="n">sorted_models</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">crystal_well_models</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">crystal_well_model</span><span class="p">:</span> <span class="n">crystal_well_model</span><span class="o">.</span><span class="n">row_first_position</span><span class="p">(),</span>
+        <span class="p">)</span>
+
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[EXPFIL] found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">crystal_well_models</span><span class="p">)</span><span class="si">}</span><span class="s2"> to be exported&quot;</span><span class="p">)</span>
 
         <span class="c1"># Export the crystal wells to the appropriate soakdb3 visit.</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__export_to_soakdb3_visit</span><span class="p">(</span><span class="n">visit_filter</span><span class="p">,</span> <span class="n">crystal_well_models</span><span class="p">)</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__export_to_soakdb3_visit</span><span class="p">(</span><span class="n">visit_filter</span><span class="p">,</span> <span class="n">sorted_models</span><span class="p">)</span>
 
         <span class="c1"># Make the list of droplocations to update with the exported flag.</span>
         <span class="n">crystal_well_droplocation_models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CrystalWellDroplocationModel</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -1068,9 +1074,16 @@ document.write(`
             <span class="n">crystal_plate_uuid</span><span class="p">,</span>
             <span class="n">plate_crystal_well_models</span><span class="p">,</span>
         <span class="p">)</span> <span class="ow">in</span> <span class="n">plates_crystal_well_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="c1"># Sort the list based on the (computed) row_first_position field.</span>
+            <span class="n">sorted_models</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">plate_crystal_well_models</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">crystal_well_model</span><span class="p">:</span> <span class="n">crystal_well_model</span><span class="o">.</span><span class="n">row_first_position</span><span class="p">(),</span>
+            <span class="p">)</span>
+
             <span class="c1"># Export the crystal wells for this plate to the appropriate csv file named for the plate.</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__export_to_csv_plate</span><span class="p">(</span>
-                <span class="n">visit_filter</span><span class="p">,</span> <span class="n">crystal_plate_uuid</span><span class="p">,</span> <span class="n">plate_crystal_well_models</span>
+                <span class="n">visit_filter</span><span class="p">,</span> <span class="n">crystal_plate_uuid</span><span class="p">,</span> <span class="n">sorted_models</span>
             <span class="p">)</span>
 
             <span class="n">confirmations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
