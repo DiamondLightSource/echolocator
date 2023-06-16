@@ -1,0 +1,1219 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>echolocator_lib.guis.aiohttp &#8212; echolocator 1.6.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/echolocator_lib/guis/aiohttp';</script>
+    <link rel="icon" href="../../../_static/dls-favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/dls-logo.svg" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../../_static/dls-logo.svg" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+    <p class="title logo__title">echolocator</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../how-to/index.html">
+                        How-to Guides
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../explanations/index.html">
+                        Explanations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../reference/index.html">
+                        Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitlab.diamond.ac.uk/xchem/echolocator" title="GitLab" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-gitlab"></i></span>
+            <label class="sr-only">GitLab</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../how-to/index.html">
+                        How-to Guides
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../explanations/index.html">
+                        Explanations
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../reference/index.html">
+                        Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitlab.diamond.ac.uk/xchem/echolocator" title="GitLab" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-gitlab"></i></span>
+            <label class="sr-only">GitLab</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">echolocator_lib.guis.aiohttp</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for echolocator_lib.guis.aiohttp</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">dls_servbase_api.constants</span> <span class="kn">import</span> <span class="n">Keywords</span> <span class="k">as</span> <span class="n">ProtocoljKeywords</span>
+
+<span class="c1"># Utilities.</span>
+<span class="kn">from</span> <span class="nn">dls_utilpack.callsign</span> <span class="kn">import</span> <span class="n">callsign</span>
+<span class="kn">from</span> <span class="nn">dls_utilpack.exceptions</span> <span class="kn">import</span> <span class="n">EndOfList</span><span class="p">,</span> <span class="n">ProgrammingFault</span>
+<span class="kn">from</span> <span class="nn">dls_utilpack.require</span> <span class="kn">import</span> <span class="n">require</span>
+
+<span class="c1"># Basic things.</span>
+<span class="kn">from</span> <span class="nn">dls_utilpack.thing</span> <span class="kn">import</span> <span class="n">Thing</span>
+<span class="kn">from</span> <span class="nn">dls_utilpack.visit</span> <span class="kn">import</span> <span class="n">get_xchem_directory</span>
+
+<span class="c1"># The model which describes the crystal wells to be injected into soakdb3.</span>
+<span class="kn">from</span> <span class="nn">soakdb3_api.models.crystal_well_model</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CrystalWellModel</span> <span class="k">as</span> <span class="n">Soakdb3CrystalWellModel</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Things xchembku provides.</span>
+<span class="kn">from</span> <span class="nn">xchembku_api.datafaces.context</span> <span class="kn">import</span> <span class="n">Context</span> <span class="k">as</span> <span class="n">XchembkuDatafaceClientContext</span>
+<span class="kn">from</span> <span class="nn">xchembku_api.models.crystal_plate_filter_model</span> <span class="kn">import</span> <span class="n">CrystalPlateFilterModel</span>
+<span class="kn">from</span> <span class="nn">xchembku_api.models.crystal_well_droplocation_model</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CrystalWellDroplocationModel</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">xchembku_api.models.crystal_well_filter_model</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CrystalWellFilterModel</span><span class="p">,</span>
+    <span class="n">CrystalWellFilterSortbyEnum</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">xchembku_api.models.crystal_well_needing_droplocation_model</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CrystalWellNeedingDroplocationModel</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Base class for an aiohttp server.</span>
+<span class="kn">from</span> <span class="nn">echolocator_lib.base_aiohttp</span> <span class="kn">import</span> <span class="n">BaseAiohttp</span>
+
+<span class="c1"># Object managing echolocator_composers.</span>
+<span class="kn">from</span> <span class="nn">echolocator_lib.composers.composers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Composers</span><span class="p">,</span>
+    <span class="n">echolocator_composers_get_default</span><span class="p">,</span>
+    <span class="n">echolocator_composers_has_default</span><span class="p">,</span>
+    <span class="n">echolocator_composers_set_default</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Gui protocolj things (must agree with javascript).</span>
+<span class="kn">from</span> <span class="nn">echolocator_lib.guis.constants</span> <span class="kn">import</span> <span class="n">Commands</span><span class="p">,</span> <span class="n">Cookies</span><span class="p">,</span> <span class="n">Keywords</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">thing_type</span> <span class="o">=</span> <span class="s2">&quot;echolocator_lib.echolocator_guis.aiohttp&quot;</span>
+
+
+<span class="c1"># ------------------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="Aiohttp"><a class="viewcode-back" href="../../../reference/classes.html#echolocator_lib.guis.aiohttp.Aiohttp">[docs]</a><span class="k">class</span> <span class="nc">Aiohttp</span><span class="p">(</span><span class="n">Thing</span><span class="p">,</span> <span class="n">BaseAiohttp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Object implementing remote procedure calls for the echolocator API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">specification</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">Thing</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thing_type</span><span class="p">,</span> <span class="n">specification</span><span class="p">)</span>
+        <span class="n">BaseAiohttp</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">specification</span><span class="p">[</span><span class="s2">&quot;type_specific_tbd&quot;</span><span class="p">][</span><span class="s2">&quot;aiohttp_specification&quot;</span><span class="p">],</span>
+            <span class="n">calling_file</span><span class="o">=</span><span class="vm">__file__</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku_client_context</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">def</span> <span class="nf">callsign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;Gui.Aiohttp&quot;</span><span class="p">,</span> <span class="n">BaseAiohttp</span><span class="o">.</span><span class="n">callsign</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">def</span> <span class="nf">activate_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">multiprocessing</span><span class="o">.</span><span class="n">current_process</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;gui&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">activate_process_base</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;unable to start </span><span class="si">{</span><span class="n">callsign</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> process&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exception</span>
+            <span class="p">)</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="Aiohttp.activate_thread"><a class="viewcode-back" href="../../../reference/classes.html#echolocator_lib.guis.aiohttp.Aiohttp.activate_thread">[docs]</a>    <span class="k">def</span> <span class="nf">activate_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called from inside a newly created thread.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;gui&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">activate_thread_base</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;unable to start </span><span class="si">{</span><span class="n">callsign</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> thread&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exception</span>
+            <span class="p">)</span></div>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">activate_coro</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># No special routes, we will use protocolj dispathcing only</span>
+            <span class="n">route_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Start the actual coro to listen for incoming http requests.</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">activate_coro_base</span><span class="p">(</span><span class="n">route_tuples</span><span class="p">)</span>
+
+            <span class="c1"># No default composer is set up yet?</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">echolocator_composers_has_default</span><span class="p">():</span>
+                <span class="c1"># The echolocator_composer to use.</span>
+                <span class="n">echolocator_composer_specification</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;echolocator_lib.echolocator_composers.html&quot;</span>
+                <span class="p">}</span>
+
+                <span class="c1"># Set up the default echolocator_composer.</span>
+                <span class="n">echolocator_composer</span> <span class="o">=</span> <span class="n">Composers</span><span class="p">()</span><span class="o">.</span><span class="n">build_object</span><span class="p">(</span>
+                    <span class="n">echolocator_composer_specification</span>
+                <span class="p">)</span>
+                <span class="n">echolocator_composers_set_default</span><span class="p">(</span><span class="n">echolocator_composer</span><span class="p">)</span>
+
+            <span class="c1"># Make the xchembku client context.</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">callsign</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> specification&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">specification</span><span class="p">(),</span>
+                <span class="s2">&quot;type_specific_tbd&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">callsign</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> type_specific_tbd&quot;</span><span class="p">,</span>
+                <span class="n">s</span><span class="p">,</span>
+                <span class="s2">&quot;xchembku_dataface_specification&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku_client_context</span> <span class="o">=</span> <span class="n">XchembkuDatafaceClientContext</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+            <span class="c1"># Activate the context.</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku_client_context</span><span class="o">.</span><span class="n">aenter</span><span class="p">()</span>
+
+            <span class="c1"># Get a reference to the xchembku interface provided by the context.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku_client_context</span><span class="o">.</span><span class="n">get_interface</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__export_directory</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">callsign</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> specification&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">specification</span><span class="p">(),</span>
+                <span class="s2">&quot;export_directory&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__export_subdirectory</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">callsign</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> specification&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">specification</span><span class="p">(),</span>
+                <span class="s2">&quot;export_subdirectory&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unable to start </span><span class="si">{</span><span class="n">callsign</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> server coro&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">direct_shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+
+        <span class="c1"># Forget we have an xchembku client reference.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku_client_context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku_client_context</span><span class="o">.</span><span class="n">aexit</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku_client_context</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Let the base class stop the server event looping.</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_direct_shutdown</span><span class="p">()</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">,</span> <span class="n">opaque</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="s2">&quot;request json&quot;</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">,</span> <span class="n">Keywords</span><span class="o">.</span><span class="n">COMMAND</span><span class="p">)</span>
+
+        <span class="c1"># Having no xchembku client reference means we must be shutting down.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;refusing to execute command </span><span class="si">%s</span><span class="s2"> because server is shutting down&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">Commands</span><span class="o">.</span><span class="n">LOAD_TABS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__load_tabs</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">Commands</span><span class="o">.</span><span class="n">SELECT_TAB</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__select_tab</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="n">Commands</span><span class="o">.</span><span class="n">REPORT_PLATES</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__report_plates</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="n">Commands</span><span class="o">.</span><span class="n">FETCH_IMAGE_LIST</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fetch_image_list</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="n">Commands</span><span class="o">.</span><span class="n">FETCH_IMAGE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fetch_image</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="n">Commands</span><span class="o">.</span><span class="n">EXPORT_TO_SOAKDB3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__export_to_soakdb3</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="n">Commands</span><span class="o">.</span><span class="n">EXPORT_TO_CSV</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__export_to_csv</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="n">Commands</span><span class="o">.</span><span class="n">UPDATE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__update</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;invalid command </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">command</span><span class="p">))</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__load_tabs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
+
+        <span class="n">tab_id</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cookie_content</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span> <span class="n">Cookies</span><span class="o">.</span><span class="n">TABS_MANAGER</span><span class="p">,</span> <span class="n">Keywords</span><span class="o">.</span><span class="n">TAB_ID</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUITABS] tab_id from cookie content is </span><span class="si">{</span><span class="n">tab_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Reply with tabs.</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="p">{</span><span class="n">Keywords</span><span class="o">.</span><span class="n">TAB_ID</span><span class="p">:</span> <span class="n">tab_id</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__select_tab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
+        <span class="n">tab_id</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="s2">&quot;request json&quot;</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">,</span> <span class="n">Keywords</span><span class="o">.</span><span class="n">TAB_ID</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GUITABS] tab_id in request is </span><span class="si">{</span><span class="n">tab_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Put the tab_id into the cookie.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_cookie_content</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">Cookies</span><span class="o">.</span><span class="n">TABS_MANAGER</span><span class="p">,</span> <span class="n">Keywords</span><span class="o">.</span><span class="n">TAB_ID</span><span class="p">,</span> <span class="n">tab_id</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__report_plates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
+
+        <span class="c1"># Remember last posted value for auto_update_enabled.</span>
+        <span class="n">auto_update_enabled</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_auto_update</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">,</span> <span class="n">Cookies</span><span class="o">.</span><span class="n">PLATE_LIST_UX</span>
+        <span class="p">)</span>
+
+        <span class="n">visit_filter</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_or_get_cookie_content</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span>
+            <span class="n">Cookies</span><span class="o">.</span><span class="n">PLATE_LIST_UX</span><span class="p">,</span>
+            <span class="s2">&quot;visit_filter&quot;</span><span class="p">,</span>
+            <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;visit_filter&quot;</span><span class="p">),</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">should_show_only_needing_intervention</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_or_get_cookie_content</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span>
+            <span class="n">Cookies</span><span class="o">.</span><span class="n">PLATE_LIST_UX</span><span class="p">,</span>
+            <span class="s2">&quot;should_show_only_needing_intervention&quot;</span><span class="p">,</span>
+            <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;should_show_only_needing_intervention&quot;</span><span class="p">),</span>
+            <span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;visit_filter&quot;</span><span class="p">:</span> <span class="n">visit_filter</span><span class="p">,</span>
+            <span class="s2">&quot;should_show_only_needing_intervention&quot;</span><span class="p">:</span> <span class="n">should_show_only_needing_intervention</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Start a filter where default is sorted on reverse.</span>
+        <span class="nb">filter</span> <span class="o">=</span> <span class="n">CrystalPlateFilterModel</span><span class="p">(</span><span class="n">direction</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;fetching image records, visit_filter is &#39;</span><span class="si">{</span><span class="n">visit_filter</span><span class="si">}</span><span class="s2">&#39; and &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; should_show_only_needing_intervention is &#39;</span><span class="si">{</span><span class="n">should_show_only_needing_intervention</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">visit_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">visit_filter</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="nb">filter</span><span class="o">.</span><span class="n">visit</span> <span class="o">=</span> <span class="n">visit_filter</span>
+        <span class="k">if</span> <span class="n">should_show_only_needing_intervention</span><span class="p">:</span>
+            <span class="nb">filter</span><span class="o">.</span><span class="n">needing_intervention</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Fetch the list from the xchembku.</span>
+        <span class="n">crystal_plate_report_models</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">report_crystal_plates</span><span class="p">(</span>
+            <span class="nb">filter</span>
+        <span class="p">)</span>
+
+        <span class="n">html</span> <span class="o">=</span> <span class="n">echolocator_composers_get_default</span><span class="p">()</span><span class="o">.</span><span class="n">compose_crystal_plate_report</span><span class="p">(</span>
+            <span class="n">crystal_plate_report_models</span>
+        <span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;html&quot;</span><span class="p">:</span> <span class="n">html</span><span class="p">,</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+            <span class="s2">&quot;auto_update_enabled&quot;</span><span class="p">:</span> <span class="n">auto_update_enabled</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__fetch_image_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
+
+        <span class="c1"># Remember last posted value for auto_update_enabled.</span>
+        <span class="n">auto_update_enabled</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_auto_update</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">,</span> <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_LIST_UX</span>
+        <span class="p">)</span>
+
+        <span class="n">visit_filter</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_or_get_cookie_content</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span>
+            <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_LIST_UX</span><span class="p">,</span>
+            <span class="s2">&quot;visit_filter&quot;</span><span class="p">,</span>
+            <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;visit_filter&quot;</span><span class="p">),</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">barcode_filter</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_or_get_cookie_content</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span>
+            <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_LIST_UX</span><span class="p">,</span>
+            <span class="s2">&quot;barcode_filter&quot;</span><span class="p">,</span>
+            <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;barcode_filter&quot;</span><span class="p">),</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">should_show_only_undecided</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_or_get_cookie_content</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span>
+            <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_LIST_UX</span><span class="p">,</span>
+            <span class="s2">&quot;should_show_only_undecided&quot;</span><span class="p">,</span>
+            <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;should_show_only_undecided&quot;</span><span class="p">),</span>
+            <span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">show_first_image</span> <span class="o">=</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;show_first_image&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">visit_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">visit_filter</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">visit_filter</span> <span class="o">=</span> <span class="n">visit_filter</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">barcode_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">barcode_filter</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">barcode_filter</span> <span class="o">=</span> <span class="n">barcode_filter</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="n">filters</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;visit_filter&quot;</span><span class="p">:</span> <span class="n">visit_filter</span><span class="p">,</span>
+            <span class="s2">&quot;barcode_filter&quot;</span><span class="p">:</span> <span class="n">barcode_filter</span><span class="p">,</span>
+            <span class="s2">&quot;should_show_only_undecided&quot;</span><span class="p">:</span> <span class="n">should_show_only_undecided</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">visit_filter</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;please enter a visit&quot;</span>
+            <span class="n">crystal_well_index</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">crystal_well_count</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;fetching image records, visit_filter is &#39;</span><span class="si">{</span><span class="n">visit_filter</span><span class="si">}</span><span class="s2">&#39; and &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; barcode_filter is &#39;</span><span class="si">{</span><span class="n">barcode_filter</span><span class="si">}</span><span class="s2">&#39; and &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; should_show_only_undecided is &#39;</span><span class="si">{</span><span class="n">should_show_only_undecided</span><span class="si">}</span><span class="s2">&#39; and&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; show_first_image is &#39;</span><span class="si">{</span><span class="n">show_first_image</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Start a filter for the list based on visit only.</span>
+            <span class="nb">filter</span> <span class="o">=</span> <span class="n">CrystalWellFilterModel</span><span class="p">(</span>
+                <span class="n">visit</span><span class="o">=</span><span class="n">visit_filter</span><span class="p">,</span>
+                <span class="n">sortby</span><span class="o">=</span><span class="n">CrystalWellFilterSortbyEnum</span><span class="o">.</span><span class="n">NUMBER_OF_CRYSTALS</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">barcode_filter</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="nb">filter</span><span class="o">.</span><span class="n">barcode</span> <span class="o">=</span> <span class="n">barcode_filter</span>
+
+            <span class="n">should_show_only_undecided</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_or_get_cookie_content</span><span class="p">(</span>
+                <span class="n">opaque</span><span class="p">,</span>
+                <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_LIST_UX</span><span class="p">,</span>
+                <span class="s2">&quot;should_show_only_undecided&quot;</span><span class="p">,</span>
+                <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;should_show_only_undecided&quot;</span><span class="p">),</span>
+                <span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">should_show_only_undecided</span><span class="p">:</span>
+                <span class="nb">filter</span><span class="o">.</span><span class="n">is_decided</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># Fetch the properly ordered and filtered list from the xchembku.</span>
+            <span class="n">crystal_well_models</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">fetch_crystal_wells_needing_droplocation</span><span class="p">(</span><span class="nb">filter</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">crystal_well_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">crystal_well_models</span><span class="p">)</span>
+
+            <span class="c1"># Remember the crystal well uuids in the list in the cookie.</span>
+            <span class="n">crystal_well_uuids</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">uuid</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">crystal_well_models</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_cookie_content</span><span class="p">(</span>
+                <span class="n">opaque</span><span class="p">,</span>
+                <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_LIST_UX</span><span class="p">,</span>
+                <span class="s2">&quot;crystal_well_uuids&quot;</span><span class="p">,</span>
+                <span class="n">crystal_well_uuids</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Asking for first image only, and there are any?</span>
+            <span class="k">if</span> <span class="n">show_first_image</span> <span class="ow">and</span> <span class="n">crystal_well_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Give the first image index in the response.</span>
+                <span class="n">crystal_well_index</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="c1"># Don&#39;t give html in the response.</span>
+                <span class="n">html</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># Asking for image list?</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Give the html.</span>
+                <span class="n">html</span> <span class="o">=</span> <span class="n">echolocator_composers_get_default</span><span class="p">()</span><span class="o">.</span><span class="n">compose_image_list</span><span class="p">(</span>
+                    <span class="n">crystal_well_models</span>
+                <span class="p">)</span>
+                <span class="n">crystal_well_index</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;html&quot;</span><span class="p">:</span> <span class="n">html</span><span class="p">,</span>
+            <span class="n">Keywords</span><span class="o">.</span><span class="n">CRYSTAL_WELL_INDEX</span><span class="p">:</span> <span class="n">crystal_well_index</span><span class="p">,</span>
+            <span class="n">Keywords</span><span class="o">.</span><span class="n">CRYSTAL_WELL_COUNT</span><span class="p">:</span> <span class="n">crystal_well_count</span><span class="p">,</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">,</span>
+            <span class="s2">&quot;auto_update_enabled&quot;</span><span class="p">:</span> <span class="n">auto_update_enabled</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__fetch_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
+
+        <span class="c1"># Get uuid from the cookie if it&#39;s not being posted here.</span>
+        <span class="n">crystal_well_index</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_or_get_cookie_content</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span>
+            <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_EDIT_UX</span><span class="p">,</span>
+            <span class="n">Keywords</span><span class="o">.</span><span class="n">CRYSTAL_WELL_INDEX</span><span class="p">,</span>
+            <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Keywords</span><span class="o">.</span><span class="n">CRYSTAL_WELL_INDEX</span><span class="p">),</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fetching image from crystal_well_index </span><span class="si">{</span><span class="n">crystal_well_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Not able to get an image from posted value or cookie?</span>
+        <span class="c1"># Usually first time visiting Image Details tab when no image picked from list.</span>
+        <span class="k">if</span> <span class="n">crystal_well_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProgrammingFault</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;no value for </span><span class="si">{</span><span class="n">Keywords</span><span class="o">.</span><span class="n">CRYSTAL_WELL_INDEX</span><span class="si">}</span><span class="s2"> in post or cookie </span><span class="si">{</span><span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_EDIT_UX</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Get uuids of the current list from the cookie.</span>
+        <span class="n">crystal_well_uuids</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cookie_content</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span>
+            <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_LIST_UX</span><span class="p">,</span>
+            <span class="s2">&quot;crystal_well_uuids&quot;</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">crystal_well_uuids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProgrammingFault</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;cookie </span><span class="si">{</span><span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_LIST_UX</span><span class="si">}</span><span class="s2"> has no value for crystal_well_uuids&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">crystal_well_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">crystal_well_uuids</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">crystal_well_index</span> <span class="o">&gt;=</span> <span class="n">crystal_well_count</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EndOfList</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;crystal_well_index </span><span class="si">{</span><span class="n">crystal_well_index</span><span class="si">}</span><span class="s2"> exceeds crystal_well_uuids length </span><span class="si">{</span><span class="n">crystal_well_count</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># The uuid at the posted index.</span>
+        <span class="n">crystal_well_uuid</span> <span class="o">=</span> <span class="n">crystal_well_uuids</span><span class="p">[</span><span class="n">crystal_well_index</span><span class="p">]</span>
+
+        <span class="c1"># Filter to get just the single well.</span>
+        <span class="nb">filter</span> <span class="o">=</span> <span class="n">CrystalWellFilterModel</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="n">crystal_well_uuid</span><span class="p">)</span>
+
+        <span class="c1"># Get the single record.</span>
+        <span class="n">crystal_well_models</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">fetch_crystal_wells_needing_droplocation</span><span class="p">(</span><span class="nb">filter</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">crystal_well_models</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProgrammingFault</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;crystal_well_index </span><span class="si">{</span><span class="n">crystal_well_index</span><span class="si">}</span><span class="s2"> for uuid </span><span class="si">{</span><span class="n">crystal_well_uuid</span><span class="si">}</span><span class="s2"> doesn&#39;t exist in the database&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Presumably there is only one image of interest.</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="n">crystal_well_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+        <span class="c1"># Filestore&#39;s full path to the image file.</span>
+        <span class="n">record</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;filestore&quot;</span> <span class="o">+</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;record&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">,</span>
+            <span class="c1"># Give back current one and length of the list to help with the prev/next button composing.</span>
+            <span class="n">Keywords</span><span class="o">.</span><span class="n">CRYSTAL_WELL_INDEX</span><span class="p">:</span> <span class="n">crystal_well_index</span><span class="p">,</span>
+            <span class="n">Keywords</span><span class="o">.</span><span class="n">CRYSTAL_WELL_COUNT</span><span class="p">:</span> <span class="n">crystal_well_count</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="s2">&quot;ajax request&quot;</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">,</span> <span class="s2">&quot;crystal_well_droplocation_model&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Wrap a model around the posted fields.</span>
+        <span class="n">crystal_well_droplocation_model</span> <span class="o">=</span> <span class="n">CrystalWellDroplocationModel</span><span class="p">(</span><span class="o">**</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="c1"># Update the database record.</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">upsert_crystal_well_droplocations</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">crystal_well_droplocation_model</span><span class="p">],</span>
+            <span class="n">only_fields</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Caller wants to select the next image automatically?</span>
+        <span class="k">if</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Keywords</span><span class="o">.</span><span class="n">SHOULD_ADVANCE</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="c1"># There is a next image in the sequence?</span>
+            <span class="n">crystal_well_index</span> <span class="o">=</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Keywords</span><span class="o">.</span><span class="n">CRYSTAL_WELL_INDEX_NEXT</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">crystal_well_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Advance by fetching the next image record after the update.</span>
+                <span class="c1"># Filters are provided in the IMAGE_LIST_UX cookie.</span>
+                <span class="n">next_request_dict</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">ProtocoljKeywords</span><span class="o">.</span><span class="n">ENABLE_COOKIES</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_EDIT_UX</span><span class="p">,</span>
+                        <span class="n">Cookies</span><span class="o">.</span><span class="n">IMAGE_LIST_UX</span><span class="p">,</span>
+                    <span class="p">],</span>
+                    <span class="n">Keywords</span><span class="o">.</span><span class="n">COMMAND</span><span class="p">:</span> <span class="n">Commands</span><span class="o">.</span><span class="n">FETCH_IMAGE</span><span class="p">,</span>
+                    <span class="n">Keywords</span><span class="o">.</span><span class="n">CRYSTAL_WELL_INDEX</span><span class="p">:</span> <span class="n">crystal_well_index</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fetch_image</span><span class="p">(</span><span class="n">opaque</span><span class="p">,</span> <span class="n">next_request_dict</span><span class="p">)</span>
+                <span class="n">response</span><span class="p">[</span>
+                    <span class="s2">&quot;confirmation&quot;</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;drop location has been updated and view advanced to next image&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;record&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;confirmation&quot;</span><span class="p">:</span> <span class="s2">&quot;drop location has been updated and have reached the end of the list&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;confirmation&quot;</span><span class="p">:</span> <span class="s2">&quot;drop location has been updated&quot;</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__export_to_soakdb3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
+
+        <span class="c1"># Caller must provide a visit.</span>
+        <span class="n">visit_filter</span> <span class="o">=</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;visit_filter&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">visit_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;programming error: visit not submitted with request&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Visit must not be blank.</span>
+        <span class="n">visit_filter</span> <span class="o">=</span> <span class="n">visit_filter</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">visit_filter</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;blank visit was given&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="n">response</span>
+
+        <span class="c1"># Caller may provide a barcode.</span>
+        <span class="n">barcode_filter</span> <span class="o">=</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;barcode_filter&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">barcode_filter</span> <span class="o">=</span> <span class="n">barcode_filter</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">barcode_filter</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">barcode_filter</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Get a filter for wells we want to export.</span>
+        <span class="n">crystal_well_filter</span> <span class="o">=</span> <span class="n">CrystalWellFilterModel</span><span class="p">(</span>
+            <span class="n">visit</span><span class="o">=</span><span class="n">visit_filter</span><span class="p">,</span>
+            <span class="n">barcode</span><span class="o">=</span><span class="n">barcode_filter</span><span class="p">,</span>
+            <span class="n">is_decided</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">is_usable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">sortby</span><span class="o">=</span><span class="n">CrystalWellFilterSortbyEnum</span><span class="o">.</span><span class="n">POSITION</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fetch the list of wells according to the filter.</span>
+        <span class="n">crystal_well_models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span>
+            <span class="n">CrystalWellNeedingDroplocationModel</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">fetch_crystal_wells_needing_droplocation</span><span class="p">(</span>
+            <span class="n">crystal_well_filter</span><span class="p">,</span> <span class="n">why</span><span class="o">=</span><span class="s2">&quot;[EXPFIL] get list to be epxorted&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Sort the list based on the (computed) row_first_position field.</span>
+        <span class="n">sorted_models</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">crystal_well_models</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">crystal_well_model</span><span class="p">:</span> <span class="n">crystal_well_model</span><span class="o">.</span><span class="n">row_first_position</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[EXPFIL] found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">crystal_well_models</span><span class="p">)</span><span class="si">}</span><span class="s2"> to be exported&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Export the crystal wells to the appropriate soakdb3 visit.</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__export_to_soakdb3_visit</span><span class="p">(</span><span class="n">visit_filter</span><span class="p">,</span> <span class="n">sorted_models</span><span class="p">)</span>
+
+        <span class="c1"># Make the list of droplocations to update with the exported flag.</span>
+        <span class="n">crystal_well_droplocation_models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CrystalWellDroplocationModel</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">crystal_well_model</span> <span class="ow">in</span> <span class="n">crystal_well_models</span><span class="p">:</span>
+            <span class="c1"># We only need the crystal_well_uuid for upserting.</span>
+            <span class="c1"># This will have to be revisited if we ever want multiple droplocations on a single well.</span>
+            <span class="n">crystal_well_droplocation_model</span> <span class="o">=</span> <span class="n">CrystalWellDroplocationModel</span><span class="p">(</span>
+                <span class="n">crystal_well_uuid</span><span class="o">=</span><span class="n">crystal_well_model</span><span class="o">.</span><span class="n">uuid</span><span class="p">,</span>
+                <span class="n">is_exported_to_soakdb3</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">crystal_well_droplocation_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">crystal_well_droplocation_model</span><span class="p">)</span>
+
+        <span class="c1"># Update the database for those that just got exported.</span>
+        <span class="c1"># TODO: Use a bulk update when setting is_exported_to_soakdb3 field after export.</span>
+        <span class="n">result_counts</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">upsert_crystal_well_droplocations</span><span class="p">(</span>
+            <span class="n">crystal_well_droplocation_models</span><span class="p">,</span>
+            <span class="n">only_fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;is_exported_to_soakdb3&quot;</span><span class="p">],</span>
+            <span class="n">why</span><span class="o">=</span><span class="s2">&quot;setting is_exported_to_soakdb3 field after export&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[EXPFIL] result_counts </span><span class="si">{</span><span class="n">result_counts</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ----------------------------------------------------------------------</span>
+        <span class="c1"># Start a filter where we anchor on the given image.</span>
+        <span class="nb">filter</span> <span class="o">=</span> <span class="n">CrystalPlateFilterModel</span><span class="p">(</span><span class="n">direction</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Fetch the list from the xchembku.</span>
+        <span class="n">crystal_plate_report_models</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">report_crystal_plates</span><span class="p">(</span>
+            <span class="nb">filter</span>
+        <span class="p">)</span>
+
+        <span class="n">html</span> <span class="o">=</span> <span class="n">echolocator_composers_get_default</span><span class="p">()</span><span class="o">.</span><span class="n">compose_crystal_plate_report</span><span class="p">(</span>
+            <span class="n">crystal_plate_report_models</span>
+        <span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;confirmation&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;exported </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">crystal_well_models</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows to soakdb3 visit </span><span class="si">{</span><span class="n">visit_filter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;html&quot;</span><span class="p">:</span> <span class="n">html</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__export_to_soakdb3_visit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">visit</span><span class="p">,</span>
+        <span class="n">crystal_well_models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CrystalWellNeedingDroplocationModel</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">soakdb3_crystal_well_models</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">crystal_well_models</span><span class="p">:</span>
+            <span class="n">soakdb3_crystal_well_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Soakdb3CrystalWellModel</span><span class="p">(</span>
+                    <span class="n">LabVisit</span><span class="o">=</span><span class="n">visit</span><span class="p">,</span>
+                    <span class="n">CrystalPlate</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">rockminer_collected_stem</span><span class="p">,</span>
+                    <span class="n">CrystalWell</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+                    <span class="n">EchoX</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">confirmed_microns_x</span><span class="p">,</span>
+                    <span class="n">EchoY</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">confirmed_microns_y</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">visit_directory</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">get_xchem_directory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__export_directory</span><span class="p">,</span> <span class="n">visit</span><span class="p">))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;exporting </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">soakdb3_crystal_well_models</span><span class="p">)</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">visit_directory</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># Append well records to soakdb3 database.</span>
+        <span class="c1"># Soakdb3 wants the &quot;/processing&quot; to be on the end of the visitid.</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">inject_soakdb3_crystal_wells</span><span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">visit_directory</span> <span class="o">/</span> <span class="s2">&quot;processing&quot;</span><span class="p">),</span> <span class="n">soakdb3_crystal_well_models</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__export_to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">):</span>
+
+        <span class="c1"># Caller must provide a visit.</span>
+        <span class="n">visit_filter</span> <span class="o">=</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;visit_filter&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">visit_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;visit not submitted with request (programming error)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Visit must not be blank.</span>
+        <span class="n">visit_filter</span> <span class="o">=</span> <span class="n">visit_filter</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">visit_filter</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;blank visit was given&quot;</span><span class="p">}</span>
+            <span class="k">return</span> <span class="n">response</span>
+
+        <span class="c1"># Get a filter for wells we want to export.</span>
+        <span class="n">crystal_well_filter</span> <span class="o">=</span> <span class="n">CrystalWellFilterModel</span><span class="p">(</span>
+            <span class="n">visit</span><span class="o">=</span><span class="n">visit_filter</span><span class="p">,</span>
+            <span class="n">is_decided</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">is_usable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">sortby</span><span class="o">=</span><span class="n">CrystalWellFilterSortbyEnum</span><span class="o">.</span><span class="n">POSITION</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fetch the list of wells according to the filter.</span>
+        <span class="n">crystal_well_models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span>
+            <span class="n">CrystalWellNeedingDroplocationModel</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">fetch_crystal_wells_needing_droplocation</span><span class="p">(</span>
+            <span class="n">crystal_well_filter</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Group the wells by the plate they belong to.</span>
+        <span class="n">plates_crystal_well_models</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">crystal_well_model</span> <span class="ow">in</span> <span class="n">crystal_well_models</span><span class="p">:</span>
+            <span class="n">crystal_plate_uuid</span> <span class="o">=</span> <span class="n">crystal_well_model</span><span class="o">.</span><span class="n">crystal_plate_uuid</span>
+            <span class="k">if</span> <span class="n">crystal_plate_uuid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plates_crystal_well_models</span><span class="p">:</span>
+                <span class="n">plates_crystal_well_models</span><span class="p">[</span><span class="n">crystal_plate_uuid</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">plates_crystal_well_models</span><span class="p">[</span><span class="n">crystal_plate_uuid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">crystal_well_model</span><span class="p">)</span>
+
+        <span class="c1"># Keep a list of the confirmations we will get from exporting the plates.</span>
+        <span class="n">confirmations</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Go through each plate separately.</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">crystal_plate_uuid</span><span class="p">,</span>
+            <span class="n">plate_crystal_well_models</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="n">plates_crystal_well_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="c1"># Sort the list based on the (computed) row_first_position field.</span>
+            <span class="n">sorted_models</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">plate_crystal_well_models</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">crystal_well_model</span><span class="p">:</span> <span class="n">crystal_well_model</span><span class="o">.</span><span class="n">row_first_position</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Export the crystal wells for this plate to the appropriate csv file named for the plate.</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__export_to_csv_plate</span><span class="p">(</span>
+                <span class="n">visit_filter</span><span class="p">,</span> <span class="n">crystal_plate_uuid</span><span class="p">,</span> <span class="n">sorted_models</span>
+            <span class="p">)</span>
+
+            <span class="n">confirmations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;exported </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">plate_crystal_well_models</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows to </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;confirmation&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">confirmations</span><span class="p">)}</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__export_to_csv_plate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">visit</span><span class="p">,</span>
+        <span class="n">crystal_plate_uuid</span><span class="p">,</span>
+        <span class="n">crystal_well_models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CrystalWellNeedingDroplocationModel</span><span class="p">],</span>
+    <span class="p">):</span>
+
+        <span class="c1"># Fetch the plate record for visit.</span>
+        <span class="n">crystal_plate_filter</span> <span class="o">=</span> <span class="n">CrystalPlateFilterModel</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">crystal_plate_uuid</span><span class="p">)</span>
+        <span class="n">crystal_plate_models</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__xchembku</span><span class="o">.</span><span class="n">fetch_crystal_plates</span><span class="p">(</span>
+            <span class="n">crystal_plate_filter</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">crystal_plate_models</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;database integrity error: no crystal plate for uuid &quot;</span><span class="si">{</span><span class="n">crystal_plate_uuid</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="p">)</span>
+        <span class="n">crystal_plate_model</span> <span class="o">=</span> <span class="n">crystal_plate_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Use the stem from the rockmaker Luigi pipeline to form the csv filename.</span>
+        <span class="n">visit_directory</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">get_xchem_directory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__export_directory</span><span class="p">,</span> <span class="n">visit</span><span class="p">))</span>
+        <span class="n">targets_directory</span> <span class="o">=</span> <span class="n">visit_directory</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">__export_subdirectory</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">targets_directory</span>
+            <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">crystal_plate_model</span><span class="o">.</span><span class="n">rockminer_collected_stem</span><span class="si">}</span><span class="s2">_targets.csv&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the directory does not exist: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">crystal_well_models</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">confirmed_microns_x</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">confirmed_microns_y</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">filename</span>
+
+    <span class="c1"># ----------------------------------------------------------------------------------------</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_handle_auto_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opaque</span><span class="p">,</span> <span class="n">request_dict</span><span class="p">,</span> <span class="n">cookie_name</span><span class="p">):</span>
+
+        <span class="c1"># Remember last posted value for auto_update_enabled.</span>
+        <span class="n">auto_update_enabled</span> <span class="o">=</span> <span class="n">request_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;auto_update_enabled&quot;</span><span class="p">)</span>
+        <span class="c1"># logger.debug(</span>
+        <span class="c1">#     describe(</span>
+        <span class="c1">#         f&quot;[AUTOUP] request_dict auto_update_enabled for cookie {cookie_name}&quot;,</span>
+        <span class="c1">#         auto_update_enabled,</span>
+        <span class="c1">#     )</span>
+        <span class="c1"># )</span>
+        <span class="n">auto_update_enabled</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_or_get_cookie_content</span><span class="p">(</span>
+            <span class="n">opaque</span><span class="p">,</span>
+            <span class="n">cookie_name</span><span class="p">,</span>
+            <span class="s2">&quot;auto_update_enabled&quot;</span><span class="p">,</span>
+            <span class="n">auto_update_enabled</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># logger.debug(</span>
+        <span class="c1">#     describe(</span>
+        <span class="c1">#         f&quot;[AUTOUP] request_set_or_get_cookie_content auto_update_enabled&quot;,</span>
+        <span class="c1">#         auto_update_enabled,</span>
+        <span class="c1">#     )</span>
+        <span class="c1"># )</span>
+
+        <span class="k">return</span> <span class="n">auto_update_enabled</span></div>
+</pre></div>
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
